@@ -44,7 +44,7 @@ while 1:
     # Prepares the correct response depending on the result
     if valid_cred:
         response = {
-            'valid': 'true',
+            'valid': 1,
             'data': {
                 'user': user_account.user,
                 'iban': user_account.bankAcc.iban,
@@ -53,7 +53,7 @@ while 1:
         }
     else:
         response = {
-            'valid': 'false'
+            'valid': 0
         }
     respJson = json.dumps(response)
 

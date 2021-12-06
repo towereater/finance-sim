@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 using FinanceLib;
 
@@ -27,21 +26,24 @@ namespace Client
                 usr = user,
                 pwd = password
             };
-            string jsonString = JsonSerializer.Serialize(loginData);
+            string jsonData = JsonSerializer.Serialize(loginData);
 
-            // Sends the data to the server for a check
-            string jsonResp = GetUserAccount(jsonString);
-            var response = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResp);
+            // Sends the data to the server for a check and gets the response
+            string jsonResp = GetUserAccount(jsonData);
+            JsonNode root = JsonNode.Parse(jsonResp);
+            JsonSerializerOptions options = new JsonSerializerOptions {
+                AllowTrailingCommas = true
+            };
 
-            // Manages the response
-            if (response["valid"].ToString() == "true")
+            // Manages the response by checking its data content
+            if (root["valid"].GetValue<bool>())
             {
-                var data = (JsonElement)response["data"];
+                JsonNode data = root["data"];
                 userAccount = new UserAccount() {
-                    Username = data.GetProperty("user").ToString(),
+                    Username = data["user"].GetValue<string>(),
                     BankAccount = new BankAccount() {
-                        IBAN = data.GetProperty("iban").ToString(),
-                        Cash = data.GetProperty("cash")
+                        IBAN = data["iban"].GetValue<string>(),
+                        Cash = data["cash"].GetValue<double>()
                     }
                 };
                 Console.WriteLine("Your IBAN is: " + userAccount.BankAccount.IBAN);
