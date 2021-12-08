@@ -3,8 +3,8 @@ namespace FinanceLib
     public class BankAccount
     {
         // IBAN code of the account
-        private string iban;
-        public string IBAN
+        private int iban;
+        public int IBAN
         {
             get { return iban; }
             set { iban = value; }

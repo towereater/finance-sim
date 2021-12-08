@@ -42,7 +42,7 @@ namespace Client
                 userAccount = new UserAccount() {
                     Username = data["user"].GetValue<string>(),
                     BankAccount = new BankAccount() {
-                        IBAN = data["iban"].GetValue<string>(),
+                        IBAN = data["iban"].GetValue<int>(),
                         Cash = data["cash"].GetValue<double>()
                     }
                 };
@@ -61,8 +61,8 @@ namespace Client
 
             try {
                 // Sets up the remote end point to match the localhost on port 11000
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                IPAddress ipAddress = ipHostInfo.AddressList[0];
+                //IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+                IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
                 // Creates the TCP/IP socket
