@@ -36,7 +36,7 @@ namespace Client
             };
 
             // Manages the response by checking its data content
-            if (root["valid"].GetValue<bool>())
+            if (root["valid"].GetValue<int>() == 1)
             {
                 JsonNode data = root["data"];
                 userAccount = new UserAccount() {
