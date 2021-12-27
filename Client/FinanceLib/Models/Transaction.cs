@@ -1,4 +1,4 @@
-namespace FinanceLib
+namespace FinanceLib.Models
 {
     public class Transaction
     {

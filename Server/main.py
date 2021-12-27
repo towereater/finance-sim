@@ -1,13 +1,36 @@
+from enum import Enum
 from socket import *
+from cryptography.fernet import Fernet
 import json
+from Server.financelib.wallet import Wallet
 
 import financelib.useraccount as ua
 
-# List of possible bank accounts
+# Data content of a json packet
+REQUEST_TOKEN = "requestToken"
+RESPONSE_TOKEN = "responseToken"
+PAYLOAD = "payload"
+
+# List of possible requests
+class RequestToken(Enum):
+    LOGIN = 0
+    WALLET = 1
+
+# List of user accounts
+wallet1 = Wallet()
+wallet2 = Wallet()
+wallet3 = Wallet()
+user1 = ua.UserAccount("andnic", "pass")
+user1.wallets = [ wallet1, wallet2 ]
+user2 = ua.UserAccount("frau", "xdxd")
+user2.wallets = [ wallet2, wallet3 ]
 user_accounts = [
-    ua.UserAccount("andnic", "pass"),
-    ua.UserAccount("frau", "xdxd"),
+    user1,
+    user2,
 ]
+
+# Active connections
+access_tokens = {}
 
 # Server port number
 server_port = 11000
@@ -28,33 +51,79 @@ while 1:
     data = connection_socket.recv(1024).decode("utf-8")
     print("Data received, elaborating it")
 
-    # Extracts the user account data
-    logJson = json.loads(data)
-    usr = logJson["usr"]
-    pwd = logJson["pwd"]
+    # Prepares the object to analyse
+    log_json = json.loads(data)
+    requestToken = log_json[REQUEST_TOKEN]
+    payload = log_json[PAYLOAD]
 
-    # Verifies the validity of the received data
-    valid_cred = False
-    user_account = None
-    for usr_acc in user_accounts:
-        if usr_acc.match_credentials(usr, pwd):
-            user_account = usr_acc
-            valid_cred = True
+    # If login procedure was initiated
+    if requestToken == RequestToken.LOGIN:
+        print("LOGIN requested")
 
-    # Prepares the correct response depending on the result
-    if valid_cred:
-        response = {
-            'valid': 1,
-            'data': {
-                'user': user_account.user,
-                'iban': user_account.bankAcc.iban,
-                'cash': user_account.bankAcc.cash,
+        user = payload["user"]
+        password = payload["password"]
+
+        # Verifies the validity of the received data
+        #TODO: DATABASE SET
+        valid_cred = False
+        user_index = -1
+        for idx,item in enumerate(user_accounts):
+            if item.match_credentials(user, password):
+                user_index = idx
+                valid_cred = True
+                break
+
+        # Prepares the correct response depending on the result
+        if valid_cred:
+            key = Fernet.generate_key().decode()
+            access_tokens[key].append(user_index)
+            response = {
+                REQUEST_TOKEN: requestToken,
+                RESPONSE_TOKEN: 1,
+                PAYLOAD: {
+                    'accessToken': key,
+                },
             }
-        }
+        else:
+            response = {
+                REQUEST_TOKEN: requestToken,
+                RESPONSE_TOKEN: 0,
+                PAYLOAD: {
+                    'message': "The combination username and password was not correct.",
+                },
+            }
+    elif requestToken == RequestToken.WALLET:
+        print("WALLET requested")
+
+        key = payload["accessToken"]
+        index = access_tokens[key]
+
+        # Checking the access token
+        if index == None:
+            response = {
+                REQUEST_TOKEN: requestToken,
+                RESPONSE_TOKEN: 0,
+                PAYLOAD: {
+                    'message': "Invalid access token has been provided",
+                },
+            }
+        else:
+            response = {
+                REQUEST_TOKEN: requestToken,
+                RESPONSE_TOKEN: 1,
+                PAYLOAD: {
+                    'wallets': [ wallet.to_json() for wallet in user_accounts[index].wallets ],
+                },
+            }
     else:
         response = {
-            'valid': 0
+            REQUEST_TOKEN: requestToken,
+            RESPONSE_TOKEN: 0,
+            PAYLOAD: {
+                'message': "Invalid request token. The server cannot correctly handle it.",
+            },
         }
+
     respJson = json.dumps(response)
 
     # send back modified string to client

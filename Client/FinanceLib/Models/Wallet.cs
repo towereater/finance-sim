@@ -1,16 +1,16 @@
-namespace FinanceLib
+namespace FinanceLib.Models
 {
-    public class BankAccount
+    public class Wallet
     {
-        // IBAN code of the account
-        private int iban;
-        public int IBAN
+        // IBAN code of the wallet
+        private string iban;
+        public string IBAN
         {
             get { return iban; }
             set { iban = value; }
         }
         
-        // Cash inside the account
+        // Cash inside the wallet
         private double cash;
         public double Cash
         {

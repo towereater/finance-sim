@@ -1,4 +1,4 @@
-namespace FinanceLib
+namespace FinanceLib.Models
 {
     public class UserAccount
     {
@@ -10,12 +10,12 @@ namespace FinanceLib
             set { user = value; }
         }
         
-        // Reference to the bank account of the user
-        private BankAccount bankacc;
-        public BankAccount BankAccount
+        // Reference to the bank accounts of the user
+        private Wallet[] wallets;
+        public Wallet[] Wallets
         {
-            get { return bankacc; }
-            set { bankacc = value; }
+            get { return wallets; }
+            set { wallets = value; }
         }
     }
 }
