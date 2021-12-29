@@ -33,6 +33,12 @@ namespace Client
 
                         foreach (Wallet w in wallets)
                             Console.WriteLine($"IBAN: {w.IBAN}\nCash: {w.Cash}");
+                        
+                        Console.WriteLine("Insert a IBAN code to retrieve info about");
+                        wallets = account.GetWallets(Console.ReadLine());
+                        
+                        foreach (Wallet w in wallets)
+                            Console.WriteLine($"IBAN: {w.IBAN}\nCash: {w.Cash}");
                     }
                     else {
                         Console.WriteLine("Error while downloading wallet data!");

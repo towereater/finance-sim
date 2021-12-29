@@ -10,7 +10,7 @@ namespace FinanceLib.Managers
     public class NetManager
     {
         // IP of the server to contact when making a request
-        public static string ServerIP = "localhost";
+        public static string ServerIP = "127.0.0.1";
 
         // Validation token used to get informations from server
         public string AccessToken { get; private set; }
@@ -66,8 +66,9 @@ namespace FinanceLib.Managers
 
             try {
                 // Sets up the remote end point to match the localhost on port 11000
-                IPHostEntry ipHostInfo = Dns.GetHostEntry(ServerIP);
-                IPAddress ipAddress = ipHostInfo.AddressList[0];
+                //IPHostEntry ipHostInfo = Dns.GetHostEntry(ServerIP);
+                //IPAddress ipAddress = ipHostInfo.AddressList[0];
+                IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
                 // Creates the TCP/IP socket
@@ -79,7 +80,11 @@ namespace FinanceLib.Managers
                     sender.Connect(remoteEP);
 
                     // Sets up the message and sends it to the remote host
-                    string jsonRequest = JsonSerializer.Serialize(request);
+                    string jsonRequest = JsonSerializer.Serialize(request,
+                        new JsonSerializerOptions() {
+                            AllowTrailingCommas = true,
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    });
                     byte[] outBuffer = Encoding.ASCII.GetBytes(jsonRequest);
                     int outBytes = sender.Send(outBuffer);
 
@@ -92,7 +97,14 @@ namespace FinanceLib.Managers
 
                     // Converts the data and sets up the response
                     string jsonResponse = Encoding.ASCII.GetString(inBuffer, 0, inBytes);
-                    response = JsonSerializer.Deserialize<BankRequest>(jsonResponse);
+
+                    Console.WriteLine(jsonResponse);
+
+                    response = JsonSerializer.Deserialize<BankRequest>(jsonResponse,
+                        new JsonSerializerOptions() {
+                            AllowTrailingCommas = true,
+                            PropertyNameCaseInsensitive = true,
+                    });
 
                     // Successful response
                     return true;
@@ -117,6 +129,8 @@ namespace FinanceLib.Managers
 
             // In case of error returns its message
             if (errorCatched) {
+                Console.WriteLine($"ERROR CATCHED: {errorMessage}");
+
                 response = new BankRequest() {
                     RequestToken = request.RequestToken,
                     ResponseToken = ResponseToken.Failure,

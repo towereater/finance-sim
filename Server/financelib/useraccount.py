@@ -26,4 +26,4 @@ class UserAccount:
         del self._wallets
 
     def match_credentials(self, user, pwd):
-        return self.user == user and self.pwd == pwd
+        return self.user == user and self.password == pwd

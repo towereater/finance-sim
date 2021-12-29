@@ -1,4 +1,5 @@
 using FinanceLib.Models;
+using FinanceLib.Utils;
 
 namespace FinanceLib.Managers
 {
@@ -50,7 +51,8 @@ namespace FinanceLib.Managers
             bool respSuccess = netMan.Request(request, out response);
 
             if (respSuccess && response.ResponseToken == ResponseToken.Success)
-                return (Wallet[])response.Payload["wallets"];
+                //return (Wallet[])response.Payload["wallets"];
+                return JsonConverter.GetValue<Wallet[]>(response.Payload["wallets"]);
 
             return null;
         }

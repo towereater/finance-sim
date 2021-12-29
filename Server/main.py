@@ -1,36 +1,37 @@
-from enum import Enum
+from enum import IntEnum
 from socket import *
 from cryptography.fernet import Fernet
 import json
-from Server.financelib.wallet import Wallet
 
-import financelib.useraccount as ua
+from financelib.wallet import Wallet
+from financelib.useraccount import UserAccount
 
 # Data content of a json packet
 REQUEST_TOKEN = "requestToken"
 RESPONSE_TOKEN = "responseToken"
+ACCESS_TOKEN = "accessToken"
 PAYLOAD = "payload"
 
 # List of possible requests
-class RequestToken(Enum):
-    LOGIN = 0
-    WALLET = 1
+class RequestToken(IntEnum):
+    Login = 0
+    Wallet = 1
 
 # List of user accounts
 wallet1 = Wallet()
 wallet2 = Wallet()
 wallet3 = Wallet()
-user1 = ua.UserAccount("andnic", "pass")
+user1 = UserAccount("andnic", "pass")
 user1.wallets = [ wallet1, wallet2 ]
-user2 = ua.UserAccount("frau", "xdxd")
+user2 = UserAccount("frau", "xdxd")
 user2.wallets = [ wallet2, wallet3 ]
 user_accounts = [
     user1,
     user2,
 ]
 
-# Active connections
-access_tokens = {}
+# Active connections of the form (key: accessToken, value: userAccountIndex)
+connections = {}
 
 # Server port number
 server_port = 11000
@@ -46,18 +47,22 @@ while 1:
     # Server waits for incoming connections on accept()
     # For incoming requests, a new socket is created on return
     connection_socket, addr = server_socket.accept()
-    print("Connected to a client, waiting for data")
+    print("Connected to a client, waiting for requests")
     # Receives sentence on newly established connectionSocket
     data = connection_socket.recv(1024).decode("utf-8")
-    print("Data received, elaborating it")
+    print("Request received, elaborating it")
 
     # Prepares the object to analyse
-    log_json = json.loads(data)
-    requestToken = log_json[REQUEST_TOKEN]
-    payload = log_json[PAYLOAD]
+    reqJson = json.loads(data)
+
+    print(reqJson)
+
+    requestToken = reqJson[REQUEST_TOKEN]
+    accessToken = reqJson[ACCESS_TOKEN]
+    payload = reqJson[PAYLOAD]
 
     # If login procedure was initiated
-    if requestToken == RequestToken.LOGIN:
+    if requestToken == int(RequestToken.Login):
         print("LOGIN requested")
 
         user = payload["user"]
@@ -73,10 +78,10 @@ while 1:
                 valid_cred = True
                 break
 
-        # Prepares the correct response depending on the result
+        # The user-pass pair has been found
         if valid_cred:
             key = Fernet.generate_key().decode()
-            access_tokens[key].append(user_index)
+            connections[key] = user_index
             response = {
                 REQUEST_TOKEN: requestToken,
                 RESPONSE_TOKEN: 1,
@@ -84,6 +89,7 @@ while 1:
                     'accessToken': key,
                 },
             }
+        # The user-pass pair has not been found
         else:
             response = {
                 REQUEST_TOKEN: requestToken,
@@ -92,11 +98,10 @@ while 1:
                     'message': "The combination username and password was not correct.",
                 },
             }
-    elif requestToken == RequestToken.WALLET:
+    elif requestToken == int(RequestToken.Wallet):
         print("WALLET requested")
 
-        key = payload["accessToken"]
-        index = access_tokens[key]
+        index = connections[accessToken]
 
         # Checking the access token
         if index == None:
@@ -116,6 +121,8 @@ while 1:
                 },
             }
     else:
+        print("UNKNOWN request was made")
+
         response = {
             REQUEST_TOKEN: requestToken,
             RESPONSE_TOKEN: 0,
