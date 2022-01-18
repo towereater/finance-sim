@@ -3,8 +3,9 @@ namespace FinanceLib.Models
 {
     // Possible requests made to the server
     public enum RequestToken {
-        LogIn = 0,
-        Wallets = 1
+        CreateAccount = 0,
+        LogIn = 1,
+        Wallets = 21,
     }
 
     // Response results of a given request

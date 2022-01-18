@@ -15,13 +15,7 @@ namespace FinanceLib.Managers
         // Validation token used to get informations from server
         public string AccessToken { get; private set; }
 
-        // Costructor with a custom server IP address
-        private NetManager(string accessToken)
-        {
-            AccessToken = accessToken;
-        }
-
-        public static NetManager Initialize(string user, string pass)
+        public string Initialize(string user, string pass)
         {
             // Sets up the request
             BankRequest request = new BankRequest() {
@@ -39,9 +33,9 @@ namespace FinanceLib.Managers
             // If both the request was correctly delivered and the login successful,
             // then it creates a new NetManager with the given token
             if (respSuccess && response.ResponseToken == ResponseToken.Success)
-                return new NetManager(response.Payload["accessToken"].ToString());
+                AccessToken = response.Payload["accessToken"].ToString();
             
-            return null;
+            return response.Payload["message"].ToString();
         }
 
         public bool Request(BankRequest request, out BankRequest response)
@@ -54,7 +48,7 @@ namespace FinanceLib.Managers
         }
 
         // Default method used to send requests to the server
-        private static bool ServerRequest(BankRequest request, out BankRequest response)
+        public static bool ServerRequest(BankRequest request, out BankRequest response)
         {
             // Input stream data buffer and bytes received
             byte[] inBuffer = new byte[1024];
@@ -129,13 +123,13 @@ namespace FinanceLib.Managers
 
             // In case of error returns its message
             if (errorCatched) {
-                Console.WriteLine($"ERROR CATCHED: {errorMessage}");
+                //Console.WriteLine($"ERROR CATCHED: {errorMessage}");
 
                 response = new BankRequest() {
                     RequestToken = request.RequestToken,
                     ResponseToken = ResponseToken.Failure,
                     Payload = new Dictionary<string, object>() {
-                        ["errorMessage"] = errorMessage,
+                        ["message"] = errorMessage,
                     },
                 };
 
