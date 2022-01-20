@@ -17,7 +17,7 @@ PAYLOAD = "payload"
 # List of possible requests
 class RequestToken(IntEnum):
     CreateAccount = 0
-    Login = 1
+    LogIn = 1
     CreateWallet = 21
     GetWallet = 22
     DeleteWallet = 23
@@ -56,7 +56,7 @@ def create_account(payload):
             },
         }
     # Username already present in the db
-    elif select_account_by_username(db_path, user) is not None:
+    elif len(select_account_by_username(db_path, user)) > 0:
         return {
             REQUEST_TOKEN: RequestToken.CreateAccount,
             RESPONSE_TOKEN: 0,
@@ -86,16 +86,17 @@ def login(payload):
 
     # Searches for the login data in the db
     accounts = select_account_by_username(db_path, user)
+
     # If the username has been found
-    if accounts is not None:
+    if len(accounts) > 0:
         # If the password matches
-        if accounts["password"] == password:
+        if accounts[0][2] == password:
             # Creates a new accessToken and saves it in the connections list
             accessToken = Fernet.generate_key().decode()
-            connections[accessToken] = accounts["id"]
+            connections[accessToken] = accounts[0][0]
 
             return {
-                REQUEST_TOKEN: RequestToken.Login,
+                REQUEST_TOKEN: RequestToken.LogIn,
                 RESPONSE_TOKEN: 1,
                 PAYLOAD: {
                     'accessToken': accessToken,
@@ -105,7 +106,7 @@ def login(payload):
         # If the password does not match
         else:
             return {
-                REQUEST_TOKEN: RequestToken.Login,
+                REQUEST_TOKEN: RequestToken.LogIn,
                 RESPONSE_TOKEN: 0,
                 PAYLOAD: {
                     'message': "Password is not correct.",
@@ -114,7 +115,7 @@ def login(payload):
     # If the username has not been found
     else:
         return {
-            REQUEST_TOKEN: RequestToken.Login,
+            REQUEST_TOKEN: RequestToken.LogIn,
             RESPONSE_TOKEN: 0,
             PAYLOAD: {
                 'message': "Username does not exists.",
@@ -124,42 +125,95 @@ def login(payload):
 # Get wallet procedure
 # Returns all the wallets associated to the given user.
 def get_wallet(payload, accessToken):
+    # Extraction of the account id
     account_id = connections[accessToken]
 
-    return {
-        REQUEST_TOKEN: RequestToken.GetWallet,
-        RESPONSE_TOKEN: 1,
-        PAYLOAD: {
-            'wallets': [ {
-                'iban': wallet["iban"],
-                'cash': wallet["cash"],
-            } for wallet in select_wallets_by_account(db_path, account_id) ],
-            'message': "Wallets associated to given account."
-        },
-    }
+    # Selection of the wallets
+    wallets = select_wallets_by_account(db_path, account_id)
+
+    # Some wallets have been found
+    if len(wallets) > 0:
+        return {
+            REQUEST_TOKEN: RequestToken.GetWallet,
+            RESPONSE_TOKEN: 1,
+            PAYLOAD: {
+                'wallets': [ {
+                    'iban': wallet[0],
+                    'cash': wallet[1],
+                } for wallet in wallets ],
+                'message': "Wallets associated to given account."
+            },
+        }
+    # No wallets have been found
+    else:
+        return {
+            REQUEST_TOKEN: RequestToken.GetWallet,
+            RESPONSE_TOKEN: 0,
+            PAYLOAD: {
+                'message': "No wallets found associated to given account."
+            },
+        }
 
 # Create wallet procedure
 # Adds a new entry in the wallets table corresponding to a iban-cash pair.
-#TODO: FIX IBAN RANDOMIZATION
 def create_wallet(payload, accessToken):
+    # Extraction of the account id
     account_id = connections[accessToken]
+
+    # Generation of the wallet data
+    #TODO: CHANGE IBAN RANDOMIZATION
     iban = Fernet.generate_key().decode()
     cash = 0
 
-    wallet = insert_wallet(db_path, iban, cash)
-    insert_account_wallet(db_path, account_id, wallet["id"])
+    # Insertion of the wallet data in the db
+    insert_wallet(db_path, iban, cash)
+    #insert_account_wallet(db_file, account_id, )
+    wallet = select_wallets_by_account(db_path, account_id)
+    print(wallet)
 
-    return {
-        REQUEST_TOKEN: RequestToken.CreateWallet,
-        RESPONSE_TOKEN: 1,
-        PAYLOAD: {
-            'wallets': [ {
-                'iban': iban,
-                'cash': cash,
-            } ],
-            'message': "New wallet associated to given account created."
-        },
-    }
+    # Wallet correctly inserted in the db
+    if len(wallet) > 0:
+        account_wallet = insert_account_wallet(db_path, account_id, wallet[0])
+
+        # Account-wallet pair correctly inserted in the db
+        if len(account_wallet) > 0:
+            return {
+                REQUEST_TOKEN: RequestToken.CreateWallet,
+                RESPONSE_TOKEN: 1,
+                PAYLOAD: {
+                    'wallets': [ {
+                        'iban': iban,
+                        'cash': cash,
+                    } ],
+                    'message': "New wallet associated to given account created."
+                },
+            }
+        # Account-wallet pair insertion error
+        else:
+            return {
+                REQUEST_TOKEN: RequestToken.CreateWallet,
+                RESPONSE_TOKEN: 0,
+                PAYLOAD: {
+                    'wallets': [ {
+                        'iban': iban,
+                        'cash': cash,
+                    } ],
+                    'message': "An error occurred while inserting a account-wallet pair in the db."
+                },
+            }
+    # Wallet insertion error
+    else:
+        return {
+            REQUEST_TOKEN: RequestToken.CreateWallet,
+            RESPONSE_TOKEN: 0,
+            PAYLOAD: {
+                'wallets': [ {
+                    'iban': iban,
+                    'cash': cash,
+                } ],
+                'message': "An error occurred while inserting a wallet in the db."
+            },
+        }
 
 def handle_request(request):
     # Decomposes the json into parts
@@ -169,14 +223,15 @@ def handle_request(request):
 
     # CREATE_ACCOUNT requested
     if requestToken == int(RequestToken.CreateAccount):
-        print("CREATE_ACCOUNT requested")
+        print("CREATE_ACCOUNT requested.")
         return create_account(payload)
     # LOGIN requested
-    elif requestToken == int(RequestToken.Login):
-        print("LOGIN requested")
+    elif requestToken == int(RequestToken.LogIn):
+        print("LOGIN requested.")
         return login(payload)
     # The other procedures require a valid accessToken, so its existence is checked
     elif accessToken is None or connections[accessToken] is None:
+        print("ACCESS_TOKEN not valid, refusing connection.")
         return {
                 REQUEST_TOKEN: requestToken,
                 RESPONSE_TOKEN: 0,
@@ -188,20 +243,20 @@ def handle_request(request):
     else:
         # GET_WALLET requested
         if requestToken == int(RequestToken.GetWallet):
-            print("GET_WALLET requested")
+            print("GET_WALLET requested.")
             return get_wallet(payload, accessToken)
         # CREATE_WALLET requested
         elif requestToken == int(RequestToken.CreateWallet):
-            print("CREATE_WALLET requested")
+            print("CREATE_WALLET requested.")
             return create_wallet(payload, accessToken)
         # UNKNOWN request
         else:
-            print("UNKNOWN request")
+            print("UNKNOWN request, cannot handle it.")
             return {
                 REQUEST_TOKEN: requestToken,
                 RESPONSE_TOKEN: 0,
                 PAYLOAD: {
-                    'message': "Invalid request. The server cannot correctly handle it.",
+                    'message': "Invalid request. The server cannot handle it.",
                 },
             }
 
@@ -210,29 +265,29 @@ def run_server(server_port):
     server_socket = socket(AF_INET, SOCK_STREAM)
     server_socket.bind(('', server_port))
     server_socket.listen(5)
-    print ("The server is ready to receive")
+    print ("The server is ready to receive\n")
 
     while 1:
         # Server waits for incoming connections on accept()
         # For incoming requests, a new socket is created on return
         connection_socket, addr = server_socket.accept()
-        print("Connected to a client, waiting for requests")
+        print("Connected to a client, waiting for requests...")
 
         # Receives some data on the newly established connectionSocket
-        data = connection_socket.recv(1024).decode("utf-8")
+        reqJson = connection_socket.recv(1024).decode("utf-8")
 
         # Analyses the request made by the client and sets up the response
-        print("Request received, elaborating it")
-        request = json.loads(data)
+        print("Request received, elaborating it.")
+        request = json.loads(reqJson)
         response = handle_request(request)
         respJson = json.dumps(response)
 
         # Sends back the modified string to the client
-        print("Sending the response to the client")
+        print("Sending the response to the client...")
         connection_socket.send(respJson.encode("utf-8"))
 
         # Closes the connection with the client
-        print("Closing the connection with the client")
+        print("Closing the connection with the client.\n")
         connection_socket.close()
     
 def main():

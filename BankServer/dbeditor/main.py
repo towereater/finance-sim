@@ -13,19 +13,6 @@ def get_connection(db_file):
     
     return conn
 
-def create_wallets(conn):
-    comm = '''CREATE TABLE IF NOT EXISTS wallets (
-            id INTEGER PRIMARY KEY,
-            iban CHAR(30) UNIQUE,
-            cash FLOAT(15, 4) DEFAULT(0)
-        )'''
-
-    try:
-        cur = conn.cursor()
-        cur.execute(comm)
-    except sqlite3.Error as e:
-        print(f"An error has occurred while executing a command: {e}")
-
 def insert_wallet(conn, params):
     comm = '''INSERT INTO wallets VALUES (?, ?)'''
 
@@ -45,30 +32,6 @@ def select_wallets(conn):
     except sqlite3.Error as e:
         print(f"An error has occurred while executing a command: {e}")
 
-def generate_wallets(conn):
-    create_wallets(conn)
-
-    for i in range(5):
-        iban = Fernet.generate_key().decode()
-        cash = randint(0, 10000)
-        insert_wallet(conn, (iban, cash))
-
-    for row in select_wallets(conn):
-        print(row)
-
-def create_accounts(conn):
-    comm = '''CREATE TABLE IF NOT EXISTS accounts (
-            id INTEGER PRIMARY KEY,
-            username VARCHAR(20) NOT NULL UNIQUE,
-            password VARCHAR(20) NOT NULL
-        )'''
-
-    try:
-        cur = conn.cursor()
-        cur.execute(comm)
-    except sqlite3.Error as e:
-        print(f"An error has occurred while executing a command: {e}")
-
 def insert_account(conn, username, password):
     comm = '''INSERT INTO accounts (username, password) VALUES (?, ?)'''
 
@@ -78,30 +41,15 @@ def insert_account(conn, username, password):
     except sqlite3.Error as e:
         print(f"An error has occurred while executing a command: {e}")
 
-def select_accounts(conn):
-    comm = '''SELECT * FROM accounts'''
+def select_accounts(conn, username):
+    comm = '''SELECT username, password FROM accounts WHERE username = ?'''
 
     try:
         cur = conn.cursor()
-        cur.execute(comm)
+        cur.execute(comm, (username,))
         return cur.fetchall()
     except sqlite3.Error as e:
         print(f"An error has occurred while executing a command: {e}")
-
-def generate_accounts(conn):
-    create_accounts(conn)
-
-    params = [
-        ("andnic", "pass"),
-        ("frau", "xdxd"),
-        ("admin", "admin")
-    ]
-
-    for i in range(3):
-        insert_account(conn, params[i])
-
-    for row in select_accounts(conn):
-        print(row)
     
 def create_account_wallets(conn):
     comm = '''CREATE TABLE IF NOT EXISTS account_wallets (
@@ -131,16 +79,10 @@ def main():
     db_mem = ":memory:"
     conn = get_connection(db_path)
 
-    #generate_wallets(conn)
-    #generate_accounts(conn)
-
-    create_accounts(conn)
-    create_wallets(conn)
-    create_account_wallets(conn)
-
-    #insert_account(conn, "andnic", "pass")
-    for acc in select_accounts(conn):
-        print(acc)
+    print(select_accounts(conn, "andnic") is None)
+    for row in select_accounts(conn, "andnic"):
+        print(row[0])
+        print(row[1])
 
     conn.commit()
     conn.close()

@@ -35,27 +35,44 @@ def execute_command(db_file, command, params):
 
 # Account selection using username value
 def select_account_by_username(db_file, username):
-    comm = '''SELECT * FROM accounts WHERE username = ?'''
-    return execute_command(db_file, comm, (username))
+    comm = '''
+        SELECT *
+        FROM accounts
+        WHERE username = ?
+    '''
+    return execute_command(db_file, comm, (username,))
 
 # Wallet selection using account id
 def select_wallets_by_account(db_file, account_id):
-    comm = '''SELECT W.iban, W.cash FROM account_wallets AW
-        JOIN wallets W ON W.id = AW.wallet_id
-        WHERE account_id = ?'''
-    return execute_command(db_file, comm, (account_id))
+    comm = '''
+        SELECT W.iban, W.cash
+        FROM account_wallets AW
+        JOIN wallets W
+        ON W.id = AW.wallet_id
+        WHERE account_id = ?
+    '''
+    return execute_command(db_file, comm, (account_id,))
 
 # Account insertion
 def insert_account(db_file, username, password):
-    comm = '''INSERT INTO accounts (username, password) VALUES (?, ?)'''
+    comm = '''
+        INSERT INTO accounts (username, password)
+        VALUES (?, ?)
+    '''
     return execute_command(db_file, comm, (username, password))
 
 # Wallet insertion
 def insert_wallet(db_file, iban, cash=0):
-    comm = '''INSERT INTO wallets (iban, cash) VALUES (?, ?)'''
+    comm = '''
+        INSERT INTO wallets (iban, cash)
+        VALUES (?, ?)
+    '''
     return execute_command(db_file, comm, (iban, cash))
 
 # Account-wallet pair insertion
 def insert_account_wallet(db_file, account_id, wallet_id):
-    comm = '''INSERT INTO account_wallets (account_id, wallet_id) VALUES (?, ?)'''
+    comm = '''
+        INSERT INTO account_wallets (account_id, wallet_id)
+        VALUES (?, ?)
+    '''
     return execute_command(db_file, comm, (account_id, wallet_id))

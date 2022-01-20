@@ -1,5 +1,3 @@
-using System;
-
 using FinanceLib.Managers;
 
 namespace ClientConsoleApp
@@ -42,8 +40,7 @@ namespace ClientConsoleApp
                         Console.WriteLine($"{message}\n");
                     }
                 }
-
-                else
+                else {
                     ans = GetMenuOption(3);
 
                     if (ans == 1) {
@@ -58,6 +55,7 @@ namespace ClientConsoleApp
                         string message = AccountManager.LogOut();
                         Console.WriteLine($"{message}\n");
                     }
+                }
 
                 Console.Write("Press any key");
                 Console.ReadKey(true);

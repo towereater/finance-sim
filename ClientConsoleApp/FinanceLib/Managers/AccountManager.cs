@@ -52,7 +52,7 @@ namespace FinanceLib.Managers
         public string LogOut()
         {
             // Drops all session data
-            netMan = null;
+            netMan.Release();
             UserAccount = null;
 
             return "Logout successful";
@@ -62,7 +62,7 @@ namespace FinanceLib.Managers
         {
             // Sets up the request
             BankRequest request = new BankRequest() {
-                RequestToken = RequestToken.Wallets,
+                RequestToken = RequestToken.CreateWallet,
                 Payload = new Dictionary<string, object>(),
             };
 
@@ -89,7 +89,7 @@ namespace FinanceLib.Managers
         {
             // Sets up the request
             BankRequest request = new BankRequest() {
-                RequestToken = RequestToken.Wallets,
+                RequestToken = RequestToken.GetWallet,
                 Payload = new Dictionary<string, object>(),
             };
 

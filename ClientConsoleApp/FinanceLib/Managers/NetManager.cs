@@ -38,6 +38,11 @@ namespace FinanceLib.Managers
             return response.Payload["message"].ToString();
         }
 
+        public void Release()
+        {
+            AccessToken = string.Empty;
+        }
+
         public bool Request(BankRequest request, out BankRequest response)
         {
             // Adds the access token to the request
@@ -91,8 +96,6 @@ namespace FinanceLib.Managers
 
                     // Converts the data and sets up the response
                     string jsonResponse = Encoding.ASCII.GetString(inBuffer, 0, inBytes);
-
-                    Console.WriteLine(jsonResponse);
 
                     response = JsonSerializer.Deserialize<BankRequest>(jsonResponse,
                         new JsonSerializerOptions() {

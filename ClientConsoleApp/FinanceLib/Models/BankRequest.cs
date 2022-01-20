@@ -5,7 +5,9 @@ namespace FinanceLib.Models
     public enum RequestToken {
         CreateAccount = 0,
         LogIn = 1,
-        Wallets = 21,
+        CreateWallet = 21,
+        GetWallet = 22,
+        DeleteWallet = 23,
     }
 
     // Response results of a given request
