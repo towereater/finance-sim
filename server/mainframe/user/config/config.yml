@@ -1,0 +1,10 @@
+# Server configuration
+server:
+  host: "localhost"
+  port: "12000"
+
+# DB configuration
+db:
+  host: "127.0.0.1"
+  port: "27017"
+  timeout: 5
