@@ -10,10 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Update user API function
-func UpdateUser(w http.ResponseWriter, r *http.Request, urlModel string) {
+// Patch user API function
+func PatchUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	// Parsing of the request
-	var req model.UpdateUserInput
+	var req model.PatchUserInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -29,18 +29,32 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 		return
 	}
 
+	// Fetch of the user data
+	user, err := db.SelectUser(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	// Generation of the updated document
-	user := model.User{
-		Id:       id,
-		Username: req.Username,
-		Password: req.Password,
-		Name:     req.Name,
-		Surname:  req.Surname,
-		Birth:    req.Birth,
+	if req.Username != "" {
+		user.Username = req.Username
+	}
+	if req.Password != "" {
+		user.Password = req.Password
+	}
+	if req.Name != "" {
+		user.Name = req.Name
+	}
+	if req.Surname != "" {
+		user.Surname = req.Surname
+	}
+	if req.Birth != "" {
+		user.Birth = req.Birth
 	}
 
 	// Execution of the request
-	err = db.UpdateUser(id, user)
+	err = db.UpdateUser(id, *user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"mainframe/user/config"
-	"mainframe/user/handler"
+	"bff/config"
+	"bff/handler"
 )
 
 func loadConfig(path string) {
@@ -33,7 +33,7 @@ func handleRequests() {
 
 func main() {
 	// Logging
-	fmt.Println("User service starting up")
+	fmt.Println("BFF service starting up")
 
 	// Loading config file
 	loadConfig("./config/config.yml")
@@ -43,5 +43,5 @@ func main() {
 
 	// Starting up
 	fmt.Println("Ready to listen incoming requests")
-	http.ListenAndServe(":"+config.AppConfig.Server.Port, nil)
+	http.ListenAndServe(":"+config.AppConfig.App.Port, nil)
 }

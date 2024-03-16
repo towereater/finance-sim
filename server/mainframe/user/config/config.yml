@@ -1,7 +1,7 @@
 # Server configuration
 server:
   host: "localhost"
-  port: "12000"
+  port: "12001"
 
 # DB configuration
 db:

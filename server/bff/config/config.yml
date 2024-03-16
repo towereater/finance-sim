@@ -1,0 +1,10 @@
+# Application configuration
+app:
+  host: "localhost"
+  port: "13000"
+
+# Mainframe server configuration
+server:
+  users:
+    host: "localhost"
+    port: "12001"

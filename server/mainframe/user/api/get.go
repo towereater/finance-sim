@@ -30,8 +30,8 @@ func GetUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	}
 
 	// Response output
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -59,11 +59,11 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	var filter model.User
 
 	if queryParams.Has("username") {
-		filter.Name = queryParams.Get("username")
+		filter.Username = queryParams.Get("username")
 	}
 
 	if queryParams.Has("password") {
-		filter.Name = queryParams.Get("password")
+		filter.Password = queryParams.Get("password")
 	}
 
 	if queryParams.Has("name") {
@@ -86,7 +86,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Response output
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 }

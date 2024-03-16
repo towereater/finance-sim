@@ -44,6 +44,8 @@ func userByIdHandler(w http.ResponseWriter, r *http.Request) {
 		api.GetUser(w, r, handledPath)
 	case "PUT":
 		api.UpdateUser(w, r, handledPath)
+	case "PATCH":
+		api.PatchUser(w, r, handledPath)
 	case "DELETE":
 		api.DeleteUser(w, r, handledPath)
 	default:
