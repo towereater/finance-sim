@@ -28,6 +28,8 @@ public class BankApp
 
                     string message = AccountManager.LogIn(user, pass);
                     Console.WriteLine($"{message}\n");
+
+                    WalletManager.AuthorizationToken = AccountManager.AuthorizationToken;
                 }
                 else if (ans == 2) {
                     string user = GetString("Insert a new username (-q to exit): ");

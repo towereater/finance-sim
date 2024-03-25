@@ -56,13 +56,40 @@ def create_account_wallets(conn):
             id INTEGER PRIMARY KEY,
             account_id INTEGER NOT NULL,
             wallet_id INTEGER NOT NULL,
-            FOREIGN KEY (account_id) REFERENCES accounts (id),
             FOREIGN KEY (wallet_id) REFERENCES wallets (id)
         )'''
 
     try:
         cur = conn.cursor()
         cur.execute(comm)
+    except sqlite3.Error as e:
+        print(f"An error has occurred while executing a command: {e}")
+
+def insert_account_wallets(conn, username, password):
+    comm = '''INSERT INTO account_wallets (account_id, wallet_id) VALUES (?, ?)'''
+
+    try:
+        cur = conn.cursor()
+        cur.execute(comm, (username, password))
+    except sqlite3.Error as e:
+        print(f"An error has occurred while executing a command: {e}")
+
+def update_account_wallets(conn, account_id_new, account_id_old):
+    comm = '''UPDATE account_wallets SET account_id = ? WHERE account_id = ?'''
+
+    try:
+        cur = conn.cursor()
+        cur.execute(comm, (account_id_new, account_id_old))
+    except sqlite3.Error as e:
+        print(f"An error has occurred while executing a command: {e}")
+
+def select_account_wallets(conn, account_id):
+    comm = '''SELECT wallet_id FROM account_wallets WHERE account_id = ?'''
+
+    try:
+        cur = conn.cursor()
+        cur.execute(comm, (account_id,))
+        return cur.fetchall()
     except sqlite3.Error as e:
         print(f"An error has occurred while executing a command: {e}")
 

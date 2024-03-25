@@ -9,7 +9,9 @@ public class AccountManager
     private NewNetManager newNetManager = new("http://127.0.0.1:13000/");
 
     // Verifies whether or not a login was made by checking the NetManager access token
-    public bool IsLogged { get; protected set; }
+    public bool IsLogged => !string.IsNullOrEmpty(AuthorizationToken);
+
+    public string AuthorizationToken { get; protected set; }
 
     // User account connected to the manager
     public UserAccount UserAccount { get; protected set; }
@@ -43,7 +45,7 @@ public class AccountManager
                 Birth = response.Payload["birth"].ToString(),
             };
 
-            IsLogged = true;
+            AuthorizationToken = response.AuthorizationToken;
 
             return $"Login successful";
         }
@@ -57,7 +59,7 @@ public class AccountManager
     public string LogOut()
     {
         // Drops all session data
-        IsLogged = false;
+        AuthorizationToken = null;
         UserAccount = null;
 
         return "Logout successful";

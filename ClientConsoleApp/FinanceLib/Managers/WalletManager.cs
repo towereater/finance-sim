@@ -10,13 +10,16 @@ public class WalletManager
     private NetManager netMan = new NetManager();
 
     // Verifies whether or not a login was made by checking the NetManager access token
-    public bool IsLogged { get { return !string.IsNullOrEmpty(netMan.AccessToken); } }
+    public bool IsLogged => !string.IsNullOrEmpty(AuthorizationToken);
+
+    public string AuthorizationToken { get; set; }
 
     public string CreateWallet()
     {
         // Sets up the request
         BankRequest request = new BankRequest() {
             RequestToken = RequestToken.CreateWallet,
+            AuthorizationToken = AuthorizationToken,
             Payload = new Dictionary<string, object>(),
         };
 
@@ -44,6 +47,7 @@ public class WalletManager
         // Sets up the request
         BankRequest request = new BankRequest() {
             RequestToken = RequestToken.GetWallet,
+            AuthorizationToken = AuthorizationToken,
             Payload = new Dictionary<string, object>(),
         };
 

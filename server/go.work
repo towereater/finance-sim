@@ -2,3 +2,4 @@ go 1.21.3
 
 use ./mainframe/user
 use ./bff
+use ./migration/user

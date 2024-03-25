@@ -11,20 +11,7 @@ namespace FinanceLib.Managers;
 
 public class NetManager
 {
-    // Validation token used to get informations from server
-    public string AccessToken { get; private set; }
-
     public bool Request(BankRequest request, out BankRequest response)
-    {
-        // Adds the access token to the request
-        request.AuthorizationToken = AccessToken;
-
-        // Sends the request using the static version of the function
-        return ServerRequest(request, out response);
-    }
-
-    // Default method used to send requests to the server
-    public static bool ServerRequest(BankRequest request, out BankRequest response)
     {
         // Input stream data buffer and bytes received
         byte[] inBuffer = new byte[1024];
@@ -52,7 +39,6 @@ public class NetManager
                 // Sets up the message and sends it to the remote host
                 string jsonRequest = JsonSerializer.Serialize(request,
                     new JsonSerializerOptions() {
-                        AllowTrailingCommas = true,
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 });
                 byte[] outBuffer = Encoding.ASCII.GetBytes(jsonRequest);
@@ -166,22 +152,22 @@ public class NewNetManager
         if (httpResponse.IsSuccessStatusCode)
         {
             response.ResponseToken = ResponseToken.Success;
+
+            response.Payload = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse,
+                new JsonSerializerOptions {
+                    AllowTrailingCommas = true,
+                    PropertyNameCaseInsensitive = true,
+            });
+
+            if (httpResponse.Headers.Contains("Jwt"))
+            {
+                response.AuthorizationToken = httpResponse.Headers.GetValues("Jwt").ElementAt(0);
+            }
         }
         else
         {
             response.ResponseToken = ResponseToken.Failure;
         }
-
-        if (httpResponse.Headers.Contains("Jwt"))
-        {
-            response.AuthorizationToken = httpResponse.Headers.GetValues("Jwt").ElementAt(0);
-        }
-
-        response.Payload = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse,
-            new JsonSerializerOptions {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true,
-        });
 
         return response;
     }

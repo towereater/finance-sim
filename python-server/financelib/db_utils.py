@@ -46,12 +46,21 @@ def select_account_by_username(db_file, username):
 def select_wallets_by_account(db_file, account_id):
     comm = '''
         SELECT W.iban, W.cash
-        FROM account_wallets AW
-        JOIN wallets W
-        ON W.id = AW.wallet_id
-        WHERE account_id = ?
+        FROM wallets W
+        JOIN account_wallets_new AW
+        ON AW.wallet_id = W.id
+        WHERE AW.account_id = ?
     '''
     return execute_command(db_file, comm, (account_id,))
+
+# Wallet selection using account id
+def select_wallet_by_iban(db_file, iban):
+    comm = '''
+        SELECT W.id, W.iban, W.cash
+        FROM wallets W
+        WHERE W.iban = ?
+    '''
+    return execute_command(db_file, comm, (iban,))
 
 # Account insertion
 def insert_account(db_file, username, password):
@@ -73,6 +82,14 @@ def insert_wallet(db_file, iban, cash=0):
 def insert_account_wallet(db_file, account_id, wallet_id):
     comm = '''
         INSERT INTO account_wallets (account_id, wallet_id)
+        VALUES (?, ?)
+    '''
+    return execute_command(db_file, comm, (account_id, wallet_id))
+
+# Account-wallet pair insertion
+def insert_account_wallet_new(db_file, account_id, wallet_id):
+    comm = '''
+        INSERT INTO account_wallets_new (account_id, wallet_id)
         VALUES (?, ?)
     '''
     return execute_command(db_file, comm, (account_id, wallet_id))
