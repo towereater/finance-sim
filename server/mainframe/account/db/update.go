@@ -18,10 +18,7 @@ func UpdateUser(id primitive.ObjectID, user model.User) error {
 
 	// Construction of the DB objects
 	filter := bson.M{"_id": id}
-	update := []bson.M{{"$set": user}}
-	if user.Accounts != nil && len(user.Accounts) == 0 {
-		update = append(update, bson.M{"$unset": "accounts"})
-	}
+	update := bson.M{"$set": user}
 
 	// Insert of a document
 	_, err = coll.UpdateOne(context.TODO(), filter, update)

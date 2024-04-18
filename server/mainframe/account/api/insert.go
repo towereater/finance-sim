@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"mainframe/user/db"
-	"mainframe/user/model"
+	"mainframe/account/db"
+	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Insert user API function
-func InsertUser(w http.ResponseWriter, r *http.Request) {
+// Insert account API function
+func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	// Parsing of the request
-	var req model.InsertUserInput
+	var req model.InsertAccountInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -21,21 +21,15 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generation of the new document
-	user := model.User{
-		Id:       primitive.NewObjectID(),
-		Username: req.Username,
-		Password: req.Password,
-		Name:     req.Name,
-		Surname:  req.Surname,
-		Birth:    req.Birth,
-		Accounts: req.Accounts,
-	}
-	if req.Accounts == nil || len(req.Accounts) == 0 {
-		user.Accounts = nil
+	account := model.Account{
+		Id:    primitive.NewObjectID(),
+		IBAN:  primitive.NewObjectID().Hex(),
+		Owner: req.Owner,
+		Cash:  0,
 	}
 
 	// Execution of the request
-	err = db.InsertUser(user)
+	err = db.InsertAccount(account)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,5 +38,5 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 	// Response output
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(account)
 }

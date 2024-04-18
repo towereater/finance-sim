@@ -3,13 +3,11 @@ package db
 import (
 	"context"
 
-	"mainframe/user/model"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func UpdateUser(id primitive.ObjectID, user model.User) error {
+func AddAccount(id primitive.ObjectID, account primitive.ObjectID) error {
 	// Retrieve the collection
 	coll, err := getCollection("bank", "users")
 	if err != nil {
@@ -18,10 +16,7 @@ func UpdateUser(id primitive.ObjectID, user model.User) error {
 
 	// Construction of the DB objects
 	filter := bson.M{"_id": id}
-	update := []bson.M{{"$set": user}}
-	if user.Accounts != nil && len(user.Accounts) == 0 {
-		update = append(update, bson.M{"$unset": "accounts"})
-	}
+	update := bson.M{"$push": bson.M{"accounts": account}}
 
 	// Insert of a document
 	_, err = coll.UpdateOne(context.TODO(), filter, update)

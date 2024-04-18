@@ -7,11 +7,12 @@ import (
 	"mainframe/user/api"
 )
 
-// Handles all the API functions for this service
 func HandleRequests() {
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/users", usersHandler)
-	http.HandleFunc("/users/", userByIdHandler)
+	http.HandleFunc("/users/{userId}", userByIdHandler)
+	http.HandleFunc("/users/{userId}/add-account", userAddAccountHandler)
+	http.HandleFunc("/users/{userId}/remove-account", userRemoveAccountHandler)
 }
 
 // Handles home path
@@ -48,6 +49,32 @@ func userByIdHandler(w http.ResponseWriter, r *http.Request) {
 		api.PatchUser(w, r, handledPath)
 	case "DELETE":
 		api.DeleteUser(w, r, handledPath)
+	default:
+		http.Error(w, r.Method, http.StatusMethodNotAllowed)
+	}
+}
+
+// Handles user accounts API functions
+func userAddAccountHandler(w http.ResponseWriter, r *http.Request) {
+	var handledPath = "/users/{id}/add-account"
+
+	// Check of the method request
+	switch r.Method {
+	case "PATCH":
+		api.AddAccount(w, r, handledPath)
+	default:
+		http.Error(w, r.Method, http.StatusMethodNotAllowed)
+	}
+}
+
+// Handles user accounts API functions
+func userRemoveAccountHandler(w http.ResponseWriter, r *http.Request) {
+	var handledPath = "/users/{id}/remove-account"
+
+	// Check of the method request
+	switch r.Method {
+	case "PATCH":
+		api.RemoveAccount(w, r, handledPath)
 	default:
 		http.Error(w, r.Method, http.StatusMethodNotAllowed)
 	}

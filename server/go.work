@@ -1,5 +1,9 @@
-go 1.21.3
+go 1.22.2
 
 use ./mainframe/user
+
+use ./mainframe/account
+
 use ./bff
+
 use ./migration/user

@@ -9,4 +9,5 @@ type User struct {
 	Name     string             `json:"name" bson:"name"`
 	Surname  string             `json:"surname" bson:"surname"`
 	Birth    string             `json:"birth" bson:"birth"`
+	Accounts []string           `json:"accounts,omitempty" bson:"accounts,omitempty"`
 }

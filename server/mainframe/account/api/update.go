@@ -37,10 +37,6 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 		Name:     req.Name,
 		Surname:  req.Surname,
 		Birth:    req.Birth,
-		Accounts: req.Accounts,
-	}
-	if req.Accounts == nil {
-		user.Accounts = make([]string, 0)
 	}
 
 	// Execution of the request

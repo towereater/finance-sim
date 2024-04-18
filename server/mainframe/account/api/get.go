@@ -61,17 +61,17 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	if queryParams.Has("username") {
 		filter.Username = queryParams.Get("username")
 	}
+
 	if queryParams.Has("password") {
 		filter.Password = queryParams.Get("password")
 	}
+
 	if queryParams.Has("name") {
 		filter.Name = queryParams.Get("name")
 	}
+
 	if queryParams.Has("surname") {
 		filter.Surname = queryParams.Get("surname")
-	}
-	if queryParams.Has("birth") {
-		filter.Birth = queryParams.Get("birth")
 	}
 
 	// Execution of the request

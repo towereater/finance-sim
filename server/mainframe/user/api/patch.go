@@ -52,6 +52,9 @@ func PatchUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	if req.Birth != "" {
 		user.Birth = req.Birth
 	}
+	if req.Accounts != nil {
+		user.Accounts = req.Accounts
+	}
 
 	// Execution of the request
 	err = db.UpdateUser(id, *user)
