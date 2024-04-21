@@ -11,7 +11,7 @@ import (
 )
 
 // Patch user API function
-func PatchUser(w http.ResponseWriter, r *http.Request, urlModel string) {
+func PatchUser(w http.ResponseWriter, r *http.Request) {
 	// Parsing of the request
 	var req model.PatchUserInput
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -21,9 +21,7 @@ func PatchUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	}
 
 	// Extraction of extra parameters
-	pathParams := getPathParams(r.URL, urlModel)
-
-	id, err := primitive.ObjectIDFromHex(pathParams["id"])
+	id, err := primitive.ObjectIDFromHex(r.PathValue("userId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return

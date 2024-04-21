@@ -12,11 +12,9 @@ import (
 )
 
 // Get user API function
-func GetUser(w http.ResponseWriter, r *http.Request, urlModel string) {
+func GetUser(w http.ResponseWriter, r *http.Request) {
 	// Extraction of extra parameters
-	pathParams := getPathParams(r.URL, urlModel)
-
-	id, err := primitive.ObjectIDFromHex(pathParams["id"])
+	id, err := primitive.ObjectIDFromHex(r.PathValue("userId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
@@ -75,12 +73,12 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execution of the request
-	user, err := db.SelectUsers(filter, fromId, limit, order)
+	users, err := db.SelectUsers(filter, fromId, limit, order)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if user == nil {
+	if users == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -88,5 +86,5 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Response output
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(users)
 }

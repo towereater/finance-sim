@@ -5,25 +5,23 @@ import (
 	"net/http"
 	"strconv"
 
-	"mainframe/user/db"
-	"mainframe/user/model"
+	"mainframe/account/db"
+	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Get user API function
-func GetUser(w http.ResponseWriter, r *http.Request, urlModel string) {
+// Get account API function
+func GetAccount(w http.ResponseWriter, r *http.Request) {
 	// Extraction of extra parameters
-	pathParams := getPathParams(r.URL, urlModel)
-
-	id, err := primitive.ObjectIDFromHex(pathParams["id"])
+	id, err := primitive.ObjectIDFromHex(r.PathValue("accountId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
 	// Execution of the request
-	user, err := db.SelectUser(id)
+	user, err := db.SelectAccount(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -35,8 +33,8 @@ func GetUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	json.NewEncoder(w).Encode(user)
 }
 
-// Get users API function
-func GetUsers(w http.ResponseWriter, r *http.Request) {
+// Get accounts API function
+func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	// Extraction of extra parameters
 	queryParams := r.URL.Query()
 
@@ -56,31 +54,23 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Building the filter
-	var filter model.User
+	var filter model.Account
 
-	if queryParams.Has("username") {
-		filter.Username = queryParams.Get("username")
+	if queryParams.Has("iban") {
+		filter.IBAN = queryParams.Get("iban")
 	}
 
-	if queryParams.Has("password") {
-		filter.Password = queryParams.Get("password")
-	}
-
-	if queryParams.Has("name") {
-		filter.Name = queryParams.Get("name")
-	}
-
-	if queryParams.Has("surname") {
-		filter.Surname = queryParams.Get("surname")
+	if queryParams.Has("owner") {
+		filter.Owner = queryParams.Get("owner")
 	}
 
 	// Execution of the request
-	user, err := db.SelectUsers(filter, fromId, limit, order)
+	accounts, err := db.SelectAccounts(filter, fromId, limit, order)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if user == nil {
+	if accounts == nil {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
@@ -88,5 +78,5 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Response output
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(accounts)
 }

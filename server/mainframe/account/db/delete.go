@@ -7,9 +7,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func DeleteUser(id primitive.ObjectID) error {
+func DeleteAccount(id primitive.ObjectID) error {
 	// Retrieve the collection
-	coll, err := getCollection("bank", "users")
+	coll, err := getCollection("bank", "accounts")
 	if err != nil {
 		return err
 	}

@@ -28,6 +28,7 @@ func accountsHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		api.GetAccounts(w, r)
 	case "POST":
+		//TODO: INSERT A NEW ACCOUNT IN THE OWNER ACCOUNTS LIST
 		api.InsertAccount(w, r)
 	default:
 		http.Error(w, r.Method, http.StatusMethodNotAllowed)
@@ -36,18 +37,19 @@ func accountsHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles users API functions
 func accountsByIdHandler(w http.ResponseWriter, r *http.Request) {
-	var handledPath = "/accounts/{id}"
-
 	// Check of the method request
 	switch r.Method {
 	case "GET":
-		api.GetAccount(w, r, handledPath)
+		api.GetAccount(w, r)
 	case "PUT":
-		api.UpdateAccount(w, r, handledPath)
+		//TODO: UPDATE THE ACCOUNT OF THE OWNER ACCOUNTS LIST
+		api.UpdateAccount(w, r)
 	case "PATCH":
-		api.PatchAccount(w, r, handledPath)
+		//TODO: UPDATE THE ACCOUNT OF THE OWNER ACCOUNTS LIST IF OWNER IS SET
+		api.PatchAccount(w, r)
 	case "DELETE":
-		api.DeleteAccount(w, r, handledPath)
+		//TODO: REMOVE THE ACCOUNT FROM THE OWNER ACCOUNTS LIST
+		api.DeleteAccount(w, r)
 	default:
 		http.Error(w, r.Method, http.StatusMethodNotAllowed)
 	}

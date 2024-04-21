@@ -9,11 +9,9 @@ import (
 )
 
 // Delete user API function
-func DeleteUser(w http.ResponseWriter, r *http.Request, urlModel string) {
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// Extraction of extra parameters
-	pathParams := getPathParams(r.URL, urlModel)
-
-	id, err := primitive.ObjectIDFromHex(pathParams["id"])
+	id, err := primitive.ObjectIDFromHex(r.PathValue("userId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return

@@ -3,30 +3,30 @@ package db
 import (
 	"context"
 
-	"mainframe/user/model"
+	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectUser(id primitive.ObjectID) (*model.User, error) {
+func SelectAccount(id primitive.ObjectID) (*model.Account, error) {
 	// Retrieve the collection
-	coll, err := getCollection("bank", "users")
+	coll, err := getCollection("bank", "accounts")
 	if err != nil {
 		return nil, err
 	}
 
 	// Search for a document
-	var user model.User
+	var user model.Account
 	err = coll.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
 
 	return &user, err
 }
 
-func SelectUsers(user model.User, fromId primitive.ObjectID, limit int, order int) ([]model.User, error) {
+func SelectAccounts(account model.Account, fromId primitive.ObjectID, limit int, order int) ([]model.Account, error) {
 	// Retrieve the collection
-	coll, err := getCollection("bank", "users")
+	coll, err := getCollection("bank", "accounts")
 	if err != nil {
 		return nil, err
 	}
@@ -38,20 +38,11 @@ func SelectUsers(user model.User, fromId primitive.ObjectID, limit int, order in
 
 	// Setting up filter
 	var filter = make(bson.D, 0, 6)
-	if user.Username != "" {
-		filter = append(filter, bson.E{Key: "username", Value: user.Username})
+	if account.IBAN != "" {
+		filter = append(filter, bson.E{Key: "iban", Value: account.IBAN})
 	}
-	if user.Password != "" {
-		filter = append(filter, bson.E{Key: "password", Value: user.Password})
-	}
-	if user.Name != "" {
-		filter = append(filter, bson.E{Key: "name", Value: user.Name})
-	}
-	if user.Surname != "" {
-		filter = append(filter, bson.E{Key: "surname", Value: user.Surname})
-	}
-	if user.Birth != "" {
-		filter = append(filter, bson.E{Key: "birth", Value: user.Birth})
+	if account.Owner != "" {
+		filter = append(filter, bson.E{Key: "owner", Value: account.Owner})
 	}
 
 	if fromId != primitive.NilObjectID {
@@ -69,8 +60,8 @@ func SelectUsers(user model.User, fromId primitive.ObjectID, limit int, order in
 	}
 
 	// Search for the documents
-	var users []model.User
-	err = cursor.All(context.TODO(), &users)
+	var accounts []model.Account
+	err = cursor.All(context.TODO(), &accounts)
 
-	return users, err
+	return accounts, err
 }

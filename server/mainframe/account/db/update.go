@@ -3,22 +3,22 @@ package db
 import (
 	"context"
 
-	"mainframe/user/model"
+	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func UpdateUser(id primitive.ObjectID, user model.User) error {
+func UpdateAccount(id primitive.ObjectID, account model.Account) error {
 	// Retrieve the collection
-	coll, err := getCollection("bank", "users")
+	coll, err := getCollection("bank", "accounts")
 	if err != nil {
 		return err
 	}
 
 	// Construction of the DB objects
 	filter := bson.M{"_id": id}
-	update := bson.M{"$set": user}
+	update := bson.M{"$set": account}
 
 	// Insert of a document
 	_, err = coll.UpdateOne(context.TODO(), filter, update)

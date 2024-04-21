@@ -17,6 +17,10 @@ type Config struct {
 		Port    string `yaml:"port" envconfig:"DB_PORT"`
 		Timeout int    `yaml:"timeout" envconfig:"DB_TIMEOUT"`
 	} `yaml:"db"`
+	UsersServer struct {
+		Host string `yaml:"host" envconfig:"USERS_SERVER_HOST"`
+		Port string `yaml:"port" envconfig:"USERS_SERVER_PORT"`
+	}
 }
 
 var AppConfig Config

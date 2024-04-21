@@ -8,3 +8,8 @@ db:
   host: "127.0.0.1"
   port: "27017"
   timeout: 5
+
+# Users server configuration
+usersserver:
+  host: "127.0.0.1"
+  port: "12001"

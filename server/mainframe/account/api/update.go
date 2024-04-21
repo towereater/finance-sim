@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"mainframe/user/db"
-	"mainframe/user/model"
+	"mainframe/account/db"
+	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Update user API function
-func UpdateUser(w http.ResponseWriter, r *http.Request, urlModel string) {
+// Update account API function
+func UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	// Parsing of the request
-	var req model.UpdateUserInput
+	var req model.UpdateAccountInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -21,26 +21,38 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	}
 
 	// Extraction of extra parameters
-	pathParams := getPathParams(r.URL, urlModel)
-
-	id, err := primitive.ObjectIDFromHex(pathParams["id"])
+	id, err := primitive.ObjectIDFromHex(r.PathValue("accountId"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
+	// Fetch of the account data
+	currentAccount, err := db.SelectAccount(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Update account in the user accounts list
+	if currentAccount.Owner != req.Owner {
+		err = updateAccountOwner(id.Hex(), currentAccount.Owner, req.Owner)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	// Generation of the updated document
-	user := model.User{
-		Id:       id,
-		Username: req.Username,
-		Password: req.Password,
-		Name:     req.Name,
-		Surname:  req.Surname,
-		Birth:    req.Birth,
+	account := model.Account{
+		Id:    id,
+		IBAN:  req.IBAN,
+		Owner: req.Owner,
+		Cash:  req.Cash,
 	}
 
 	// Execution of the request
-	err = db.UpdateUser(id, user)
+	err = db.UpdateAccount(id, account)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,5 +61,5 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, urlModel string) {
 	// Response output
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(account)
 }

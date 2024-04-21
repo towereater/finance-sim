@@ -11,8 +11,7 @@ func HandleRequests() {
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/users", usersHandler)
 	http.HandleFunc("/users/{userId}", userByIdHandler)
-	http.HandleFunc("/users/{userId}/add-account", userAddAccountHandler)
-	http.HandleFunc("/users/{userId}/remove-account", userRemoveAccountHandler)
+	http.HandleFunc("/users/{userId}/accounts/{accountId}", userAccountsByIdHandler)
 }
 
 // Handles home path
@@ -37,44 +36,29 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 
 // Handles users API functions
 func userByIdHandler(w http.ResponseWriter, r *http.Request) {
-	var handledPath = "/users/{id}"
-
 	// Check of the method request
 	switch r.Method {
 	case "GET":
-		api.GetUser(w, r, handledPath)
+		api.GetUser(w, r)
 	case "PUT":
-		api.UpdateUser(w, r, handledPath)
+		api.UpdateUser(w, r)
 	case "PATCH":
-		api.PatchUser(w, r, handledPath)
+		api.PatchUser(w, r)
 	case "DELETE":
-		api.DeleteUser(w, r, handledPath)
+		api.DeleteUser(w, r)
 	default:
 		http.Error(w, r.Method, http.StatusMethodNotAllowed)
 	}
 }
 
 // Handles user accounts API functions
-func userAddAccountHandler(w http.ResponseWriter, r *http.Request) {
-	var handledPath = "/users/{id}/add-account"
-
+func userAccountsByIdHandler(w http.ResponseWriter, r *http.Request) {
 	// Check of the method request
 	switch r.Method {
-	case "PATCH":
-		api.AddAccount(w, r, handledPath)
-	default:
-		http.Error(w, r.Method, http.StatusMethodNotAllowed)
-	}
-}
-
-// Handles user accounts API functions
-func userRemoveAccountHandler(w http.ResponseWriter, r *http.Request) {
-	var handledPath = "/users/{id}/remove-account"
-
-	// Check of the method request
-	switch r.Method {
-	case "PATCH":
-		api.RemoveAccount(w, r, handledPath)
+	case "POST":
+		api.AddAccount(w, r)
+	case "DELETE":
+		api.RemoveAccount(w, r)
 	default:
 		http.Error(w, r.Method, http.StatusMethodNotAllowed)
 	}
