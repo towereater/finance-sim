@@ -17,6 +17,10 @@ type Config struct {
 			Host string `yaml:"host" envconfig:"USERS_HOST"`
 			Port string `yaml:"port" envconfig:"USERS_PORT"`
 		} `yaml:"users"`
+		Accounts struct {
+			Host string `yaml:"host" envconfig:"ACCOUNTS_HOST"`
+			Port string `yaml:"port" envconfig:"ACCOUNTS_PORT"`
+		} `yaml:"accounts"`
 	} `yaml:"server"`
 }
 

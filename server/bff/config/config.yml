@@ -8,3 +8,6 @@ server:
   users:
     host: "localhost"
     port: "12001"
+  accounts:
+    host: "localhost"
+    port: "12002"
