@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bff/api"
 	"encoding/json"
 	"errors"
 	"io"
@@ -58,7 +57,7 @@ func insertAccountToUser(accountId string, userId string) error {
 	url = url + "/users/" + userId + "/accounts/" + accountId
 
 	// Execution of the request
-	res, err := api.ExecuteHttpRequest(http.MethodPost, url, "")
+	res, err := ExecuteHttpRequest(http.MethodPost, url, "")
 	if err != nil {
 		return err
 	}

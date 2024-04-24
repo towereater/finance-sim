@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bff/api"
 	"encoding/json"
 	"errors"
 	"io"
@@ -77,7 +76,7 @@ func updateAccountOwner(accountId string, oldOwnerId string, newOwnerId string) 
 	url = url + "/users/" + oldOwnerId + "/accounts/" + accountId
 
 	// Execution of the request
-	res, err := api.ExecuteHttpRequest(http.MethodDelete, url, "")
+	res, err := ExecuteHttpRequest(http.MethodDelete, url, "")
 	if err != nil {
 		return err
 	}
@@ -101,7 +100,7 @@ func updateAccountOwner(accountId string, oldOwnerId string, newOwnerId string) 
 	url = url + "/users/" + newOwnerId + "/accounts/" + accountId
 
 	// Execution of the request
-	res, err = api.ExecuteHttpRequest(http.MethodPost, url, "")
+	res, err = ExecuteHttpRequest(http.MethodPost, url, "")
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	cfg "mainframe/user/config"
+	cfg "mainframe/account/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

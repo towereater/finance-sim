@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bff/api"
 	"errors"
 	"io"
 	"net/http"
@@ -52,7 +51,7 @@ func deleteAccountFromUser(accountId string, userId string) error {
 	url = url + "/users/" + userId + "/accounts/" + accountId
 
 	// Execution of the request
-	res, err := api.ExecuteHttpRequest(http.MethodDelete, url, "")
+	res, err := ExecuteHttpRequest(http.MethodDelete, url, "")
 	if err != nil {
 		return err
 	}
