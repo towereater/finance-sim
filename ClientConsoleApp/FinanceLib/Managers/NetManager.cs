@@ -121,13 +121,15 @@ public class NewNetManager
     public BankRequest Request(HttpMethod httpMethod, BankRequest request)
     {
         // Inclusion of the authentication token
-        if (request.AuthorizationToken != null)
+        if (request.AuthorizationToken != null
+            && !client.DefaultRequestHeaders.Contains("Authorization"))
         {
             client.DefaultRequestHeaders.Add("Authorization", request.AuthorizationToken);
         }
 
         // Execution of the request
         HttpResponseMessage httpResponse;
+
         if (httpMethod == HttpMethod.Post)
         {
             httpResponse = client.PostAsJsonAsync(
@@ -136,6 +138,12 @@ public class NewNetManager
                 new JsonSerializerOptions{
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 }
+            ).Result;
+        }
+        else if (httpMethod == HttpMethod.Get)
+        {
+            httpResponse = client.GetAsync(
+                request.APIUrl
             ).Result;
         }
         else
