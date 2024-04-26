@@ -161,11 +161,15 @@ public class NewNetManager
         {
             response.ResponseToken = ResponseToken.Success;
 
-            response.Payload = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonResponse,
-                new JsonSerializerOptions {
-                    AllowTrailingCommas = true,
-                    PropertyNameCaseInsensitive = true,
-            });
+            if (jsonResponse.Length > 0)
+            {
+                response.Payload = JsonSerializer.Deserialize<Dictionary<string, object>>(
+                    jsonResponse,
+                    new JsonSerializerOptions {
+                        AllowTrailingCommas = true,
+                        PropertyNameCaseInsensitive = true,
+                });
+            }
 
             if (httpResponse.Headers.Contains("Jwt"))
             {

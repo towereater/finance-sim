@@ -68,8 +68,9 @@ public class BankApp
                     Console.WriteLine($"{message}\n");
                 }
                 else if (ans == 3) {
-                    string message = AccountManager.LogOut();
-                    Console.WriteLine($"{message}\n");
+                    AccountManager = new AccountManager();
+                    WalletManager = new WalletManager();
+                    Console.WriteLine("Logout successful\n");
                 }
             }
 

@@ -22,7 +22,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 	// Construction of the request
 	url := "http://" + cfg.AppConfig.Server.Accounts.Host + ":" + cfg.AppConfig.Server.Accounts.Port
-	url = url + "/accounts"
+	url = url + "/accounts?owner=" + jwt
 
 	// Execution of the request
 	res, err := api.ExecuteHttpRequest(http.MethodGet, url, "")
@@ -30,6 +30,11 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	if res.StatusCode == http.StatusNoContent {
+		w.WriteHeader(res.StatusCode)
+		return
+	}
+
 	defer res.Body.Close()
 
 	// Response parsing

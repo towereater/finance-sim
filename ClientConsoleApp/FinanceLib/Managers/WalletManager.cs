@@ -55,6 +55,11 @@ public class WalletManager
 
         if (response.ResponseToken == ResponseToken.Success)
         {
+            if (response.Payload == null || !response.Payload.TryGetValue("accounts", out _))
+            {
+                return "User has no wallets";
+            }
+
             string output = string.Empty;
 
             Wallets = JsonSerializer.Deserialize<Wallet[]>(response.Payload["accounts"].ToString(),
@@ -62,6 +67,8 @@ public class WalletManager
                     AllowTrailingCommas = true,
                     PropertyNameCaseInsensitive = true,
             });
+
+            Console.WriteLine(Wallets.Length);
             
             for (int i = 0; i < Wallets.Length; i++){
                 if (Wallets[i] == null){

@@ -54,14 +54,4 @@ public class AccountManager
             return "Login failed";
         }
     }
-
-    // Logout procedure
-    public string LogOut()
-    {
-        // Drops all session data
-        AuthorizationToken = null;
-        UserAccount = null;
-
-        return "Logout successful";
-    }
 }
