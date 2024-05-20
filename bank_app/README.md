@@ -1,3 +1,3 @@
-# bank_app
+# My HB
 
-A new Flutter project.
+A home banking and finance app

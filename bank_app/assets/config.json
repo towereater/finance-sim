@@ -1,0 +1,11 @@
+{
+    "server": {
+        "host": "127.0.0.1",
+        "port": "13000"
+    },
+
+    "users": {
+        "login": "users/login",
+        "register": "users/register"
+    }
+}
