@@ -73,6 +73,9 @@ class RegisterScreen extends StatelessWidget {
               decoration: const InputDecoration(
                 labelText: 'Password',
               ),
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
             ),
             const SizedBox(height: 20.0),
             MaterialButton(

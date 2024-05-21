@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:bank_app/screens/user_access/login_screen.dart';
 import 'package:bank_app/screens/user_access/register_screen.dart';
 import 'package:bank_app/screens/home/home_screen.dart';
+
+import 'package:bank_app/models/user.dart';
+
 import 'package:bank_app/config/config.dart' as config;
 
 void main() {
@@ -30,8 +33,8 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => LoginScreen(),
-        '/register':(context) => RegisterScreen(),
-        '/home':(context) => HomeScreen(),
+        '/register': (context) => RegisterScreen(),
+        '/home': (context) => HomeScreen(user: ModalRoute.of(context)?.settings.arguments as User),
       },
     );
   }

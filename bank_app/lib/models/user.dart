@@ -2,11 +2,13 @@ class User {
   final String name;
   final String surname;
   final String birth;
+  final List<String> accounts;
 
   const User({
     required this.name,
     required this.surname,
-    required this.birth
+    required this.birth,
+    required this.accounts,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -15,11 +17,13 @@ class User {
         'name': String name,
         'surname': String surname,
         'birth': String birth,
+        'accounts': List<String> accounts,
       } => 
         User(
           name: name,
           surname: surname,
-          birth: birth
+          birth: birth,
+          accounts: accounts,
         ),
       _ => throw const FormatException('Failed to load user'),
     };

@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 
+import 'package:bank_app/models/user.dart';
+
 class LoginScreen extends StatelessWidget {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+
+  final User user = const User(
+      name: 'And',
+      surname: 'Nic',
+      birth: '2023-04-23',
+      accounts: ['100001', '100002', '100005']);
 
   LoginScreen({super.key});
 
   void loginButtonPressed(BuildContext context) {
     if (usernameController.text == 'andnic' &&
         passwordController.text == 'password') {
-      Navigator.pushNamed(context, '/home');
+      Navigator.pushNamed(context, '/home', arguments: user);
 
       usernameController.clear();
       passwordController.clear();
@@ -20,6 +28,9 @@ class LoginScreen extends StatelessWidget {
   }
 
   void registerButtonPressed(BuildContext context) {
+    usernameController.clear();
+    passwordController.clear();
+
     Navigator.pushNamed(context, '/register');
   }
 
@@ -43,6 +54,9 @@ class LoginScreen extends StatelessWidget {
               decoration: const InputDecoration(
                 labelText: 'Password',
               ),
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
             ),
             const SizedBox(height: 20.0),
             MaterialButton(
