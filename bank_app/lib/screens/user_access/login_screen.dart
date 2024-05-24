@@ -40,25 +40,21 @@ class LoginScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            Expanded(
-              child: TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                ),
+            TextField(
+              controller: usernameController,
+              decoration: const InputDecoration(
+                labelText: 'Username',
               ),
             ),
             const SizedBox(height: 20.0),
-            Expanded(
-              child: TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                ),
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(
+                labelText: 'Password',
               ),
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
             ),
             const SizedBox(height: 20.0),
             MaterialButton(
