@@ -6,7 +6,8 @@ type LoginUserInput struct {
 }
 
 type LoginUserOutput struct {
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Birth   string `json:"birth"`
+	Name    string   `json:"name"`
+	Surname string   `json:"surname"`
+	Birth   string   `json:"birth"`
+	Account []string `json:"accounts"`
 }

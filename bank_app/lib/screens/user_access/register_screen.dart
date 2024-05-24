@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:bank_app/api/register_user.dart';
+
 class RegisterScreen extends StatelessWidget {
   final nameController = TextEditingController();
   final surnameController = TextEditingController();
@@ -9,23 +11,28 @@ class RegisterScreen extends StatelessWidget {
 
   RegisterScreen({super.key});
 
-  void registerButtonPressed(BuildContext context) {
-    if (usernameController.text == 'andnic' &&
-        passwordController.text == 'password') {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Registration complete')));
+  Future<void> registerButtonPressed(BuildContext context) async {
+    String name = nameController.text;
+    String surname = surnameController.text;
+    String birth = birthController.text;
+    String username = usernameController.text;
+    String password = passwordController.text;
 
-      Navigator.pop(context);
-
+    await registerUser(username, password, name, surname, birth).then((value) {
+      usernameController.clear();
+      passwordController.clear();
       nameController.clear();
       surnameController.clear();
       birthController.clear();
-      usernameController.clear();
-      passwordController.clear();
-    } else {
+
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration complete!')));
+    }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Registration failed')));
-    }
+          .showSnackBar(SnackBar(content: Text(error.toString())));
+    });
   }
 
   void backButtonPressed(BuildContext context) {

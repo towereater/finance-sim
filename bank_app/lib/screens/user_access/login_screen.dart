@@ -1,37 +1,35 @@
 import 'package:flutter/material.dart';
 
-import 'package:bank_app/models/user.dart';
+import 'package:bank_app/api/login_user.dart';
+
+import 'package:bank_app/config/config.dart' as config;
 
 class LoginScreen extends StatelessWidget {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final User user = const User(
-      name: 'And',
-      surname: 'Nic',
-      birth: '2023-04-23',
-      accounts: ['100001', '100002', '100005']);
-
   LoginScreen({super.key});
 
-  void loginButtonPressed(BuildContext context) {
-    if (usernameController.text == 'andnic' &&
-        passwordController.text == 'password') {
-      Navigator.pushNamed(context, '/home', arguments: user);
+  Future<void> loginButtonPressed(BuildContext context) async {
+    String username = usernameController.text;
+    String password = passwordController.text;
 
+    await loginUser(username, password).then((value) {
       usernameController.clear();
       passwordController.clear();
-    } else {
+
+      Navigator.pushNamed(context, config.routeHome, arguments: value);
+    }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Wrong credentials')));
-    }
+          .showSnackBar(SnackBar(content: Text(error.toString())));
+    });
   }
 
   void registerButtonPressed(BuildContext context) {
     usernameController.clear();
     passwordController.clear();
 
-    Navigator.pushNamed(context, '/register');
+    Navigator.pushNamed(context, config.routeRegister);
   }
 
   @override
@@ -42,26 +40,32 @@ class LoginScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            TextField(
-              controller: usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
+            Expanded(
+              child: TextField(
+                controller: usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                ),
               ),
             ),
             const SizedBox(height: 20.0),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
+            Expanded(
+              child: TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                ),
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
               ),
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
             ),
             const SizedBox(height: 20.0),
             MaterialButton(
               color: Theme.of(context).highlightColor,
-              onPressed: () => loginButtonPressed(context),
+              onPressed: () async {
+                await loginButtonPressed(context);
+              },
               child: const Text('Login'),
             ),
             const SizedBox(height: 10.0),

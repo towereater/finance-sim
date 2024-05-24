@@ -93,6 +93,8 @@ func userAccountByIdHandler(w http.ResponseWriter, r *http.Request) {
 		account.GetAccount(w, r)
 	case "DELETE":
 		account.DeleteAccount(w, r)
+	case "OPTIONS":
+		account.AccountOptions(w, r)
 	default:
 		http.Error(w, r.Method, http.StatusMethodNotAllowed)
 	}

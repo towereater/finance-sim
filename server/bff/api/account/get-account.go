@@ -52,6 +52,8 @@ func GetAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Response output
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(res.StatusCode)
 	json.NewEncoder(w).Encode(account)

@@ -56,9 +56,12 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		Name:    user[0].Name,
 		Surname: user[0].Surname,
 		Birth:   user[0].Birth,
+		Account: user[0].Accounts,
 	}
 
 	// Response output
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Expose-Headers", "*")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Jwt", user[0].Id.Hex())
 	w.WriteHeader(res.StatusCode)

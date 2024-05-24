@@ -1,28 +1,39 @@
 import 'package:flutter/material.dart';
 
 import 'package:bank_app/models/user.dart';
+import 'package:bank_app/models/account.dart';
+import 'package:bank_app/api/get_account.dart';
+
+import 'package:bank_app/config/config.dart' as config;
 
 class HomeScreen extends StatefulWidget {
   final User user;
+  final String authorizationToken;
 
-  const HomeScreen({super.key, required this.user});
+  const HomeScreen({super.key, required this.user, required this.authorizationToken});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List accounts = [
-    ['100001', 'Andnic', 12],
-    ['100002', 'Andnic', 0],
-    ['100005', 'Andnic', 39],
-  ];
-
+  Account? account;
   int selectedIndex = -1;
 
-  changeSelectedItem(int index) {
+  Future<void> accountTileOnTap(BuildContext context, int index) async {
     setState(() {
       selectedIndex = index;
+    });
+
+    String acccountId = widget.user.accounts[selectedIndex];
+
+    await getAccount(widget.authorizationToken, acccountId).then((value) {
+      setState(() {
+        account = value;
+      });
+    }).onError((error, stackTrace) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
     });
   }
 
@@ -30,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListTile(
       leading: const Icon(Icons.credit_card),
       title: Text(widget.user.accounts[index]),
-      onTap: () => changeSelectedItem(index),
+      onTap: () => accountTileOnTap(context, index),
     );
   }
 
@@ -53,7 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
               onPressed: () => {
-                    Navigator.popUntil(context, ModalRoute.withName('/login')),
+                    Navigator.popUntil(
+                        context, ModalRoute.withName(config.routeLogin)),
                   },
               icon: const Icon(Icons.logout)),
         ],
@@ -63,17 +75,17 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           children: [
             Flexible(
-              flex: 1,
+              flex: 2,
               child: ListView.builder(
                 itemCount: widget.user.accounts.length,
                 itemBuilder: accountListBuilder,
               ),
             ),
             Flexible(
-              flex: 4,
+              flex: 5,
               child: Builder(
                 builder: (context) {
-                  if (selectedIndex == -1) {
+                  if (selectedIndex == -1 || account == null) {
                     return const Padding(
                       padding: EdgeInsets.all(20.0),
                       child: Align(
@@ -93,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Account ${accounts[selectedIndex][0]}',
+                            'Account IBAN: ${account!.iban}',
                             style: const TextStyle(
                               fontSize: 18,
                             ),
@@ -102,13 +114,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 40,
                           ),
                           Text(
-                            'Owner: ${accounts[selectedIndex][1]}',
+                            'Owner: ${account!.owner}',
                             style: const TextStyle(
                               fontSize: 15,
                             ),
                           ),
                           Text(
-                            'Cash: ${accounts[selectedIndex][2]}\$',
+                            'Cash: ${account!.cash}\$',
                             style: const TextStyle(
                               fontSize: 15,
                             ),

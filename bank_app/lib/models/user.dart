@@ -17,13 +17,13 @@ class User {
         'name': String name,
         'surname': String surname,
         'birth': String birth,
-        'accounts': List<String> accounts,
-      } => 
+        'accounts': List<dynamic>? accounts,
+      } =>
         User(
           name: name,
           surname: surname,
           birth: birth,
-          accounts: accounts,
+          accounts: accounts != null ? List<String>.from(accounts) : [],
         ),
       _ => throw const FormatException('Failed to load user'),
     };
