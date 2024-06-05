@@ -5,7 +5,3 @@ use ./mainframe/user
 use ./mainframe/account
 
 use ./bff
-
-use ./migration/user
-
-use ./migration/account
