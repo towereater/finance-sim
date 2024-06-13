@@ -1,0 +1,39 @@
+name: bankapp
+
+services:
+  user-service:
+    build: ./mainframe/user
+    ports:
+      - "12001:12001"
+    networks:
+      - back-tier
+      - db-tier
+  
+  account-service:
+    build: ./mainframe/account
+    ports:
+      - "12002:12002"
+    networks:
+      - back-tier
+      - db-tier
+  
+  bff:
+    build: ./bff
+    ports:
+      - "13000:13000"
+    networks:
+      - back-tier
+  
+  mongo:
+    image: mongo:7.0.2
+    volumes:
+      - type: bind
+        source: /tmp/mongo-data
+        target: /tmp/mongo-data
+    networks:
+      - db-tier
+    command: ["mongod", "--dbpath", "/tmp/mongo-data"]
+
+networks:
+  back-tier: {}
+  db-tier: {}

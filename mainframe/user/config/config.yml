@@ -1,10 +1,10 @@
 # Server configuration
 server:
-  host: "localhost"
+  host: "127.0.0.1"
   port: "12001"
 
 # DB configuration
 db:
-  host: "127.0.0.1"
+  host: "mongo"
   port: "27017"
   timeout: 5

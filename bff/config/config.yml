@@ -1,13 +1,13 @@
 # Application configuration
 app:
-  host: "localhost"
+  host: "127.0.0.1"
   port: "13000"
 
 # Mainframe server configuration
 server:
   users:
-    host: "localhost"
+    host: "user-service"
     port: "12001"
   accounts:
-    host: "localhost"
+    host: "account-service"
     port: "12002"
