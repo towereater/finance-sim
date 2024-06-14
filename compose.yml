@@ -26,6 +26,8 @@ services:
   
   mongo:
     image: mongo:7.0.2
+    ports:
+      - "27017:27017"
     volumes:
       - type: bind
         source: /Users/andnic/Documents/mongo-data
