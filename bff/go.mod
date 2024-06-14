@@ -3,6 +3,7 @@ module bff
 go 1.22.2
 
 replace mainframe/user => ../mainframe/user
+
 replace mainframe/account => ../mainframe/account
 
 require (

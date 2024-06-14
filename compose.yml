@@ -28,11 +28,11 @@ services:
     image: mongo:7.0.2
     volumes:
       - type: bind
-        source: /tmp/mongo-data
-        target: /tmp/mongo-data
+        source: /Users/andnic/Documents/mongo-data
+        target: /etc/mongo-data
     networks:
       - db-tier
-    command: ["mongod", "--dbpath", "/tmp/mongo-data"]
+    command: ["mongod", "--dbpath", "/etc/mongo-data"]
 
 networks:
   back-tier: {}
