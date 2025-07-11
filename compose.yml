@@ -3,38 +3,51 @@ name: bankapp
 services:
   user-service:
     build: ./mainframe/user
+    container_name: users
+    env_file:
+      - ".env"
     ports:
-      - "12001:12001"
+      - "${USER_SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      mongo:
+        condition: service_healthy
     networks:
       - back-tier
       - db-tier
   
-  account-service:
-    build: ./mainframe/account
-    ports:
-      - "12002:12002"
-    networks:
-      - back-tier
-      - db-tier
+  # account-service:
+  #   build: ./mainframe/account
+  #   ports:
+  #     - "12002:12002"
+  #   networks:
+  #     - back-tier
+  #     - db-tier
   
-  bff:
-    build: ./bff
-    ports:
-      - "13000:13000"
-    networks:
-      - back-tier
+  # bff:
+  #   build: ./bff
+  #   ports:
+  #     - "13000:13000"
+  #   networks:
+  #     - back-tier
   
   mongo:
-    image: mongo:7.0.2
+    image: mongo:8.0.9
+    container_name: mongo
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT}:27017"
     volumes:
-      - type: bind
-        source: /Users/andnic/Documents/mongo-data
-        target: /etc/mongo-data
+      - ./mongo/init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    #volumes:
+    #  - type: bind
+    #    source: /Users/andnic/Documents/mongo-data
+    #    target: /etc/mongo-data
     networks:
       - db-tier
-    command: ["mongod", "--dbpath", "/etc/mongo-data"]
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   back-tier: {}

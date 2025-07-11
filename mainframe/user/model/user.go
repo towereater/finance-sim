@@ -11,3 +11,19 @@ type User struct {
 	Birth    string             `json:"birth" bson:"birth"`
 	Accounts []string           `json:"accounts,omitempty" bson:"accounts,omitempty"`
 }
+
+type InsertUserInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Birth    string `json:"birth"`
+}
+
+type UpdateUserInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Birth    string `json:"birth"`
+}

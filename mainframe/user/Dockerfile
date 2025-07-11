@@ -1,4 +1,7 @@
-FROM golang:1.22
+FROM golang:1.24.2
+
+# Exposed server port required at build time
+ARG SERVER_PORT
 
 WORKDIR /app
 
@@ -6,8 +9,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . ./
-RUN CGO_ENABLED=0 GOOS=linux go build -o /server
+RUN CGO_ENABLED=0 GOOS=linux go build -o /main
 
-EXPOSE 12001
+EXPOSE ${SERVER_PORT}
 
-CMD ["/server"]
+ENTRYPOINT ["/main"]
+CMD ["./config.yml"]
