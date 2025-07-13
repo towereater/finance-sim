@@ -7,64 +7,57 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	Server struct {
-		Host string `yaml:"host" envconfig:"SERVER_HOST"`
-		Port string `yaml:"port" envconfig:"SERVER_PORT"`
-	} `yaml:"server"`
-	DB struct {
-		Host    string `yaml:"host" envconfig:"DB_HOST"`
-		Port    string `yaml:"port" envconfig:"DB_PORT"`
-		Timeout int    `yaml:"timeout" envconfig:"DB_TIMEOUT"`
-	} `yaml:"db"`
-	UsersServer struct {
-		Host string `yaml:"host" envconfig:"USERS_SERVER_HOST"`
-		Port string `yaml:"port" envconfig:"USERS_SERVER_PORT"`
-	}
+type DBConfig struct {
+	Host    string `yaml:"host" envconfig:"DB_HOST"`
+	Timeout int    `yaml:"timeout" envconfig:"DB_TIMEOUT"`
 }
 
-var AppConfig Config
+type Config struct {
+	Server struct {
+		Port string `yaml:"port" envconfig:"SERVER_PORT"`
+	} `yaml:"server"`
+	DB          DBConfig `yaml:"db"`
+	Prefix      string   `yaml:"prefix" envconfig:"COLL_PREFIX"`
+	Collections struct {
+		Accounts string `yaml:"accounts" envconfig:"COLL_ACCOUNTS"`
+	} `yaml:"collections"`
+	Services struct {
+		Users   string `yaml:"users" envconfig:"SERVICES_USERS"`
+		Timeout int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
+	} `yaml:"services"`
+}
 
-func readConfig(path string) error {
-	// Read entire config file
+func readConfig(path string) (Config, error) {
+	//Read entire config file
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return Config{}, err
 	}
 	defer f.Close()
 
 	// Conversion of the yaml to struct
+	var config Config
+
 	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&AppConfig)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	err = decoder.Decode(&config)
+	return config, err
 }
 
-func readEnv() error {
+func readEnv(config Config) (Config, error) {
 	// Loads the enviromental variables
-	err := envconfig.Process("", &AppConfig)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	err := envconfig.Process("", &config)
+	return config, err
 }
 
-func LoadConfig(path string) error {
+func LoadConfig(path string) (Config, error) {
 	// Reading config file
-	err := readConfig(path)
+	config, err := readConfig(path)
 	if err != nil {
-		return err
+		return Config{}, err
 	}
 
 	// Setting environmental variables
-	err = readEnv()
-	if err != nil {
-		return err
-	}
+	config, err = readEnv(config)
 
-	return nil
+	return config, err
 }

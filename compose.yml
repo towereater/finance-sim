@@ -15,13 +15,21 @@ services:
       - back-tier
       - db-tier
   
-  # account-service:
-  #   build: ./mainframe/account
-  #   ports:
-  #     - "12002:12002"
-  #   networks:
-  #     - back-tier
-  #     - db-tier
+  account-service:
+    build: ./mainframe/account
+    container_name: accounts
+    env_file:
+      - ".env"
+    ports:
+      - "${ACCOUNT_SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - back-tier
+      - db-tier
   
   # bff:
   #   build: ./bff

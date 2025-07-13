@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 
@@ -9,39 +10,45 @@ import (
 	"mainframe/account/handler"
 )
 
-func loadConfig(path string) {
-	// Logging
-	fmt.Println("Loading configuration")
+func main() {
+	// Get run args
+	if len(os.Args) < 2 {
+		fmt.Printf("No config file set\n")
+		os.Exit(1)
+	}
+	configPath := os.Args[1]
 
-	// Reading config file
-	err := config.LoadConfig(path)
+	// Setup machine config
+	fmt.Printf("Loading configuration from %s\n", configPath)
+	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
-		fmt.Println("Error while loading configuration:", err)
+		fmt.Printf("Error while reading config file: %s\n", err.Error())
 		os.Exit(2)
 	}
+	fmt.Printf("Configuration loaded: %+v\n", cfg)
 
-	// Logging
-	fmt.Printf("Configuration ready: %+v\n", config.AppConfig)
-}
+	// Create the mux
+	mux := http.NewServeMux()
 
-func handleRequests() {
-	// Logging
-	fmt.Println("Setting up handlers")
+	// Setup server routes
+	fmt.Printf("Setting up routes\n")
+	handler.SetupRoutes(cfg, mux)
 
-	handler.HandleRequests()
-}
-
-func main() {
-	// Logging
-	fmt.Println("User service starting up")
-
-	// Loading config file
-	loadConfig("./config/config.yml")
-
-	// Setting up routing paths
-	handleRequests()
+	// Create the server
+	server := &http.Server{
+		Handler: mux,
+	}
+	ln, err := net.Listen("tcp", ":"+cfg.Server.Port)
+	if err != nil {
+		fmt.Printf("Error while assigning server port: %s\n", err.Error())
+		os.Exit(3)
+	}
 
 	// Starting up
-	fmt.Println("Ready to listen incoming requests")
-	http.ListenAndServe(":"+config.AppConfig.Server.Port, nil)
+	fmt.Printf("Ready to listen incoming requests\n")
+	server.Serve(ln)
+	if err != nil {
+		fmt.Printf("Error while starting up server: %s\n", err.Error())
+		os.Exit(4)
+	}
 }
