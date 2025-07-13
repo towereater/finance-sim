@@ -100,5 +100,5 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Response output
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
