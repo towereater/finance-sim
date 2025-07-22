@@ -38,7 +38,6 @@ public class DossierController {
             .orElse(ResponseEntity.notFound().build());
     }
     
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDossier(@PathVariable String id) {
         dossierService.deleteDossier(id);
