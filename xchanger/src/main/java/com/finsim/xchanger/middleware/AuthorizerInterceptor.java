@@ -21,6 +21,10 @@ public class AuthorizerInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String apiToken = request.getHeader("authorization");
 
+        if (apiToken != null) {
+            return false;
+        }
+
         Optional<Bank> bank = bankService.findBankByApiToken(apiToken);
 
         if (!bank.isPresent()) {

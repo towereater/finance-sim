@@ -9,9 +9,9 @@ public class InterceptorConfigurator implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // Logger
-        registry.addInterceptor(new LoggerInterceptor()).addPathPatterns("/*");
+        registry.addInterceptor(new LoggerInterceptor()).addPathPatterns("/**");
 
         // API token authorizer
-        registry.addInterceptor(new AuthorizerInterceptor()).addPathPatterns("/dossiers/*");
+        registry.addInterceptor(new AuthorizerInterceptor()).addPathPatterns("/dossiers/**");
     }
 }
