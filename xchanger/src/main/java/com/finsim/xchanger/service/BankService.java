@@ -16,4 +16,12 @@ public class BankService {
     public Optional<Bank> findBankByApiToken(String apiToken) {
         return bankRepository.findByApiToken(apiToken);
     }
+
+    public long count() {
+        return bankRepository.count();
+    }
+
+    public Bank insertBank(Bank bank) {
+        return bankRepository.insert(bank);
+    }
 }
