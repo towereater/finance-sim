@@ -5,8 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.finsim.xchanger.db.BankRepository;
-import com.finsim.xchanger.entity.Bank;
+import com.finsim.xchanger.model.Bank;
+import com.finsim.xchanger.repository.BankRepository;
 
 @Service
 public class BankService {

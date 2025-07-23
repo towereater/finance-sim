@@ -3,8 +3,8 @@ package com.finsim.xchanger.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.finsim.xchanger.db.DossierRepository;
-import com.finsim.xchanger.entity.Dossier;
+import com.finsim.xchanger.model.Dossier;
+import com.finsim.xchanger.repository.DossierRepository;
 
 import java.util.List;
 import java.util.Optional;

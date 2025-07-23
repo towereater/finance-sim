@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.finsim.xchanger.entity.Dossier;
+import com.finsim.xchanger.model.Dossier;
 import com.finsim.xchanger.service.DossierService;
 
 @RestController

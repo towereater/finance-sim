@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.finsim.xchanger.entity.Bank;
+import com.finsim.xchanger.model.Bank;
 import com.finsim.xchanger.service.BankService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,10 +27,6 @@ public class AuthorizerInterceptor implements HandlerInterceptor {
 
         Optional<Bank> bank = bankService.findBankByApiToken(apiToken);
 
-        if (!bank.isPresent()) {
-            return false;
-        }
-
-        return true;
+        return bank.isPresent();
     }
 }
