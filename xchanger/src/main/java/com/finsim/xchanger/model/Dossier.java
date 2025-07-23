@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "dossiers")
 public class Dossier {
     @Id
@@ -18,4 +18,10 @@ public class Dossier {
     public String name;
     public String surname;
     public String birth;
+
+    public Dossier(String name, String surname, String birth) {
+        this.name = name;
+        this.surname = surname;
+        this.birth = birth;
+    }
 }

@@ -18,7 +18,7 @@ public class BankConfigurator implements CommandLineRunner {
 		System.err.printf("Bank collection configuration started%n");
 
 		if (bankService.count() == 0) {
-			bankService.insertBank(new Bank("", "06270", "AAAAA"));
+			bankService.insertBank(new Bank("06270", "3cae43527ddbc85be07f711577e1fe48e0c5c70d6511432f2b0349f737a09d63"));
 		}
 
 		// Logging
