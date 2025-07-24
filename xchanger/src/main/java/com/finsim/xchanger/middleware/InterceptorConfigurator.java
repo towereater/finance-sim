@@ -19,6 +19,7 @@ public class InterceptorConfigurator implements WebMvcConfigurer {
         registry.addInterceptor(loggerInterceptor).addPathPatterns("/**");
 
         // API token authorizer
-        registry.addInterceptor(authorizerInterceptor).addPathPatterns("/dossiers/**");
+        registry.addInterceptor(authorizerInterceptor).addPathPatterns(
+            "/dossiers", "/dossiers/**");
     }
 }
