@@ -47,6 +47,9 @@ func SelectAccounts(cfg config.Config, abi string, accountFilter model.Account, 
 	if accountFilter.Owner != "" {
 		filter["owner"] = accountFilter.Owner
 	}
+	if accountFilter.Service != "" {
+		filter["service"] = accountFilter.Service
+	}
 	filter["_id"] = bson.M{"$gt": from}
 
 	// Define the cursor

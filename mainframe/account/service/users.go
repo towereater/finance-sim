@@ -4,15 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"mainframe/account/config"
+	"mainframe/account/model"
 	"net/http"
 )
 
-func AddAccountToUser(cfg config.Config, accountId string, userId string) error {
+func AddAccountToUser(cfg config.Config, userId string, payload model.AddAccountToUserInput) error {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users/%s/accounts/%s", cfg.Services.Users, userId, accountId)
+	url := fmt.Sprintf("http://%s/users/%s/accounts", cfg.Services.Users, userId)
 
 	// Execute the request
-	res, err := ExecuteHttpRequest(cfg, http.MethodPost, url, "")
+	res, err := ExecuteHttpRequest(cfg, http.MethodPost, url, payload)
 	if err != nil {
 		return err
 	}
@@ -25,7 +26,7 @@ func AddAccountToUser(cfg config.Config, accountId string, userId string) error 
 	return nil
 }
 
-func RemoveAccountFromUser(cfg config.Config, accountId string, userId string) error {
+func RemoveAccountFromUser(cfg config.Config, userId string, accountId string) error {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users/%s/accounts/%s", cfg.Services.Users, userId, accountId)
 

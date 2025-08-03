@@ -38,12 +38,22 @@ func usersByIdHandler() http.Handler {
 	})
 }
 
-func userAccountsByIdHandler() http.Handler {
+func userAccountsHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
 		switch r.Method {
 		case "POST":
 			api.AddAccount(w, r)
+		default:
+			http.Error(w, r.Method, http.StatusMethodNotAllowed)
+		}
+	})
+}
+
+func userAccountsByIdHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check of the method request
+		switch r.Method {
 		case "DELETE":
 			api.RemoveAccount(w, r)
 		default:

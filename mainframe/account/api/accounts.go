@@ -89,6 +89,9 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	if queryParams.Has("owner") {
 		filter.Owner = queryParams.Get("owner")
 	}
+	if queryParams.Has("service") {
+		filter.Owner = queryParams.Get("service")
+	}
 
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
@@ -126,10 +129,23 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Owner == "" {
+		fmt.Printf("Invalid account owner\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Service == "" || len(req.Service) != 2 {
+		fmt.Printf("Invalid account service\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	// Build the new document
 	account := model.Account{
-		Id:    primitive.NewObjectID(),
-		Owner: req.Owner,
+		Id:      primitive.NewObjectID(),
+		Owner:   req.Owner,
+		Service: req.Service,
 	}
 
 	// Extract context parameters
@@ -150,7 +166,12 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add account to the user accounts list
-	err = service.AddAccountToUser(cfg, account.Id.Hex(), req.Owner)
+	payload := model.AddAccountToUserInput{
+		Id:      account.Id,
+		Service: account.Service,
+	}
+
+	err = service.AddAccountToUser(cfg, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %s to user %s: %s\n",
 			account.Id,
@@ -210,7 +231,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remove account from the user accounts list
-	err = service.RemoveAccountFromUser(cfg, accountId.Hex(), account.Owner)
+	err = service.RemoveAccountFromUser(cfg, account.Owner, accountId.Hex())
 	if err != nil {
 		fmt.Printf("Error while removing account %s from user %s: %s\n",
 			account.Id,
@@ -227,7 +248,12 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Add account to the user accounts list
-		err = service.AddAccountToUser(cfg, account.Id.Hex(), account.Owner)
+		payload := model.AddAccountToUserInput{
+			Id:      account.Id,
+			Service: account.Service,
+		}
+
+		err = service.AddAccountToUser(cfg, account.Owner, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s to user %s: %s\n",
 				account.Id,
