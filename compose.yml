@@ -1,7 +1,21 @@
 name: bankapp
 
 services:
-  user-service:
+  # xchanger:
+  #   build: ./xchanger
+  #   container_name: xchanger
+  #   env_file:
+  #     - ".env"
+  #   ports:
+  #     - "${XCHANGER_SERVER_PORT}:${SERVER_PORT}"
+  #   depends_on:
+  #     mongo:
+  #       condition: service_healthy
+  #   networks:
+  #     - back-tier
+  #     - db-tier
+
+  user:
     build: ./mainframe/user
     container_name: users
     env_file:
@@ -15,7 +29,7 @@ services:
       - back-tier
       - db-tier
   
-  account-service:
+  account:
     build: ./mainframe/account
     container_name: accounts
     env_file:
@@ -23,14 +37,16 @@ services:
     ports:
       - "${ACCOUNT_SERVER_PORT}:${SERVER_PORT}"
     depends_on:
+      # xchanger:
+      #   condition: service_started
+      user:
+        condition: service_started
       mongo:
         condition: service_healthy
-      user-service:
-        condition: service_started
     networks:
       - back-tier
       - db-tier
-  
+
   # bff:
   #   build: ./bff
   #   ports:

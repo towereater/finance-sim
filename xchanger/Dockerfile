@@ -9,11 +9,13 @@ RUN gradle build
 # Stage 2: Final image
 FROM openjdk:21
 
+# Exposed server port required at build time
+ARG SERVER_PORT
 ARG JAR_FILE=xchanger-0.0.1-SNAPSHOT.jar
 
 WORKDIR /app
 COPY --from=builder /app/build/libs/${JAR_FILE} /app
 
-EXPOSE 8080
+EXPOSE ${SERVER_PORT}
 
-ENTRYPOINT ["java", "-jar", "xchanger-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-Dserver.port=${SERVER.PORT}", "-jar", "xchanger-0.0.1-SNAPSHOT.jar"]
