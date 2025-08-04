@@ -16,8 +16,12 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 	// Users handler
 	mux.Handle("/accounts",
 		mw.AuthorizedLoggerMiddleware(accountsHandler(), cfg))
-	mux.Handle(fmt.Sprintf("/accounts/{%s}",
-		config.ContextAccountId),
+	mux.Handle(fmt.Sprintf("/accounts/services/{%s}",
+		config.ContextService),
+		mw.AuthorizedLoggerMiddleware(accountsByServiceHandler(), cfg))
+	mux.Handle(fmt.Sprintf("/accounts/services/{%s}/accounts/{%s}",
+		config.ContextService,
+		config.ContextAccount),
 		mw.AuthorizedLoggerMiddleware(accountsByIdHandler(), cfg))
 }
 

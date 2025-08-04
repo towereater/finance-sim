@@ -7,7 +7,9 @@ const ContextConfig ContextKey = "config"
 const ContextAbi ContextKey = "abi"
 
 // Path and query parameters
-const ContextAccountId ContextKey = "accountId"
+const ContextAccount ContextKey = "account"
+const ContextService ContextKey = "service"
+const ContextOwner ContextKey = "owner"
 
 const ContextFrom ContextKey = "from"
 const ContextLimit ContextKey = "limit"

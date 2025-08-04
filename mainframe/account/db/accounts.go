@@ -5,11 +5,10 @@ import (
 	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectAccount(cfg config.Config, abi string, accountId primitive.ObjectID) (model.Account, error) {
+func SelectAccount(cfg config.Config, abi string, accountId model.AccountId) (model.Account, error) {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()
@@ -27,7 +26,7 @@ func SelectAccount(cfg config.Config, abi string, accountId primitive.ObjectID) 
 	return account, err
 }
 
-func SelectAccounts(cfg config.Config, abi string, accountFilter model.Account, from primitive.ObjectID, limit int) ([]model.Account, error) {
+func SelectAccounts(cfg config.Config, abi string, accountFilter model.Account, from string, limit int) ([]model.Account, error) {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()
@@ -44,13 +43,16 @@ func SelectAccounts(cfg config.Config, abi string, accountFilter model.Account, 
 
 	// Setup filter
 	filter := bson.M{}
+	if accountFilter.Id.Account != "" {
+		filter["_id.account"] = accountFilter.Id.Account
+	}
+	if accountFilter.Id.Service != "" {
+		filter["_id.service"] = accountFilter.Id.Service
+	}
 	if accountFilter.Owner != "" {
 		filter["owner"] = accountFilter.Owner
 	}
-	if accountFilter.Service != "" {
-		filter["service"] = accountFilter.Service
-	}
-	filter["_id"] = bson.M{"$gt": from}
+	filter["_id.account"] = bson.M{"$gt": from}
 
 	// Define the cursor
 	cursor, err := coll.Find(ctx, filter, &opts)
@@ -88,7 +90,7 @@ func InsertAccount(cfg config.Config, abi string, account model.Account) error {
 	return err
 }
 
-func DeleteAccount(cfg config.Config, abi string, accountId primitive.ObjectID) error {
+func DeleteAccount(cfg config.Config, abi string, accountId model.AccountId) error {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()

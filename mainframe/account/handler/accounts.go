@@ -20,6 +20,18 @@ func accountsHandler() http.Handler {
 	})
 }
 
+func accountsByServiceHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check of the method request
+		switch r.Method {
+		case "GET":
+			api.GetAccounts(w, r)
+		default:
+			http.Error(w, r.Method, http.StatusMethodNotAllowed)
+		}
+	})
+}
+
 func accountsByIdHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
