@@ -1,0 +1,18 @@
+# Server
+server:
+  port: "12000"
+
+# DB connection
+db:
+  host: "mongo:27017"
+  timeout: 5
+
+# Collections
+prefix: "CK"
+collections:
+  accounts: "accounts"
+
+# External services
+services:
+  accounts: "accounts:12000"
+  timeout: 5
