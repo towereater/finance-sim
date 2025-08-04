@@ -46,6 +46,22 @@ services:
     networks:
       - back-tier
       - db-tier
+  
+  checking-account:
+    build: ./mainframe/checking-account
+    container_name: checking-accounts
+    env_file:
+      - ".env"
+    ports:
+      - "${CKACCOUNT_SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      account:
+        condition: service_started
+      mongo:
+        condition: service_healthy
+    networks:
+      - back-tier
+      - db-tier
 
   # bff:
   #   build: ./bff
