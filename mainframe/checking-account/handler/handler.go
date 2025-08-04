@@ -13,7 +13,7 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 	mux.Handle("/",
 		mw.LoggerMiddleware(homeHandler(), cfg))
 
-	// Users handler
+	// Checking accounts handler
 	mux.Handle("/checking-accounts",
 		mw.AuthorizedLoggerMiddleware(checkingAccountsHandler(), cfg))
 	mux.Handle(fmt.Sprintf("/checking-accounts/{%s}",

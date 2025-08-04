@@ -13,7 +13,7 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 	mux.Handle("/",
 		mw.LoggerMiddleware(homeHandler(), cfg))
 
-	// Users handler
+	// Dossiers handler
 	mux.Handle("/dossiers",
 		mw.AuthorizedLoggerMiddleware(dossiersHandler(), cfg))
 	mux.Handle(fmt.Sprintf("/dossiers/{%s}",

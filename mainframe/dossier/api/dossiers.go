@@ -237,7 +237,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Response output
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(dossier)
 }
 
