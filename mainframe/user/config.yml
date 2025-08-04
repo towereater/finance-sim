@@ -11,3 +11,8 @@ db:
 prefix: "US"
 collections:
   users: "users"
+
+# External services
+services:
+  security: "security:12000"
+  timeout: 5

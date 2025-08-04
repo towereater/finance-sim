@@ -21,6 +21,10 @@ type Config struct {
 	Collections struct {
 		Users string `yaml:"users" envconfig:"COLL_USERS"`
 	} `yaml:"collections"`
+	Services struct {
+		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
+		Timeout  int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
+	} `yaml:"services"`
 }
 
 func readConfig(path string) (Config, error) {
