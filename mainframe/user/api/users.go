@@ -74,13 +74,8 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	// Build the filter
 	var filter model.User
-
-	if queryParams.Has("username") {
-		filter.Username = queryParams.Get("username")
-	}
-	if queryParams.Has("password") {
-		filter.Password = queryParams.Get("password")
-	}
+	filter.Username = queryParams.Get("username")
+	filter.Password = queryParams.Get("password")
 
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
@@ -102,6 +97,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Response output
 	if len(users) == 0 {
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
