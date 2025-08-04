@@ -5,11 +5,10 @@ import (
 	"mainframe/user/model"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectUser(cfg config.Config, abi string, userId primitive.ObjectID) (model.User, error) {
+func SelectUser(cfg config.Config, abi string, userId string) (model.User, error) {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()
@@ -27,7 +26,7 @@ func SelectUser(cfg config.Config, abi string, userId primitive.ObjectID) (model
 	return user, err
 }
 
-func SelectUsers(cfg config.Config, abi string, userFilter model.User, from primitive.ObjectID, limit int) ([]model.User, error) {
+func SelectUsers(cfg config.Config, abi string, userFilter model.User, from string, limit int) ([]model.User, error) {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()
@@ -46,6 +45,9 @@ func SelectUsers(cfg config.Config, abi string, userFilter model.User, from prim
 	filter := bson.M{}
 	if userFilter.Username != "" {
 		filter["username"] = userFilter.Username
+	}
+	if userFilter.Password != "" {
+		filter["password"] = userFilter.Password
 	}
 	filter["_id"] = bson.M{"$gt": from}
 
@@ -85,7 +87,7 @@ func InsertUser(cfg config.Config, abi string, user model.User) error {
 	return err
 }
 
-func UpdateUser(cfg config.Config, abi string, userId primitive.ObjectID, user model.User) error {
+func UpdateUser(cfg config.Config, abi string, userId string, user model.User) error {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()
@@ -101,11 +103,7 @@ func UpdateUser(cfg config.Config, abi string, userId primitive.ObjectID, user m
 
 	// Setup update command
 	update := bson.M{"$set": bson.M{
-		"username": user.Username,
 		"password": user.Password,
-		"name":     user.Name,
-		"surname":  user.Surname,
-		"birth":    user.Birth,
 	}}
 
 	// Update a document
@@ -114,7 +112,7 @@ func UpdateUser(cfg config.Config, abi string, userId primitive.ObjectID, user m
 	return err
 }
 
-func DeleteUser(cfg config.Config, abi string, userId primitive.ObjectID) error {
+func DeleteUser(cfg config.Config, abi string, userId string) error {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()

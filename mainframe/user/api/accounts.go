@@ -8,56 +8,47 @@ import (
 	"mainframe/user/model"
 	"net/http"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func AddAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	id := r.PathValue(string(config.ContextUserId))
-	if id == "" {
+	userId := r.PathValue(string(config.ContextUserId))
+	if userId == "" {
 		fmt.Printf("Invalid user id value\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		fmt.Printf("Error while converting user id %s: %s\n", id, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// Parse the request
 	var req model.InsertAccountInput
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if req.Id.Hex() == "" {
+	if req.Id.Account == "" || len(req.Id.Account) != 24 {
 		fmt.Printf("Invalid account id\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if req.Service == "" || len(req.Service) != 2 {
+	if req.Id.Service == "" || len(req.Id.Service) != 2 {
 		fmt.Printf("Invalid account service\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	// Build the new document
-	account := model.Account{
-		Id:      req.Id,
-		Service: req.Service,
-	}
-
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+
+	// Build the new document
+	account := model.Account{
+		Id: req.Id,
+	}
 
 	// Check user existence
 	_, err = db.SelectUser(cfg, abi, userId)
@@ -87,30 +78,30 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 
 func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	id := r.PathValue(string(config.ContextUserId))
-	if id == "" {
+	userId := r.PathValue(string(config.ContextUserId))
+	if userId == "" {
 		fmt.Printf("Invalid user id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	userId, err := primitive.ObjectIDFromHex(id)
+	// Parse the request
+	var req model.DeleteAccountInput
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Printf("Error while converting user id %s: %s\n", id, err.Error())
+		fmt.Printf("Could not convert request body\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	id = r.PathValue(string(config.ContextAccountId))
-	if id == "" {
-		fmt.Printf("Invalid account id value\n")
+	if req.Id.Account == "" || len(req.Id.Account) != 24 {
+		fmt.Printf("Invalid account id\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	accountId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		fmt.Printf("Error while converting account id %s: %s\n", id, err.Error())
+	if req.Id.Service == "" || len(req.Id.Service) != 2 {
+		fmt.Printf("Invalid account service\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -118,6 +109,11 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+
+	// Build the new document
+	account := model.Account{
+		Id: req.Id,
+	}
 
 	// Check user existence
 	_, err = db.SelectUser(cfg, abi, userId)
@@ -133,10 +129,10 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remove the document
-	err = db.RemoveAccount(cfg, abi, userId, accountId)
+	err = db.RemoveAccount(cfg, abi, userId, account.Id)
 	if err != nil {
-		fmt.Printf("Error while removing account %s from user %s: %s\n",
-			accountId, userId, err.Error())
+		fmt.Printf("Error while removing account %+v from user %s: %s\n",
+			account.Id, userId, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

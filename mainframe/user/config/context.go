@@ -8,7 +8,6 @@ const ContextAbi ContextKey = "abi"
 
 // Path and query parameters
 const ContextUserId ContextKey = "userId"
-const ContextAccountId ContextKey = "accountId"
 
 const ContextUsername ContextKey = "username"
 

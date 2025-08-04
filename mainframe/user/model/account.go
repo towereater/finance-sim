@@ -1,13 +1,18 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Account struct {
-	Id      primitive.ObjectID `json:"id" bson:"id"`
-	Service string             `json:"service" bson:"service"`
+	Id AccountId `json:"id" bson:"id"`
+}
+
+type AccountId struct {
+	Account string `json:"account" bson:"account"`
+	Service string `json:"service" bson:"service"`
 }
 
 type InsertAccountInput struct {
-	Id      primitive.ObjectID `json:"id"`
-	Service string             `json:"service"`
+	Id AccountId `json:"id"`
+}
+
+type DeleteAccountInput struct {
+	Id AccountId `json:"id"`
 }

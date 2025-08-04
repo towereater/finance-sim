@@ -5,10 +5,9 @@ import (
 	"mainframe/user/model"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func AddAccount(cfg config.Config, abi string, userId primitive.ObjectID, account model.Account) error {
+func AddAccount(cfg config.Config, abi string, userId string, account model.Account) error {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()
@@ -31,7 +30,7 @@ func AddAccount(cfg config.Config, abi string, userId primitive.ObjectID, accoun
 	return err
 }
 
-func RemoveAccount(cfg config.Config, abi string, userId primitive.ObjectID, accountId primitive.ObjectID) error {
+func RemoveAccount(cfg config.Config, abi string, userId string, accountId model.AccountId) error {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
 	defer cancel()

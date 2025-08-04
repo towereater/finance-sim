@@ -16,16 +16,9 @@ import (
 
 func GetUser(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	id := r.PathValue(string(config.ContextUserId))
-	if id == "" {
+	userId := r.PathValue(string(config.ContextUserId))
+	if userId == "" || len(userId) != 24 {
 		fmt.Printf("Invalid user id value\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		fmt.Printf("Error while converting user id %s: %s\n", id, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -57,18 +50,14 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	var err error
 
-	from := primitive.NilObjectID
-	if queryParams.Has(string(config.ContextFrom)) {
-		from, err = primitive.ObjectIDFromHex(queryParams.Get(string(config.ContextFrom)))
-
-		if err != nil {
-			fmt.Printf("Invalid %s parameter\n", string(config.ContextFrom))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+	from := queryParams.Get(string(config.ContextFrom))
+	if from != "" && len(from) != 24 {
+		fmt.Printf("Invalid %s parameter\n", string(config.ContextFrom))
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	limit := 0
+	limit := 50
 	if queryParams.Has(string(config.ContextLimit)) {
 		limit, err = strconv.Atoi(queryParams.Get(string(config.ContextLimit)))
 
@@ -88,6 +77,9 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	if queryParams.Has("username") {
 		filter.Username = queryParams.Get("username")
+	}
+	if queryParams.Has("password") {
+		filter.Password = queryParams.Get("password")
 	}
 
 	// Extract context parameters
@@ -126,19 +118,49 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Username == "" {
+		fmt.Printf("Invalid user username\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Password == "" {
+		fmt.Printf("Invalid user password\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" {
+		fmt.Printf("Invalid user name\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Surname == "" {
+		fmt.Printf("Invalid user surname\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Birth == "" || len(req.Birth) != 10 {
+		fmt.Printf("Invalid user birth\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Extract context parameters
+	cfg := r.Context().Value(config.ContextConfig).(config.Config)
+	abi := r.Context().Value(config.ContextAbi).(string)
+
 	// Build the new document
 	user := model.User{
-		Id:       primitive.NewObjectID(),
+		Id:       primitive.NewObjectID().Hex(),
 		Username: req.Username,
 		Password: req.Password,
 		Name:     req.Name,
 		Surname:  req.Surname,
 		Birth:    req.Birth,
 	}
-
-	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
 
 	// Insert the new document
 	err = db.InsertUser(cfg, abi, user)
@@ -158,84 +180,20 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	// Parse the request
-	var req model.InsertUserInput
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		fmt.Printf("Could not convert request body\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Extract path parameters
-	id := r.PathValue(string(config.ContextUserId))
-	if id == "" {
-		fmt.Printf("Invalid user id value\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		fmt.Printf("Error while converting user id %s: %s\n", id, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Build the new document
-	user := model.User{
-		Id:       userId,
-		Username: req.Username,
-		Password: req.Password,
-		Name:     req.Name,
-		Surname:  req.Surname,
-		Birth:    req.Birth,
-	}
-
-	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-
-	// Update the document
-	err = db.UpdateUser(cfg, abi, userId, user)
-	if err == mongo.ErrNoDocuments {
-		fmt.Printf("No users with id %s\n", userId)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	if err != nil {
-		fmt.Printf("Error while updating user %+v: %s\n", user, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	// Response output
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
-}
-
 func PatchUser(w http.ResponseWriter, r *http.Request) {
-	// Parse the request
-	var req model.InsertUserInput
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		fmt.Printf("Could not convert request body\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	// Extract path parameters
-	id := r.PathValue(string(config.ContextUserId))
-	if id == "" {
+	userId := r.PathValue(string(config.ContextUserId))
+	if userId == "" || len(userId) != 24 {
 		fmt.Printf("Invalid user id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	userId, err := primitive.ObjectIDFromHex(id)
+	// Parse the request
+	var req model.UpdateUserInput
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		fmt.Printf("Error while converting user id %s: %s\n", id, err.Error())
+		fmt.Printf("Could not convert request body\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -257,21 +215,9 @@ func PatchUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generation of the updated document
-	if req.Username != "" {
-		user.Username = req.Username
-	}
+	// Generate the updated document
 	if req.Password != "" {
 		user.Password = req.Password
-	}
-	if req.Name != "" {
-		user.Name = req.Name
-	}
-	if req.Surname != "" {
-		user.Surname = req.Surname
-	}
-	if req.Birth != "" {
-		user.Birth = req.Birth
 	}
 
 	// Update the document
@@ -289,16 +235,9 @@ func PatchUser(w http.ResponseWriter, r *http.Request) {
 
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	id := r.PathValue(string(config.ContextUserId))
-	if id == "" {
+	userId := r.PathValue(string(config.ContextUserId))
+	if userId == "" || len(userId) != 24 {
 		fmt.Printf("Invalid user id value\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	userId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		fmt.Printf("Error while converting user id %s: %s\n", id, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -308,7 +247,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(config.ContextAbi).(string)
 
 	// Delete the document
-	err = db.DeleteUser(cfg, abi, userId)
+	err := db.DeleteUser(cfg, abi, userId)
 	if err != nil {
 		fmt.Printf("Error while deleting user with id %s: %s\n", userId, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
