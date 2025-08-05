@@ -14,7 +14,7 @@ func InsertXChangerDossier(cfg config.Config, payload model.InsertXChangerDossie
 	url := fmt.Sprintf("http://%s/dossiers", cfg.Services.Xchanger.Host)
 
 	// Execute the request
-	res, err := ExecuteHttpRequest(cfg, http.MethodPost, url, payload, cfg.Services.Xchanger.ApiKey)
+	res, err := ExecuteHttpRequest(cfg, http.MethodPost, url, cfg.Services.Xchanger.ApiKey, payload)
 	if err != nil {
 		return model.XChangerDossier{}, err
 	}
@@ -40,7 +40,7 @@ func DeleteXChangerDossier(cfg config.Config, dossierId string) error {
 		cfg.Services.Xchanger.Host, dossierId)
 
 	// Execute the request
-	res, err := ExecuteHttpRequest(cfg, http.MethodDelete, url, "", cfg.Services.Xchanger.ApiKey)
+	res, err := ExecuteHttpRequest(cfg, http.MethodDelete, url, cfg.Services.Xchanger.ApiKey, "")
 	if err != nil {
 		return err
 	}

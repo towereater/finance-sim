@@ -15,4 +15,5 @@ collections:
 # External services
 services:
   users: "users:12000"
+  security: "security:12000"
   timeout: 5

@@ -22,8 +22,9 @@ type Config struct {
 		Accounts string `yaml:"accounts" envconfig:"COLL_ACCOUNTS"`
 	} `yaml:"collections"`
 	Services struct {
-		Users   string `yaml:"users" envconfig:"SERVICES_USERS"`
-		Timeout int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
+		Users    string `yaml:"users" envconfig:"SERVICES_USERS"`
+		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
+		Timeout  int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
 	} `yaml:"services"`
 }
 

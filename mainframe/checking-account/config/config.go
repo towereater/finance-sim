@@ -23,6 +23,7 @@ type Config struct {
 	} `yaml:"collections"`
 	Services struct {
 		Accounts string `yaml:"accounts" envconfig:"SERVICES_ACCOUNTS"`
+		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
 		Timeout  int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
 	} `yaml:"services"`
 }

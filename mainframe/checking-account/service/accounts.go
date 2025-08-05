@@ -8,12 +8,12 @@ import (
 	"net/http"
 )
 
-func InsertAccount(cfg config.Config, payload model.InsertAccountInput) error {
+func InsertAccount(cfg config.Config, auth string, payload model.InsertAccountInput) error {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/accounts", cfg.Services.Accounts)
 
 	// Execute the request
-	res, err := ExecuteHttpRequest(cfg, http.MethodPost, url, payload)
+	res, err := ExecuteHttpRequest(cfg, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return err
 	}
@@ -26,13 +26,13 @@ func InsertAccount(cfg config.Config, payload model.InsertAccountInput) error {
 	return nil
 }
 
-func DeleteAccount(cfg config.Config, accountId string) error {
+func DeleteAccount(cfg config.Config, auth string, accountId string) error {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/accounts/services/%s/accounts/%s",
 		cfg.Services.Accounts, cfg.Prefix, accountId)
 
 	// Execute the request
-	res, err := ExecuteHttpRequest(cfg, http.MethodDelete, url, "")
+	res, err := ExecuteHttpRequest(cfg, http.MethodDelete, url, auth, "")
 	if err != nil {
 		return err
 	}

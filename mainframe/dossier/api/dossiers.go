@@ -17,7 +17,7 @@ import (
 func GetDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	dossierId := r.PathValue(string(config.ContextDossier))
-	if dossierId == "" || len(dossierId) != 24 {
+	if len(dossierId) != 24 {
 		fmt.Printf("Invalid dossier id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -113,19 +113,19 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Owner == "" || len(req.Owner) != 24 {
+	if len(req.Owner) != 24 {
 		fmt.Printf("Invalid dossier owner\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if req.CheckingAccount.Account == "" || len(req.CheckingAccount.Account) != 24 {
+	if len(req.CheckingAccount.Account) != 24 {
 		fmt.Printf("Invalid dossier checking account\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if req.CheckingAccount.Service == "" || len(req.CheckingAccount.Service) != 2 {
+	if len(req.CheckingAccount.Service) != 2 {
 		fmt.Printf("Invalid dossier checking account\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -134,9 +134,10 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+	auth := r.Context().Value(config.ContextAuth).(string)
 
 	// Get checking account data
-	ckAccount, err := service.GetAccount(cfg, req.CheckingAccount)
+	ckAccount, err := service.GetAccount(cfg, auth, req.CheckingAccount)
 	if err != nil {
 		fmt.Printf("Error while searching checking account %+v: %s\n",
 			req.CheckingAccount, err.Error())
@@ -151,7 +152,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user data
-	user, err := service.GetUser(cfg, req.Owner)
+	user, err := service.GetUser(cfg, auth, req.Owner)
 	if err != nil {
 		fmt.Printf("Error while searching user %s: %s\n", req.Owner, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -174,21 +175,11 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 		Owner: dossier.Owner,
 	}
 
-	err = service.InsertAccount(cfg, payload)
+	err = service.InsertAccount(cfg, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding dossier %s: %s\n",
 			dossier.Id,
 			err.Error())
-
-		// // Rollback
-		// // Delete the document
-		// err = db.DeleteDossier(cfg, abi, dossier.Id)
-		// if err != nil {
-		// 	fmt.Printf("Error while deleting dossier with id %s: %s\n", dossier.Id, err.Error())
-
-		// 	w.WriteHeader(http.StatusInternalServerError)
-		// 	return
-		// }
 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -244,7 +235,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	dossierId := r.PathValue(string(config.ContextDossier))
-	if dossierId == "" || len(dossierId) != 24 {
+	if len(dossierId) != 24 {
 		fmt.Printf("Invalid dossier id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -253,6 +244,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+	auth := r.Context().Value(config.ContextAuth).(string)
 
 	// Select the document
 	dossier, err := db.SelectDossier(cfg, abi, dossierId)
@@ -279,7 +271,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete dossier from the accounts list
-	err = service.DeleteAccount(cfg, dossierId)
+	err = service.DeleteAccount(cfg, auth, dossierId)
 	if err != nil {
 		fmt.Printf("Error while removing dossier %s: %s\n",
 			dossierId,
@@ -303,7 +295,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 			Owner: dossier.Owner,
 		}
 
-		err = service.InsertAccount(cfg, payload)
+		err = service.InsertAccount(cfg, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding dossier %s: %s\n",
 				dossier.Id,

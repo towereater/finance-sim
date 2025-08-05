@@ -17,7 +17,7 @@ import (
 func GetCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	accountId := r.PathValue(string(config.ContextAccountId))
-	if accountId == "" || len(accountId) != 24 {
+	if len(accountId) != 24 {
 		fmt.Printf("Invalid account id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -114,7 +114,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Owner == "" || len(req.Owner) != 24 {
+	if len(req.Owner) != 24 {
 		fmt.Printf("Invalid account owner\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -124,6 +124,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
 	cab := r.Context().Value(config.ContextCab).(string)
+	auth := r.Context().Value(config.ContextAuth).(string)
 
 	// Build the new document
 	accountId := primitive.NewObjectID().Hex()
@@ -157,7 +158,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 		Owner: account.Owner,
 	}
 
-	err = service.InsertAccount(cfg, payload)
+	err = service.InsertAccount(cfg, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %s: %s\n",
 			account.Id,
@@ -185,7 +186,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	accountId := r.PathValue(string(config.ContextAccountId))
-	if accountId == "" || len(accountId) != 24 {
+	if len(accountId) != 24 {
 		fmt.Printf("Invalid account id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -194,6 +195,7 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+	auth := r.Context().Value(config.ContextAuth).(string)
 
 	// Select the document
 	account, err := db.SelectAccount(cfg, abi, accountId)
@@ -209,7 +211,7 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete account from the accounts list
-	err = service.DeleteAccount(cfg, accountId)
+	err = service.DeleteAccount(cfg, auth, accountId)
 	if err != nil {
 		fmt.Printf("Error while removing account %s: %s\n",
 			accountId,
@@ -233,7 +235,7 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 			Owner: account.Owner,
 		}
 
-		err = service.InsertAccount(cfg, payload)
+		err = service.InsertAccount(cfg, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s: %s\n",
 				account.Id,

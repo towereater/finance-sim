@@ -27,6 +27,8 @@ func authorizer() Adapter {
 
 			ctx := context.WithValue(r.Context(), config.ContextAbi, apiKey.Abi)
 			ctx = context.WithValue(ctx, config.ContextCab, apiKey.Cab)
+			ctx = context.WithValue(ctx, config.ContextAuth, apiKey.Id)
+
 			newReq := r.WithContext(ctx)
 			h.ServeHTTP(w, newReq)
 		})

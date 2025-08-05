@@ -24,6 +24,7 @@ type Config struct {
 	Services struct {
 		Users    string `yaml:"users" envconfig:"SERVICES_USERS"`
 		Accounts string `yaml:"accounts" envconfig:"SERVICES_ACCOUNTS"`
+		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
 		Xchanger struct {
 			Host   string `yaml:"host" envconfig:"SERVICES_XCHANGER_HOST"`
 			ApiKey string `yaml:"api-key" envconfig:"SERVICES_XCHANGER_APIKEY"`

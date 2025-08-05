@@ -9,12 +9,12 @@ import (
 	"net/http"
 )
 
-func GetUser(cfg config.Config, userId string) (model.User, error) {
+func GetUser(cfg config.Config, auth string, userId string) (model.User, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users/%s", cfg.Services.Users, userId)
 
 	// Execute the request
-	res, err := ExecuteHttpRequest(cfg, http.MethodGet, url, "", "")
+	res, err := ExecuteHttpRequest(cfg, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.User{}, err
 	}

@@ -16,14 +16,14 @@ import (
 func GetAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	acc := r.PathValue(string(config.ContextAccount))
-	if acc == "" || len(acc) != 24 {
+	if len(acc) != 24 {
 		fmt.Printf("Invalid account id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	serv := r.PathValue(string(config.ContextService))
-	if serv == "" || len(serv) != 2 {
+	if len(serv) != 2 {
 		fmt.Printf("Invalid service value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -140,19 +140,19 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Id.Account == "" || len(req.Id.Account) != 24 {
+	if len(req.Id.Account) != 24 {
 		fmt.Printf("Invalid account id\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if req.Id.Service == "" || len(req.Id.Service) != 2 {
+	if len(req.Id.Service) != 2 {
 		fmt.Printf("Invalid account service\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	if req.Owner == "" {
+	if len(req.Owner) != 24 {
 		fmt.Printf("Invalid account owner\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -161,6 +161,7 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+	auth := r.Context().Value(config.ContextAuth).(string)
 
 	// Build the new document
 	account := model.Account{
@@ -189,7 +190,7 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 		Id: account.Id,
 	}
 
-	err = service.AddAccountToUser(cfg, account.Owner, payload)
+	err = service.AddAccountToUser(cfg, auth, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %+v to user %s: %s\n",
 			account.Id,
@@ -219,14 +220,14 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	acc := r.PathValue(string(config.ContextAccount))
-	if acc == "" {
+	if len(acc) != 24 {
 		fmt.Printf("Invalid account id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	serv := r.PathValue(string(config.ContextService))
-	if serv == "" || len(serv) != 2 {
+	if len(serv) != 2 {
 		fmt.Printf("Invalid service value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -235,6 +236,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
 	abi := r.Context().Value(config.ContextAbi).(string)
+	auth := r.Context().Value(config.ContextAuth).(string)
 
 	// Build the document
 	accountId := model.AccountId{
@@ -261,7 +263,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		Id: account.Id,
 	}
 
-	err = service.RemoveAccountFromUser(cfg, account.Owner, payload)
+	err = service.RemoveAccountFromUser(cfg, auth, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while removing account %+v from user %s: %s\n",
 			account.Id,
@@ -283,7 +285,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 			Id: account.Id,
 		}
 
-		err = service.AddAccountToUser(cfg, account.Owner, payload)
+		err = service.AddAccountToUser(cfg, auth, account.Owner, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s to user %s: %s\n",
 				account.Id,
