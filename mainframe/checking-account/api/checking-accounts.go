@@ -132,8 +132,11 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	account := model.CheckingAccount{
 		Id:    accountId,
 		Owner: req.Owner,
-		Cash:  0,
 		IBAN:  iban,
+		Value: model.CheckingValue{
+			Amount:   0,
+			Currency: "EUR",
+		},
 	}
 
 	// Insert the new document

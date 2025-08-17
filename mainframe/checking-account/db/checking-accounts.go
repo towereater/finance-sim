@@ -26,6 +26,24 @@ func SelectAccount(cfg config.Config, abi string, accountId string) (model.Check
 	return account, err
 }
 
+func SelectAccountByIBAN(cfg config.Config, abi string, iban string) (model.CheckingAccount, error) {
+	// Setup timeout
+	ctx, cancel := getContextFromConfig(cfg.DB)
+	defer cancel()
+
+	// Retrieve the collection
+	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	if err != nil {
+		return model.CheckingAccount{}, err
+	}
+
+	// Search for a document
+	var account model.CheckingAccount
+	err = coll.FindOne(ctx, bson.M{"iban": iban}).Decode(&account)
+
+	return account, err
+}
+
 func SelectAccounts(cfg config.Config, abi string, accountFilter model.CheckingAccount, from string, limit int) ([]model.CheckingAccount, error) {
 	// Setup timeout
 	ctx, cancel := getContextFromConfig(cfg.DB)
@@ -83,6 +101,23 @@ func InsertAccount(cfg config.Config, abi string, account model.CheckingAccount)
 
 	// Insert a document
 	_, err = coll.InsertOne(ctx, account)
+
+	return err
+}
+
+func UpdateAccount(cfg config.Config, abi string, account model.CheckingAccount) error {
+	// Setup timeout
+	ctx, cancel := getContextFromConfig(cfg.DB)
+	defer cancel()
+
+	// Retrieve the collection
+	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	if err != nil {
+		return err
+	}
+
+	// Update a document
+	_, err = coll.ReplaceOne(ctx, bson.M{"_id": account.Id}, account)
 
 	return err
 }

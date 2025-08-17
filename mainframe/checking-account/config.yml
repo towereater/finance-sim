@@ -11,6 +11,7 @@ db:
 prefix: "CK"
 collections:
   accounts: "accounts"
+  payments: "payments"
 
 # External services
 services:

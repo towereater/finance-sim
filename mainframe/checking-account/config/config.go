@@ -20,6 +20,7 @@ type Config struct {
 	Prefix      string   `yaml:"prefix" envconfig:"COLL_PREFIX"`
 	Collections struct {
 		Accounts string `yaml:"accounts" envconfig:"COLL_ACCOUNTS"`
+		Payments string `yaml:"payments" envconfig:"COLL_PAYMENTS"`
 	} `yaml:"collections"`
 	Services struct {
 		Accounts string `yaml:"accounts" envconfig:"SERVICES_ACCOUNTS"`

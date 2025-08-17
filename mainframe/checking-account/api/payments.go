@@ -1,0 +1,259 @@
+package api
+
+import (
+	"encoding/json"
+	"fmt"
+	"mainframe/checking-account/config"
+	"mainframe/checking-account/db"
+	"mainframe/checking-account/model"
+	"net/http"
+	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+func GetPayment(w http.ResponseWriter, r *http.Request) {
+	// Extract path parameters
+	paymentId := r.PathValue(string(config.ContextPaymentId))
+	if len(paymentId) != 24 {
+		fmt.Printf("Invalid payment id value\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Extract context parameters
+	cfg := r.Context().Value(config.ContextConfig).(config.Config)
+	abi := r.Context().Value(config.ContextAbi).(string)
+
+	// Select the document
+	payment, err := db.SelectPayment(cfg, abi, paymentId)
+	if err == mongo.ErrNoDocuments {
+		fmt.Printf("No payments with id %s\n", paymentId)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		fmt.Printf("Error while searching payment with id %s: %s\n", paymentId, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Response output
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(payment)
+}
+
+func GetPayments(w http.ResponseWriter, r *http.Request) {
+	// Extract query parameters
+	queryParams := r.URL.Query()
+	var err error
+
+	from := queryParams.Get(string(config.ContextFrom))
+	if from != "" && len(from) != 24 {
+		fmt.Printf("Invalid %s parameter\n", string(config.ContextFrom))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	limit := 50
+	if queryParams.Has(string(config.ContextLimit)) {
+		limit, err = strconv.Atoi(queryParams.Get(string(config.ContextLimit)))
+
+		if err != nil {
+			fmt.Printf("Invalid %s parameter\n", string(config.ContextLimit))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if limit > 50 {
+			limit = 50
+		}
+	}
+
+	// Build the filter
+	var filter model.Payment
+	filter.Type = queryParams.Get("paymenyType")
+	amount, err := strconv.ParseFloat(queryParams.Get("amount"), 32)
+	if err != nil {
+		filter.Value.Amount = float32(amount)
+	}
+	filter.Value.Currency = queryParams.Get("currency")
+	filter.Payer.AccountId.Account = queryParams.Get("account")
+	filter.Payer.AccountId.Service = queryParams.Get("service")
+	filter.Payee.Name = queryParams.Get("name")
+	filter.Payee.AccountIdentification.Type = queryParams.Get("accountIdType")
+	filter.Payee.AccountIdentification.Value = queryParams.Get("accountIdValue")
+	filter.Details = queryParams.Get("details")
+
+	// Extract context parameters
+	cfg := r.Context().Value(config.ContextConfig).(config.Config)
+	abi := r.Context().Value(config.ContextAbi).(string)
+
+	// Select all documents
+	payments, err := db.SelectPayments(cfg, abi, filter, from, limit)
+	if err == mongo.ErrNoDocuments {
+		fmt.Printf("No payments with filter %+v\n", filter)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		fmt.Printf("Error while searching payments with filter %+v: %s\n", filter, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Response output
+	if len(payments) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(payments)
+}
+
+func InsertPayment(w http.ResponseWriter, r *http.Request) {
+	// Parse the request
+	var req model.InsertPayment
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Printf("Could not convert request body\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Type != "BANK_TRANSFER" {
+		fmt.Printf("Invalid payment type\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Value.Amount <= 0 {
+		fmt.Printf("Invalid value amount\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(req.Value.Currency) != 3 {
+		fmt.Printf("Invalid value currency\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(req.Payer.AccountId.Account) != 24 {
+		fmt.Printf("Invalid payer account id\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Payer.AccountId.Service != "CK" {
+		fmt.Printf("Invalid payer account service\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Payee.Name == "" {
+		fmt.Printf("Invalid payee name\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Payee.AccountIdentification.Type != "IBAN" {
+		fmt.Printf("Invalid payee account identification type\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(req.Payee.AccountIdentification.Value) != 27 {
+		fmt.Printf("Invalid payee account identification value\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Extract context parameters
+	cfg := r.Context().Value(config.ContextConfig).(config.Config)
+	abi := r.Context().Value(config.ContextAbi).(string)
+
+	// Check payer cash availability
+	payerAccount, err := db.SelectAccount(cfg, abi, req.Payer.AccountId.Account)
+	if err != nil {
+		fmt.Printf("Error while searching payer account %s\n", req.Payer.AccountId.Account)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if payerAccount.Id == "" {
+		fmt.Printf("Payer account %s not found\n", req.Payer.AccountId.Account)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if payerAccount.Value.Amount < req.Value.Amount {
+		fmt.Printf("Payer account %s without enough funds\n", req.Payer.AccountId.Account)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	// Check payee existance on local system
+	payeeAccount := model.CheckingAccount{}
+	if req.Payee.AccountIdentification.Type == "IBAN" &&
+		req.Payee.AccountIdentification.Value[5:10] == abi {
+		payeeAccount, err = db.SelectAccountByIBAN(cfg, abi, req.Payee.AccountIdentification.Value)
+		if err != nil {
+			fmt.Printf("Error while searching payee account %s: %s\n",
+				req.Payee.AccountIdentification.Value, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	if payeeAccount.Id == "" {
+		fmt.Printf("Payee account %s not found\n", req.Payee.AccountIdentification.Value)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Remove cash from payer account
+	payerAccount.Value.Amount -= req.Value.Amount
+	err = db.UpdateAccount(cfg, abi, payerAccount)
+	if err != nil {
+		fmt.Printf("Error while updating payer account %s: %s\n", payerAccount.Id, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Add cash to payer account
+	payeeAccount.Value.Amount += req.Value.Amount
+	err = db.UpdateAccount(cfg, abi, payeeAccount)
+	if err != nil {
+		fmt.Printf("Error while updating payee account %s: %s\n", payeeAccount.Id, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Build the new document
+	paymentId := primitive.NewObjectID().Hex()
+	payment := model.Payment{
+		Id:      paymentId,
+		Type:    req.Type,
+		Value:   req.Value,
+		Payer:   req.Payer,
+		Payee:   req.Payee,
+		Details: req.Details,
+	}
+
+	// Insert the new document
+	err = db.InsertPayment(cfg, abi, payment)
+	if mongo.IsDuplicateKeyError(err) {
+		fmt.Printf("Payment %+v already exists\n", payment)
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+	if err != nil {
+		fmt.Printf("Error while inserting payment %+v: %s\n", payment, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Response output
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(payment)
+}
