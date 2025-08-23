@@ -1,5 +1,6 @@
 package com.finsim.xchanger.model;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Document(collection = "banks")
 public class Bank {
-    @Indexed(unique = true)
+    @Id
     public String abi;
 
     @Indexed(unique = true)
