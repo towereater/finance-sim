@@ -4,10 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/hello")
-public class ApiController {
+@RequestMapping("/")
+public class HomeController {
     @GetMapping
-    public String sayHello() {
-        return "Hello, World!";
+    public String getHome() {
+        return "Hello from xchanger API";
     }
 }
