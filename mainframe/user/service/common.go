@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func ExecuteHttpRequest(cfg config.Config, method string, url string, payload any, apiKey string) (*http.Response, error) {
+func ExecuteHttpRequest(cfg config.Config, method string, url string, apiKey string, payload any) (*http.Response, error) {
 	// Convert the payload
 	bytesPayload, err := json.Marshal(payload)
 	if err != nil {
