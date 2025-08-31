@@ -1,0 +1,13 @@
+{
+    "server": {
+        "port": "12000"
+    },
+    "db": {
+        "host": "mongo:27017",
+        "timeout": 5
+    },
+    "prefix": "SR",
+    "collections": {
+        "users": "users"
+    }
+}
