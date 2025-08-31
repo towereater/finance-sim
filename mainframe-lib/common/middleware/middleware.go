@@ -4,6 +4,7 @@ import (
 	"net/http"
 )
 
+// Middleware main type
 type Adapter func(http.Handler) http.Handler
 
 func chainMiddleware(h http.Handler, adapters ...Adapter) http.Handler {
@@ -15,24 +16,22 @@ func chainMiddleware(h http.Handler, adapters ...Adapter) http.Handler {
 }
 
 func LoggerMiddleware(h http.Handler, cfg any) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		adapters := []Adapter{
-			logger(),
-			addConfig(cfg),
-			addType(),
-		}
-		chainMiddleware(h, adapters...).ServeHTTP(w, r)
-	})
+	adapters := []Adapter{
+		logger(),
+		addConfig(cfg),
+		addType(),
+	}
+
+	return chainMiddleware(h, adapters...)
 }
 
-func AuthorizedLoggerMiddleware(h http.Handler, cfg any) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		adapters := []Adapter{
-			logger(),
-			addConfig(cfg),
-			authorizer(),
-			addType(),
-		}
-		chainMiddleware(h, adapters...).ServeHTTP(w, r)
-	})
+func AuthorizedLoggerMiddleware(h http.Handler, cfg any, authorizer Adapter) http.Handler {
+	adapters := []Adapter{
+		logger(),
+		addConfig(cfg),
+		authorizer,
+		addType(),
+	}
+
+	return chainMiddleware(h, adapters...)
 }

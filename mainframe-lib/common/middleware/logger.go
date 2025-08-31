@@ -7,7 +7,7 @@ import (
 )
 
 func logger() Adapter {
-	return func(h http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Log the request
 			fmt.Printf("%s %s request at %s\n",
@@ -15,7 +15,8 @@ func logger() Adapter {
 				r.Method,
 				r.URL,
 			)
-			h.ServeHTTP(w, r)
+
+			next.ServeHTTP(w, r)
 		})
 	}
 }
