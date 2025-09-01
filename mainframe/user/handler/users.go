@@ -20,7 +20,7 @@ func usersHandler() http.Handler {
 	})
 }
 
-func usersByIdHandler() http.Handler {
+func userByIdHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
 		switch r.Method {

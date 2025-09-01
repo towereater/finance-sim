@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"mainframe/user/config"
 	"mainframe/user/db"
-	"mainframe/user/model"
+
+	com "mainframe-lib/common/config"
+	usr "mainframe-lib/user/model"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,7 +23,7 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the request
-	var req model.InsertAccountInput
+	var req usr.InsertAccountInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -42,11 +44,11 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Build the new document
-	account := model.Account{
+	account := usr.Account{
 		Id: req.Id,
 	}
 
@@ -86,7 +88,7 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the request
-	var req model.DeleteAccountInput
+	var req usr.DeleteAccountInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -107,11 +109,11 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Build the new document
-	account := model.Account{
+	account := usr.Account{
 		Id: req.Id,
 	}
 

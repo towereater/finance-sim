@@ -1,40 +1,41 @@
 package db
 
 import (
+	com "mainframe-lib/common/db"
+	usr "mainframe-lib/user/model"
 	"mainframe/user/config"
-	"mainframe/user/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectUser(cfg config.Config, abi string, userId string) (model.User, error) {
+func SelectUser(cfg config.Config, abi string, userId string) (usr.User, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
 	if err != nil {
-		return model.User{}, err
+		return usr.User{}, err
 	}
 
 	// Search for a document
-	var user model.User
+	var user usr.User
 	err = coll.FindOne(ctx, bson.M{"_id": userId}).Decode(&user)
 
 	return user, err
 }
 
-func SelectUsers(cfg config.Config, abi string, userFilter model.User, from string, limit int) ([]model.User, error) {
+func SelectUsers(cfg config.Config, abi string, userFilter usr.User, from string, limit int) ([]usr.User, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
 	if err != nil {
-		return []model.User{}, err
+		return []usr.User{}, err
 	}
 
 	// Setup find options
@@ -54,29 +55,29 @@ func SelectUsers(cfg config.Config, abi string, userFilter model.User, from stri
 	// Define the cursor
 	cursor, err := coll.Find(ctx, filter, &opts)
 	if err != nil {
-		return []model.User{}, err
+		return []usr.User{}, err
 	}
 
 	// Search for the documents
-	var users []model.User
+	var users []usr.User
 	err = cursor.All(ctx, &users)
 	if err != nil {
-		return []model.User{}, err
+		return []usr.User{}, err
 	}
 
 	if users == nil {
-		return []model.User{}, nil
+		return []usr.User{}, nil
 	}
 	return users, err
 }
 
-func InsertUser(cfg config.Config, abi string, user model.User) error {
+func InsertUser(cfg config.Config, abi string, user usr.User) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -87,13 +88,13 @@ func InsertUser(cfg config.Config, abi string, user model.User) error {
 	return err
 }
 
-func UpdateUser(cfg config.Config, abi string, userId string, user model.User) error {
+func UpdateUser(cfg config.Config, abi string, userId string, user usr.User) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -114,11 +115,11 @@ func UpdateUser(cfg config.Config, abi string, userId string, user model.User) e
 
 func DeleteUser(cfg config.Config, abi string, userId string) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}

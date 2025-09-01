@@ -1,0 +1,17 @@
+{
+    "server": {
+        "port": "12000"
+    },
+    "db": {
+        "host": "mongo:27017",
+        "timeout": 5
+    },
+    "prefix": "US",
+    "collections": {
+        "users": "users"
+    },
+    "services": {
+      "security": "security:12000",
+      "timeout": 5
+    }
+}

@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	com "mainframe-lib/common/config"
+	usr "mainframe-lib/user/model"
 	"mainframe/user/config"
 	"mainframe/user/db"
-	"mainframe/user/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,8 +25,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
 	user, err := db.SelectUser(cfg, abi, userId)
@@ -73,13 +74,13 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build the filter
-	var filter model.User
+	var filter usr.User
 	filter.Username = queryParams.Get("username")
 	filter.Password = queryParams.Get("password")
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
 	users, err := db.SelectUsers(cfg, abi, filter, from, limit)
@@ -106,7 +107,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func InsertUser(w http.ResponseWriter, r *http.Request) {
 	// Parse the request
-	var req model.InsertUserInput
+	var req usr.InsertUserInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -145,11 +146,11 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Build the new document
-	user := model.User{
+	user := usr.User{
 		Id:       primitive.NewObjectID().Hex(),
 		Username: req.Username,
 		Password: req.Password,
@@ -186,7 +187,7 @@ func PatchUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the request
-	var req model.UpdateUserInput
+	var req usr.UpdateUserInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -195,8 +196,8 @@ func PatchUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
 	user, err := db.SelectUser(cfg, abi, userId)
@@ -239,8 +240,8 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Delete the document
 	err := db.DeleteUser(cfg, abi, userId)
