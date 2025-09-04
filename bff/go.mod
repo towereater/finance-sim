@@ -1,15 +1,21 @@
 module bff
 
-go 1.22.2
+go 1.24.5
 
-replace mainframe/user => ../mainframe/user
+replace mainframe-lib/user => ../mainframe-lib/user
 
-replace mainframe/account => ../mainframe/account
+replace mainframe-lib/security => ../mainframe-lib/security
+
+replace mainframe-lib/common => ../mainframe-lib/common
+
+// replace mainframe/account => ../mainframe/account
 
 require (
-	github.com/kelseyhightower/envconfig v1.4.0
-	go.mongodb.org/mongo-driver v1.15.0
-	gopkg.in/yaml.v3 v3.0.1
-	mainframe/account v0.0.0-00010101000000-000000000000
-	mainframe/user v0.0.0-00010101000000-000000000000
+	github.com/golang-jwt/jwt/v5 v5.3.0
+	mainframe-lib/common v0.0.0-00010101000000-000000000000
+	mainframe-lib/security v0.0.0-00010101000000-000000000000
+	mainframe-lib/user v0.0.0-00010101000000-000000000000
+// mainframe/account v0.0.0-00010101000000-000000000000
 )
+
+require github.com/kelseyhightower/envconfig v1.4.0 // indirect

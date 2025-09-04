@@ -1,0 +1,31 @@
+package handler
+
+import (
+	"fmt"
+	"net/http"
+
+	"bff/config"
+	mw "mainframe-lib/common/middleware"
+)
+
+func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
+	// Home path handler
+	mux.Handle("/",
+		mw.LoggerMiddleware(homeHandler(), cfg))
+
+	// Users handler
+	mux.Handle("/user/register",
+		mw.AuthorizedLoggerMiddleware(userRegisterHandler(), cfg, securityAuth()))
+	mux.Handle("/user/login",
+		mw.AuthorizedLoggerMiddleware(userLoginHandler(), cfg, securityAuth()))
+	mux.Handle("/user/password",
+		mw.AuthorizedLoggerMiddleware(userPasswordHandler(), cfg, jwtAuth()))
+}
+
+func homeHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Response output
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Hello from bff API")
+	})
+}

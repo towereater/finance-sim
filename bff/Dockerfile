@@ -1,10 +1,14 @@
-FROM golang:1.22
+FROM golang:1.24.5
+
+# Exposed server port required at build time
+ARG SERVER_PORT
 
 WORKDIR /app
 
 COPY . ./
-RUN GOFLAGS=-mod=vendor CGO_ENABLED=0 GOOS=linux go build -o /server
+RUN CGO_ENABLED=0 GOOS=linux go build -o /main
 
-EXPOSE 13000
+EXPOSE ${SERVER_PORT}
 
-CMD ["/server"]
+ENTRYPOINT ["/main"]
+CMD ["./config.json"]
