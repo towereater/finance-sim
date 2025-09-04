@@ -9,12 +9,12 @@ type Config struct {
 	com.BaseConfig
 	Prefix      string `json:"prefix" envconfig:"COLL_PREFIX"`
 	Collections struct {
-		Users string `yaml:"users" envconfig:"COLL_USERS"`
-	} `yaml:"collections"`
+		Users string `json:"users" envconfig:"COLL_USERS"`
+	} `json:"collections"`
 	Services struct {
-		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
-		Timeout  int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
-	} `yaml:"services"`
+		Security string `json:"security" envconfig:"SERVICES_SECURITY"`
+		Timeout  int    `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
+	} `json:"services"`
 }
 
 // Path and query parameters
