@@ -20,6 +20,10 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 		mw.AuthorizedLoggerMiddleware(userLoginHandler(), cfg, securityAuth()))
 	mux.Handle("/user/password",
 		mw.AuthorizedLoggerMiddleware(userPasswordHandler(), cfg, jwtAuth()))
+
+	// Accounts handler
+	mux.Handle("/accounts",
+		mw.AuthorizedLoggerMiddleware(accountsHandler(), cfg, jwtAuth()))
 }
 
 func homeHandler() http.Handler {

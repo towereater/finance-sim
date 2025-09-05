@@ -8,14 +8,17 @@ replace mainframe-lib/security => ../mainframe-lib/security
 
 replace mainframe-lib/common => ../mainframe-lib/common
 
-// replace mainframe/account => ../mainframe/account
+replace mainframe-lib/account => ../mainframe-lib/account
+
+replace mainframe-lib/checking-account => ../mainframe-lib/checking-account
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
+	mainframe-lib/account v0.0.0-00010101000000-000000000000
+	mainframe-lib/checking-account v0.0.0-00010101000000-000000000000
 	mainframe-lib/common v0.0.0-00010101000000-000000000000
 	mainframe-lib/security v0.0.0-00010101000000-000000000000
 	mainframe-lib/user v0.0.0-00010101000000-000000000000
-// mainframe/account v0.0.0-00010101000000-000000000000
 )
 
 require github.com/kelseyhightower/envconfig v1.4.0 // indirect

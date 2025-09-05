@@ -6,7 +6,7 @@
       "security": "security:12000",
       "users": "users:12000",
       "accounts": "accounts:12000",
-      "timeout": 5,
-      "apiKey": "68a11e392da97d191c5928e6"
+      "checking-accounts": "checking-accounts:12000",
+      "timeout": 5
     }
 }

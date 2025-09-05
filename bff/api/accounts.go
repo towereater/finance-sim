@@ -1,304 +1,89 @@
 package api
 
-// import (
-// 	"encoding/json"
-// 	"fmt"
-// 	"mainframe/account/config"
-// 	"mainframe/account/db"
-// 	"mainframe/account/model"
-// 	"mainframe/account/service"
-// 	"net/http"
-// 	"strconv"
+import (
+	"bff/config"
+	"bff/model"
+	"encoding/json"
+	"fmt"
+	acc "mainframe-lib/account/model"
+	sacc "mainframe-lib/account/service"
+	scha "mainframe-lib/checking-account/service"
+	com "mainframe-lib/common/config"
+	"net/http"
+	"strconv"
+)
 
-// 	"go.mongodb.org/mongo-driver/mongo"
-// )
+func GetAccounts(w http.ResponseWriter, r *http.Request) {
+	// Extract query parameters
+	queryParams := r.URL.Query()
+	var err error
 
-// func GetAccount(w http.ResponseWriter, r *http.Request) {
-// 	// Extract path parameters
-// 	acc := r.PathValue(string(config.ContextAccount))
-// 	if len(acc) != 24 {
-// 		fmt.Printf("Invalid account id value\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
+	from := queryParams.Get(string(config.ContextFrom))
+	if from != "" && len(from) != 24 {
+		fmt.Printf("Invalid %s parameter\n", string(config.ContextFrom))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-// 	serv := r.PathValue(string(config.ContextService))
-// 	if len(serv) != 2 {
-// 		fmt.Printf("Invalid service value\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
+	limit := 50
+	if queryParams.Has(string(config.ContextLimit)) {
+		limit, err = strconv.Atoi(queryParams.Get(string(config.ContextLimit)))
 
-// 	// Extract context parameters
-// 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-// 	abi := r.Context().Value(config.ContextAbi).(string)
+		if err != nil {
+			fmt.Printf("Invalid %s parameter\n", string(config.ContextLimit))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
-// 	// Build the document
-// 	accountId := model.AccountId{
-// 		Account: acc,
-// 		Service: serv,
-// 	}
+		if limit > 50 {
+			limit = 50
+		}
+	}
 
-// 	// Select the document
-// 	account, err := db.SelectAccount(cfg, abi, accountId)
-// 	if err == mongo.ErrNoDocuments {
-// 		fmt.Printf("No accounts with id %+v\n", accountId)
-// 		w.WriteHeader(http.StatusNotFound)
-// 		return
-// 	}
-// 	if err != nil {
-// 		fmt.Printf("Error while searching account with id %+v: %s\n", accountId, err.Error())
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
+	// Extract context parameters
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	auth := r.Context().Value(com.ContextAuth).(string)
+	userId := r.Context().Value(config.ContextUserId).(string)
 
-// 	// Response output
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(account)
-// }
+	// Build the filter
+	var filter acc.Account
+	filter.Id.Service = queryParams.Get(string(config.ContextService))
+	filter.Owner = userId
 
-// func GetAccounts(w http.ResponseWriter, r *http.Request) {
-// 	// Extract path parameters
-// 	serv := r.PathValue(string(config.ContextService))
-// 	if serv != "" && len(serv) != 2 {
-// 		fmt.Printf("Invalid service value\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
+	// Get all accounts
+	accounts, err := sacc.GetAccounts(cfg.Services.Accounts, cfg.Services.Timeout, auth, filter, from, limit)
+	if err != nil {
+		fmt.Printf("Error while searching accounts with filter %+v: %s\n",
+			filter, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-// 	// Extract query parameters
-// 	queryParams := r.URL.Query()
-// 	var err error
+	// Get account additional data
+	var accountInfos model.GetAccountsOutput
+	for _, a := range accounts {
+		if a.Id.Service == "CK" {
+			ckAccount, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, a.Id.Account)
+			if err != nil {
+				fmt.Printf("Error while searching account %+v: %s\n",
+					a.Id, err.Error())
+				continue
+			}
 
-// 	from := queryParams.Get(string(config.ContextFrom))
-// 	if from != "" && len(from) != 24 {
-// 		fmt.Printf("Invalid %s parameter\n", string(config.ContextFrom))
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
+			accountInfos.Accounts = append(accountInfos.Accounts, model.CheckingAccountInfo{
+				AccountInfo: model.AccountInfo{
+					AccountId: a.Id,
+				},
+				IBAN:  ckAccount.IBAN,
+				Value: ckAccount.Value,
+			})
+		} else {
+			accountInfos.Accounts = append(accountInfos.Accounts, model.AccountInfo{
+				AccountId: a.Id,
+			})
+		}
+	}
 
-// 	limit := 50
-// 	if queryParams.Has(string(config.ContextLimit)) {
-// 		limit, err = strconv.Atoi(queryParams.Get(string(config.ContextLimit)))
-
-// 		if err != nil {
-// 			fmt.Printf("Invalid %s parameter\n", string(config.ContextLimit))
-// 			w.WriteHeader(http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		if limit > 50 {
-// 			limit = 50
-// 		}
-// 	}
-
-// 	// Build the filter
-// 	var filter model.Account
-// 	filter.Id.Account = queryParams.Get(string(config.ContextAccount))
-// 	if serv == "" {
-// 		filter.Id.Service = queryParams.Get(string(config.ContextService))
-// 	} else {
-// 		filter.Id.Service = serv
-// 	}
-// 	filter.Owner = queryParams.Get(string(config.ContextOwner))
-
-// 	// Extract context parameters
-// 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-// 	abi := r.Context().Value(config.ContextAbi).(string)
-
-// 	// Select all documents
-// 	accounts, err := db.SelectAccounts(cfg, abi, filter, from, limit)
-// 	if err == mongo.ErrNoDocuments {
-// 		fmt.Printf("No accounts with filter %+v\n", filter)
-// 		w.WriteHeader(http.StatusNotFound)
-// 		return
-// 	}
-// 	if err != nil {
-// 		fmt.Printf("Error while searching accounts with filter %+v: %s\n",
-// 			filter, err.Error())
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Response output
-// 	if len(accounts) == 0 {
-// 		w.WriteHeader(http.StatusNotFound)
-// 		return
-// 	}
-
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(accounts)
-// }
-
-// func InsertAccount(w http.ResponseWriter, r *http.Request) {
-// 	// Parse the request
-// 	var req model.InsertAccountInput
-// 	err := json.NewDecoder(r.Body).Decode(&req)
-// 	if err != nil {
-// 		fmt.Printf("Could not convert request body\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	if len(req.Id.Account) != 24 {
-// 		fmt.Printf("Invalid account id\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	if len(req.Id.Service) != 2 {
-// 		fmt.Printf("Invalid account service\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	if len(req.Owner) != 24 {
-// 		fmt.Printf("Invalid account owner\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Extract context parameters
-// 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-// 	abi := r.Context().Value(config.ContextAbi).(string)
-// 	auth := r.Context().Value(config.ContextAuth).(string)
-
-// 	// Build the new document
-// 	account := model.Account{
-// 		Id: model.AccountId{
-// 			Account: req.Id.Account,
-// 			Service: req.Id.Service,
-// 		},
-// 		Owner: req.Owner,
-// 	}
-
-// 	// Insert the new document
-// 	err = db.InsertAccount(cfg, abi, account)
-// 	if mongo.IsDuplicateKeyError(err) {
-// 		fmt.Printf("Account %+v already exists\n", account)
-// 		w.WriteHeader(http.StatusConflict)
-// 		return
-// 	}
-// 	if err != nil {
-// 		fmt.Printf("Error while inserting account %+v: %s\n", account, err.Error())
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Add account to the user accounts list
-// 	payload := model.AddAccountToUserInput{
-// 		Id: account.Id,
-// 	}
-
-// 	err = service.AddAccountToUser(cfg, auth, account.Owner, payload)
-// 	if err != nil {
-// 		fmt.Printf("Error while adding account %+v to user %s: %s\n",
-// 			account.Id,
-// 			req.Owner,
-// 			err.Error())
-
-// 		// Rollback
-// 		// Delete the document
-// 		err = db.DeleteAccount(cfg, abi, account.Id)
-// 		if err != nil {
-// 			fmt.Printf("Error while deleting account with id %+v: %s\n",
-// 				account.Id, err.Error())
-
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Response output
-// 	w.WriteHeader(http.StatusCreated)
-// 	json.NewEncoder(w).Encode(account)
-// }
-
-// func DeleteAccount(w http.ResponseWriter, r *http.Request) {
-// 	// Extract path parameters
-// 	acc := r.PathValue(string(config.ContextAccount))
-// 	if len(acc) != 24 {
-// 		fmt.Printf("Invalid account id value\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	serv := r.PathValue(string(config.ContextService))
-// 	if len(serv) != 2 {
-// 		fmt.Printf("Invalid service value\n")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Extract context parameters
-// 	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-// 	abi := r.Context().Value(config.ContextAbi).(string)
-// 	auth := r.Context().Value(config.ContextAuth).(string)
-
-// 	// Build the document
-// 	accountId := model.AccountId{
-// 		Account: acc,
-// 		Service: serv,
-// 	}
-
-// 	// Select the document
-// 	account, err := db.SelectAccount(cfg, abi, accountId)
-// 	if err == mongo.ErrNoDocuments {
-// 		fmt.Printf("No accounts with id %s\n", accountId)
-// 		w.WriteHeader(http.StatusNoContent)
-// 		return
-// 	}
-// 	if err != nil {
-// 		fmt.Printf("Error while searching account with id %s: %s\n",
-// 			accountId, err.Error())
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Remove account from the user accounts list
-// 	payload := model.RemoveAccountFromUserInput{
-// 		Id: account.Id,
-// 	}
-
-// 	err = service.RemoveAccountFromUser(cfg, auth, account.Owner, payload)
-// 	if err != nil {
-// 		fmt.Printf("Error while removing account %+v from user %s: %s\n",
-// 			account.Id,
-// 			account.Owner,
-// 			err.Error())
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Delete the document
-// 	err = db.DeleteAccount(cfg, abi, accountId)
-// 	if err != nil {
-// 		fmt.Printf("Error while deleting account with id %+v: %s\n",
-// 			accountId, err.Error())
-
-// 		// Rollback
-// 		// Add account to the user accounts list
-// 		payload := model.AddAccountToUserInput{
-// 			Id: account.Id,
-// 		}
-
-// 		err = service.AddAccountToUser(cfg, auth, account.Owner, payload)
-// 		if err != nil {
-// 			fmt.Printf("Error while adding account %s to user %s: %s\n",
-// 				account.Id,
-// 				account.Owner,
-// 				err.Error())
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Response output
-// 	w.WriteHeader(http.StatusNoContent)
-// }
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(accountInfos)
+}
