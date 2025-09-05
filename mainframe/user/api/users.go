@@ -145,6 +145,12 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Cab == "" || len(req.Cab) != 5 {
+		fmt.Printf("Invalid user cab\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	// Extract context parameters
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	abi := r.Context().Value(com.ContextAbi).(string)
@@ -157,6 +163,7 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 		Name:     req.Name,
 		Surname:  req.Surname,
 		Birth:    req.Birth,
+		Cab:      req.Cab,
 	}
 
 	// Insert the new document

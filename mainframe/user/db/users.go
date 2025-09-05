@@ -50,6 +50,9 @@ func SelectUsers(cfg config.Config, abi string, userFilter usr.User, from string
 	if userFilter.Password != "" {
 		filter["password"] = userFilter.Password
 	}
+	if userFilter.Cab != "" {
+		filter["cab"] = userFilter.Cab
+	}
 	filter["_id"] = bson.M{"$gt": from}
 
 	// Define the cursor

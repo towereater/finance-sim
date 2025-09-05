@@ -7,6 +7,7 @@ type User struct {
 	Name     string    `json:"name" bson:"name"`
 	Surname  string    `json:"surname" bson:"surname"`
 	Birth    string    `json:"birth" bson:"birth"`
+	Cab      string    `json:"cab"`
 	Accounts []Account `json:"accounts,omitempty" bson:"accounts,omitempty"`
 }
 
@@ -16,6 +17,7 @@ type InsertUserInput struct {
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
 	Birth    string `json:"birth"`
+	Cab      string `json:"cab"`
 }
 
 type UpdateUserInput struct {
