@@ -5,90 +5,90 @@ import (
 	"errors"
 	"fmt"
 	com "mainframe-lib/common/service"
-	usr "mainframe-lib/user/model"
+	"mainframe-lib/user/model"
 	"net/http"
 )
 
-func GetUser(host string, timeout int, auth string, userId string) (usr.User, error) {
+func GetUser(host string, timeout int, auth string, userId string) (model.User, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users/%s", host, userId)
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
 	if err != nil {
-		return usr.User{}, err
+		return model.User{}, err
 	}
 
 	// Check response
 	if res.StatusCode != http.StatusOK {
-		return usr.User{}, fmt.Errorf("get user returned status %d", res.StatusCode)
+		return model.User{}, fmt.Errorf("get user returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
-	var user usr.User
+	var user model.User
 	err = json.NewDecoder(res.Body).Decode(&user)
 	if err != nil {
-		return usr.User{}, err
+		return model.User{}, err
 	}
 
 	return user, nil
 }
 
-func GetUserByUsername(host string, timeout int, auth string, username string, password string) (usr.User, error) {
+func GetUserByUsername(host string, timeout int, auth string, username string, password string) (model.User, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users?username=%s&password=%s", host, username, password)
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
 	if err != nil {
-		return usr.User{}, err
+		return model.User{}, err
 	}
 
 	// Check response
 	if res.StatusCode != http.StatusOK {
-		return usr.User{}, fmt.Errorf("get user returned status %d", res.StatusCode)
+		return model.User{}, fmt.Errorf("get user returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
-	var users []usr.User
+	var users []model.User
 	err = json.NewDecoder(res.Body).Decode(&users)
 	if err != nil {
-		return usr.User{}, err
+		return model.User{}, err
 	}
 
 	if len(users) > 1 {
-		return usr.User{}, fmt.Errorf("get user returned more than one user")
+		return model.User{}, fmt.Errorf("get user returned more than one user")
 	}
 
 	return users[0], nil
 }
 
-func InsertUser(host string, timeout int, auth string, payload usr.InsertUserInput) (usr.User, error) {
+func InsertUser(host string, timeout int, auth string, payload model.InsertUserInput) (model.User, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users", host)
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
 	if err != nil {
-		return usr.User{}, err
+		return model.User{}, err
 	}
 
 	// Check response
 	if res.StatusCode != http.StatusCreated {
-		return usr.User{}, fmt.Errorf("insert user returned status %d", res.StatusCode)
+		return model.User{}, fmt.Errorf("insert user returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
-	var user usr.User
+	var user model.User
 	err = json.NewDecoder(res.Body).Decode(&user)
 	if err != nil {
-		return usr.User{}, err
+		return model.User{}, err
 	}
 
 	return user, nil
 }
 
-func UpdateUser(host string, timeout int, auth string, userId string, payload usr.UpdateUserInput) error {
+func UpdateUser(host string, timeout int, auth string, userId string, payload model.UpdateUserInput) error {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users/%s", host, userId)
 
@@ -104,11 +104,11 @@ func UpdateUser(host string, timeout int, auth string, userId string, payload us
 	}
 
 	// Parse the response
-	var user usr.User
+	var user model.User
 	return json.NewDecoder(res.Body).Decode(&user)
 }
 
-func AddAccountToUser(host string, timeout int, auth string, userId string, payload usr.InsertAccountInput) error {
+func AddAccountToUser(host string, timeout int, auth string, userId string, payload model.InsertAccountInput) error {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users/%s/accounts", host, userId)
 
@@ -126,7 +126,7 @@ func AddAccountToUser(host string, timeout int, auth string, userId string, payl
 	return nil
 }
 
-func RemoveAccountFromUser(host string, timeout int, auth string, userId string, payload usr.DeleteAccountInput) error {
+func RemoveAccountFromUser(host string, timeout int, auth string, userId string, payload model.DeleteAccountInput) error {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/users/%s/accounts", host, userId)
 
