@@ -5,18 +5,21 @@ import (
 	"fmt"
 	"mainframe/account/config"
 	"mainframe/account/db"
-	"mainframe/account/model"
-	"mainframe/account/service"
 	"net/http"
 	"strconv"
+
+	acc "mainframe-lib/account/model"
+	com "mainframe-lib/common/config"
+	usr "mainframe-lib/user/model"
+	susr "mainframe-lib/user/service"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	acc := r.PathValue(string(config.ContextAccount))
-	if len(acc) != 24 {
+	accId := r.PathValue(string(config.ContextAccount))
+	if len(accId) != 24 {
 		fmt.Printf("Invalid account id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -30,12 +33,12 @@ func GetAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Build the document
-	accountId := model.AccountId{
-		Account: acc,
+	accountId := acc.AccountId{
+		Account: accId,
 		Service: serv,
 	}
 
@@ -93,7 +96,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build the filter
-	var filter model.Account
+	var filter acc.Account
 	filter.Id.Account = queryParams.Get(string(config.ContextAccount))
 	if serv == "" {
 		filter.Id.Service = queryParams.Get(string(config.ContextService))
@@ -103,8 +106,8 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	filter.Owner = queryParams.Get(string(config.ContextOwner))
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
 	accounts, err := db.SelectAccounts(cfg, abi, filter, from, limit)
@@ -132,7 +135,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	// Parse the request
-	var req model.InsertAccountInput
+	var req acc.InsertAccountInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -159,13 +162,13 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-	auth := r.Context().Value(config.ContextAuth).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Build the new document
-	account := model.Account{
-		Id: model.AccountId{
+	account := acc.Account{
+		Id: acc.AccountId{
 			Account: req.Id.Account,
 			Service: req.Id.Service,
 		},
@@ -186,11 +189,14 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add account to the user accounts list
-	payload := model.AddAccountToUserInput{
-		Id: account.Id,
+	payload := usr.InsertAccountInput{
+		Id: usr.AccountId{
+			Account: account.Id.Account,
+			Service: account.Id.Service,
+		},
 	}
 
-	err = service.AddAccountToUser(cfg, auth, account.Owner, payload)
+	err = susr.AddAccountToUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %+v to user %s: %s\n",
 			account.Id,
@@ -219,8 +225,8 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 
 func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	acc := r.PathValue(string(config.ContextAccount))
-	if len(acc) != 24 {
+	accId := r.PathValue(string(config.ContextAccount))
+	if len(accId) != 24 {
 		fmt.Printf("Invalid account id value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -234,13 +240,13 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-	auth := r.Context().Value(config.ContextAuth).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Build the document
-	accountId := model.AccountId{
-		Account: acc,
+	accountId := acc.AccountId{
+		Account: accId,
 		Service: serv,
 	}
 
@@ -259,11 +265,14 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remove account from the user accounts list
-	payload := model.RemoveAccountFromUserInput{
-		Id: account.Id,
+	payload := usr.DeleteAccountInput{
+		Id: usr.AccountId{
+			Account: account.Id.Account,
+			Service: account.Id.Service,
+		},
 	}
 
-	err = service.RemoveAccountFromUser(cfg, auth, account.Owner, payload)
+	err = susr.RemoveAccountFromUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while removing account %+v from user %s: %s\n",
 			account.Id,
@@ -281,11 +290,14 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Add account to the user accounts list
-		payload := model.AddAccountToUserInput{
-			Id: account.Id,
+		payload := usr.InsertAccountInput{
+			Id: usr.AccountId{
+				Account: account.Id.Account,
+				Service: account.Id.Service,
+			},
 		}
 
-		err = service.AddAccountToUser(cfg, auth, account.Owner, payload)
+		err = susr.AddAccountToUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s to user %s: %s\n",
 				account.Id,

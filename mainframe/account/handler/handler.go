@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	mw "mainframe-lib/common/middleware"
 	"mainframe/account/config"
-	mw "mainframe/account/middleware"
 )
 
 func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
@@ -15,14 +15,14 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 
 	// Accounts handler
 	mux.Handle("/accounts",
-		mw.AuthorizedLoggerMiddleware(accountsHandler(), cfg))
+		mw.AuthorizedLoggerMiddleware(accountsHandler(), cfg, securityAuth()))
 	mux.Handle(fmt.Sprintf("/accounts/services/{%s}",
 		config.ContextService),
-		mw.AuthorizedLoggerMiddleware(accountsByServiceHandler(), cfg))
+		mw.AuthorizedLoggerMiddleware(accountsByServiceHandler(), cfg, securityAuth()))
 	mux.Handle(fmt.Sprintf("/accounts/services/{%s}/accounts/{%s}",
 		config.ContextService,
 		config.ContextAccount),
-		mw.AuthorizedLoggerMiddleware(accountsByIdHandler(), cfg))
+		mw.AuthorizedLoggerMiddleware(accountsByIdHandler(), cfg, securityAuth()))
 }
 
 func homeHandler() http.Handler {

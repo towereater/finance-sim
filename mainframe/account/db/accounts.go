@@ -1,40 +1,41 @@
 package db
 
 import (
+	acc "mainframe-lib/account/model"
+	com "mainframe-lib/common/db"
 	"mainframe/account/config"
-	"mainframe/account/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectAccount(cfg config.Config, abi string, accountId model.AccountId) (model.Account, error) {
+func SelectAccount(cfg config.Config, abi string, accountId acc.AccountId) (acc.Account, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
 	if err != nil {
-		return model.Account{}, err
+		return acc.Account{}, err
 	}
 
 	// Search for a document
-	var account model.Account
+	var account acc.Account
 	err = coll.FindOne(ctx, bson.M{"_id": accountId}).Decode(&account)
 
 	return account, err
 }
 
-func SelectAccounts(cfg config.Config, abi string, accountFilter model.Account, from string, limit int) ([]model.Account, error) {
+func SelectAccounts(cfg config.Config, abi string, accountFilter acc.Account, from string, limit int) ([]acc.Account, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
 	if err != nil {
-		return []model.Account{}, err
+		return []acc.Account{}, err
 	}
 
 	// Setup find options
@@ -57,29 +58,29 @@ func SelectAccounts(cfg config.Config, abi string, accountFilter model.Account, 
 	// Define the cursor
 	cursor, err := coll.Find(ctx, filter, &opts)
 	if err != nil {
-		return []model.Account{}, err
+		return []acc.Account{}, err
 	}
 
 	// Search for the documents
-	var accounts []model.Account
+	var accounts []acc.Account
 	err = cursor.All(ctx, &accounts)
 	if err != nil {
-		return []model.Account{}, err
+		return []acc.Account{}, err
 	}
 
 	if accounts == nil {
-		return []model.Account{}, nil
+		return []acc.Account{}, nil
 	}
 	return accounts, err
 }
 
-func InsertAccount(cfg config.Config, abi string, account model.Account) error {
+func InsertAccount(cfg config.Config, abi string, account acc.Account) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}
@@ -90,13 +91,13 @@ func InsertAccount(cfg config.Config, abi string, account model.Account) error {
 	return err
 }
 
-func DeleteAccount(cfg config.Config, abi string, accountId model.AccountId) error {
+func DeleteAccount(cfg config.Config, abi string, accountId acc.AccountId) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}

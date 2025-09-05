@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	com "mainframe-lib/common/config"
 	"mainframe/account/config"
 	"mainframe/account/handler"
 )
@@ -17,10 +18,11 @@ func main() {
 		os.Exit(1)
 	}
 	configPath := os.Args[1]
+	fmt.Printf("Loading configuration from %s\n", configPath)
 
 	// Setup machine config
-	fmt.Printf("Loading configuration from %s\n", configPath)
-	cfg, err := config.LoadConfig(configPath)
+	var cfg config.Config
+	err := com.LoadConfig(configPath, &cfg)
 	if err != nil {
 		fmt.Printf("Error while reading config file: %s\n", err.Error())
 		os.Exit(2)
