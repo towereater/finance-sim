@@ -1,40 +1,41 @@
 package db
 
 import (
+	cha "mainframe-lib/checking-account/model"
+	com "mainframe-lib/common/db"
 	"mainframe/checking-account/config"
-	"mainframe/checking-account/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectPayment(cfg config.Config, abi string, paymentId string) (model.Payment, error) {
+func SelectPayment(cfg config.Config, abi string, paymentId string) (cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
 	if err != nil {
-		return model.Payment{}, err
+		return cha.Payment{}, err
 	}
 
 	// Search for a document
-	var payment model.Payment
+	var payment cha.Payment
 	err = coll.FindOne(ctx, bson.M{"_id": paymentId}).Decode(&payment)
 
 	return payment, err
 }
 
-func SelectPayments(cfg config.Config, abi string, paymentFilter model.Payment, from string, limit int) ([]model.Payment, error) {
+func SelectPayments(cfg config.Config, abi string, paymentFilter cha.Payment, from string, limit int) ([]cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
 	if err != nil {
-		return []model.Payment{}, err
+		return []cha.Payment{}, err
 	}
 
 	// Setup find options
@@ -75,29 +76,29 @@ func SelectPayments(cfg config.Config, abi string, paymentFilter model.Payment, 
 	// Define the cursor
 	cursor, err := coll.Find(ctx, filter, &opts)
 	if err != nil {
-		return []model.Payment{}, err
+		return []cha.Payment{}, err
 	}
 
 	// Search for the documents
-	var payments []model.Payment
+	var payments []cha.Payment
 	err = cursor.All(ctx, &payments)
 	if err != nil {
-		return []model.Payment{}, err
+		return []cha.Payment{}, err
 	}
 
 	if payments == nil {
-		return []model.Payment{}, nil
+		return []cha.Payment{}, nil
 	}
 	return payments, err
 }
 
-func InsertPayment(cfg config.Config, abi string, payment model.Payment) error {
+func InsertPayment(cfg config.Config, abi string, payment cha.Payment) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
 	if err != nil {
 		return err
 	}

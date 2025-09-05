@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"mainframe/checking-account/config"
 	"mainframe/checking-account/db"
-	"mainframe/checking-account/model"
 	"net/http"
 	"strconv"
+
+	cha "mainframe-lib/checking-account/model"
+	com "mainframe-lib/common/config"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,8 +25,8 @@ func GetPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
 	payment, err := db.SelectPayment(cfg, abi, paymentId)
@@ -72,7 +74,7 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build the filter
-	var filter model.Payment
+	var filter cha.Payment
 	filter.Type = queryParams.Get("paymenyType")
 	amount, err := strconv.ParseFloat(queryParams.Get("amount"), 32)
 	if err != nil {
@@ -87,8 +89,8 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 	filter.Details = queryParams.Get("details")
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
 	payments, err := db.SelectPayments(cfg, abi, filter, from, limit)
@@ -115,7 +117,7 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 
 func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	// Parse the request
-	var req model.InsertPayment
+	var req cha.InsertPayment
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -172,8 +174,8 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Check payer cash availability
 	payerAccount, err := db.SelectAccount(cfg, abi, req.Payer.AccountId.Account)
@@ -194,7 +196,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check payee existance on local system
-	payeeAccount := model.CheckingAccount{}
+	payeeAccount := cha.CheckingAccount{}
 	if req.Payee.AccountIdentification.Type == "IBAN" &&
 		req.Payee.AccountIdentification.Value[5:10] == abi {
 		payeeAccount, err = db.SelectAccountByIBAN(cfg, abi, req.Payee.AccountIdentification.Value)
@@ -231,7 +233,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 
 	// Build the new document
 	paymentId := primitive.NewObjectID().Hex()
-	payment := model.Payment{
+	payment := cha.Payment{
 		Id:      paymentId,
 		Type:    req.Type,
 		Value:   req.Value,

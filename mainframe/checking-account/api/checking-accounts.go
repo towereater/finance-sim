@@ -5,10 +5,15 @@ import (
 	"fmt"
 	"mainframe/checking-account/config"
 	"mainframe/checking-account/db"
-	"mainframe/checking-account/model"
 	"mainframe/checking-account/service"
 	"net/http"
 	"strconv"
+
+	acc "mainframe-lib/account/model"
+	sacc "mainframe-lib/account/service"
+	cha "mainframe-lib/checking-account/model"
+	com "mainframe-lib/common/config"
+	susr "mainframe-lib/user/service"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,8 +29,8 @@ func GetCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
 	account, err := db.SelectAccount(cfg, abi, accountId)
@@ -73,13 +78,13 @@ func GetCheckingAccounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build the filter
-	var filter model.CheckingAccount
+	var filter cha.CheckingAccount
 	filter.IBAN = queryParams.Get("iban")
 	filter.Owner = queryParams.Get("owner")
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
 	accounts, err := db.SelectAccounts(cfg, abi, filter, from, limit)
@@ -106,7 +111,7 @@ func GetCheckingAccounts(w http.ResponseWriter, r *http.Request) {
 
 func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	// Parse the request
-	var req model.InsertCheckingAccountInput
+	var req cha.InsertCheckingAccountInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -121,19 +126,26 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-	cab := r.Context().Value(config.ContextCab).(string)
-	auth := r.Context().Value(config.ContextAuth).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
+
+	// Get user details
+	user, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
+	if err != nil {
+		fmt.Printf("Error while getting user %s: %s\n", req.Owner, err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	// Build the new document
 	accountId := primitive.NewObjectID().Hex()
-	iban := service.GenerateNewIBAN(abi, cab, accountId)
-	account := model.CheckingAccount{
+	iban := service.GenerateNewIBAN(abi, user.Cab, accountId)
+	account := cha.CheckingAccount{
 		Id:    accountId,
 		Owner: req.Owner,
 		IBAN:  iban,
-		Value: model.CheckingValue{
+		Value: cha.CheckingValue{
 			Amount:   0,
 			Currency: "EUR",
 		},
@@ -153,15 +165,15 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert account into the accounts list
-	payload := model.InsertAccountInput{
-		Id: model.AccountId{
+	payload := acc.InsertAccountInput{
+		Id: acc.AccountId{
 			Account: account.Id,
 			Service: cfg.Prefix,
 		},
 		Owner: account.Owner,
 	}
 
-	err = service.InsertAccount(cfg, auth, payload)
+	err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %s: %s\n",
 			account.Id,
@@ -196,9 +208,9 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-	auth := r.Context().Value(config.ContextAuth).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Select the document
 	account, err := db.SelectAccount(cfg, abi, accountId)
@@ -214,7 +226,12 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete account from the accounts list
-	err = service.DeleteAccount(cfg, auth, accountId)
+	accId := acc.AccountId{
+		Account: account.Id,
+		Service: "CK",
+	}
+
+	err = sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accId)
 	if err != nil {
 		fmt.Printf("Error while removing account %s: %s\n",
 			accountId,
@@ -230,15 +247,15 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Insert account to the accounts list
-		payload := model.InsertAccountInput{
-			Id: model.AccountId{
+		payload := acc.InsertAccountInput{
+			Id: acc.AccountId{
 				Account: account.Id,
 				Service: cfg.Prefix,
 			},
 			Owner: account.Owner,
 		}
 
-		err = service.InsertAccount(cfg, auth, payload)
+		err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s: %s\n",
 				account.Id,

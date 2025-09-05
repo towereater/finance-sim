@@ -1,65 +1,28 @@
 package config
 
 import (
-	"os"
-
-	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/yaml.v3"
+	com "mainframe-lib/common/config"
 )
 
-type DBConfig struct {
-	Host    string `yaml:"host" envconfig:"DB_HOST"`
-	Timeout int    `yaml:"timeout" envconfig:"DB_TIMEOUT"`
-}
-
+// Base config extension
 type Config struct {
-	Server struct {
-		Port string `yaml:"port" envconfig:"SERVER_PORT"`
-	} `yaml:"server"`
-	DB          DBConfig `yaml:"db"`
-	Prefix      string   `yaml:"prefix" envconfig:"COLL_PREFIX"`
+	com.BaseConfig
+	Prefix      string `json:"prefix" envconfig:"COLL_PREFIX"`
 	Collections struct {
-		Accounts string `yaml:"accounts" envconfig:"COLL_ACCOUNTS"`
-		Payments string `yaml:"payments" envconfig:"COLL_PAYMENTS"`
-	} `yaml:"collections"`
+		Accounts string `json:"accounts" envconfig:"COLL_ACCOUNTS"`
+		Payments string `json:"payments" envconfig:"COLL_PAYMENTS"`
+	} `json:"collections"`
 	Services struct {
-		Accounts string `yaml:"accounts" envconfig:"SERVICES_ACCOUNTS"`
-		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
-		Timeout  int    `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
-	} `yaml:"services"`
+		Users    string `json:"users" envconfig:"SERVICES_USERS"`
+		Accounts string `json:"accounts" envconfig:"SERVICES_ACCOUNTS"`
+		Security string `json:"security" envconfig:"SERVICES_SECURITY"`
+		Timeout  int    `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
+	} `json:"services"`
 }
 
-func readConfig(path string) (Config, error) {
-	//Read entire config file
-	f, err := os.Open(path)
-	if err != nil {
-		return Config{}, err
-	}
-	defer f.Close()
+// Path and query parameters
+const ContextAccountId com.ContextKey = "accountId"
+const ContextPaymentId com.ContextKey = "paymentId"
 
-	// Conversion of the yaml to struct
-	var config Config
-
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&config)
-	return config, err
-}
-
-func readEnv(config Config) (Config, error) {
-	// Loads the enviromental variables
-	err := envconfig.Process("", &config)
-	return config, err
-}
-
-func LoadConfig(path string) (Config, error) {
-	// Reading config file
-	config, err := readConfig(path)
-	if err != nil {
-		return Config{}, err
-	}
-
-	// Setting environmental variables
-	config, err = readEnv(config)
-
-	return config, err
-}
+const ContextFrom com.ContextKey = "from"
+const ContextLimit com.ContextKey = "limit"
