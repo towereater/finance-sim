@@ -11,8 +11,9 @@ type AccountInfo struct {
 
 type CheckingAccountInfo struct {
 	AccountInfo
-	IBAN  string            `json:"iban"`
-	Value cha.CheckingValue `json:"value" bson:"value"`
+	IBAN           string            `json:"iban"`
+	Value          cha.CheckingValue `json:"value"`
+	LatestPayments []cha.Payment     `json:"latestPayments,omitempty"`
 }
 
 type GetAccountsOutput struct {

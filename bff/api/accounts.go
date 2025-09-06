@@ -3,11 +3,11 @@ package api
 import (
 	"bff/config"
 	"bff/model"
+	"bff/service"
 	"encoding/json"
 	"fmt"
 	acc "mainframe-lib/account/model"
 	sacc "mainframe-lib/account/service"
-	scha "mainframe-lib/checking-account/service"
 	com "mainframe-lib/common/config"
 	"net/http"
 	"strconv"
@@ -63,20 +63,14 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	var accountInfos model.GetAccountsOutput
 	for _, a := range accounts {
 		if a.Id.Service == "CK" {
-			ckAccount, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, a.Id.Account)
+			ckAccount, err := service.GetCheckingAccountInfo(cfg, auth, a.Id.Account)
 			if err != nil {
-				fmt.Printf("Error while searching account %+v: %s\n",
+				fmt.Printf("Error while searching checking account %+v: %s\n",
 					a.Id, err.Error())
 				continue
 			}
 
-			accountInfos.Accounts = append(accountInfos.Accounts, model.CheckingAccountInfo{
-				AccountInfo: model.AccountInfo{
-					AccountId: a.Id,
-				},
-				IBAN:  ckAccount.IBAN,
-				Value: ckAccount.Value,
-			})
+			accountInfos.Accounts = append(accountInfos.Accounts, ckAccount)
 		} else {
 			accountInfos.Accounts = append(accountInfos.Accounts, model.AccountInfo{
 				AccountId: a.Id,
