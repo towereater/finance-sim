@@ -1,40 +1,41 @@
 package db
 
 import (
+	com "mainframe-lib/common/db"
+	dos "mainframe-lib/dossier/model"
 	"mainframe/dossier/config"
-	"mainframe/dossier/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectDossier(cfg config.Config, abi string, dossierId string) (model.Dossier, error) {
+func SelectDossier(cfg config.Config, abi string, dossierId string) (dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
 	if err != nil {
-		return model.Dossier{}, err
+		return dos.Dossier{}, err
 	}
 
 	// Search for a document
-	var dossier model.Dossier
+	var dossier dos.Dossier
 	err = coll.FindOne(ctx, bson.M{"_id": dossierId}).Decode(&dossier)
 
 	return dossier, err
 }
 
-func SelectDossiers(cfg config.Config, abi string, dossierFilter model.Dossier, from string, limit int) ([]model.Dossier, error) {
+func SelectDossiers(cfg config.Config, abi string, dossierFilter dos.Dossier, from string, limit int) ([]dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
 	if err != nil {
-		return []model.Dossier{}, err
+		return []dos.Dossier{}, err
 	}
 
 	// Setup find options
@@ -51,29 +52,29 @@ func SelectDossiers(cfg config.Config, abi string, dossierFilter model.Dossier, 
 	// Define the cursor
 	cursor, err := coll.Find(ctx, filter, &opts)
 	if err != nil {
-		return []model.Dossier{}, err
+		return []dos.Dossier{}, err
 	}
 
 	// Search for the documents
-	var dossiers []model.Dossier
+	var dossiers []dos.Dossier
 	err = cursor.All(ctx, &dossiers)
 	if err != nil {
-		return []model.Dossier{}, err
+		return []dos.Dossier{}, err
 	}
 
 	if dossiers == nil {
-		return []model.Dossier{}, nil
+		return []dos.Dossier{}, nil
 	}
 	return dossiers, err
 }
 
-func InsertDossier(cfg config.Config, abi string, dossier model.Dossier) error {
+func InsertDossier(cfg config.Config, abi string, dossier dos.Dossier) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
 	if err != nil {
 		return err
 	}
@@ -86,11 +87,11 @@ func InsertDossier(cfg config.Config, abi string, dossier model.Dossier) error {
 
 func DeleteDossier(cfg config.Config, abi string, dossierId string) error {
 	// Setup timeout
-	ctx, cancel := getContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DB)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := getCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
 	if err != nil {
 		return err
 	}

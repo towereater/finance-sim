@@ -1,0 +1,24 @@
+{
+    "server": {
+        "port": "12000"
+    },
+    "db": {
+        "host": "mongo:27017",
+        "timeout": 5
+    },
+    "prefix": "DS",
+    "collections": {
+        "dossiers": "dossiers"
+    },
+    "services": {
+      "security": "security:12000",
+      "users": "users:12000",
+      "accounts": "accounts:12000",
+      "ck-accounts": "checking-accounts:12000",
+      "xchanger": {
+        "host": "xchanger:12000",
+        "api-key": "3cae43527ddbc85be07f711577e1fe48e0c5c70d6511432f2b0349f737a09d63"
+      },
+      "timeout": 5
+    }
+}

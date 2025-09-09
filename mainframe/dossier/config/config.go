@@ -1,69 +1,31 @@
 package config
 
 import (
-	"os"
-
-	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/yaml.v3"
+	com "mainframe-lib/common/config"
 )
 
-type DBConfig struct {
-	Host    string `yaml:"host" envconfig:"DB_HOST"`
-	Timeout int    `yaml:"timeout" envconfig:"DB_TIMEOUT"`
-}
-
+// Base config extension
 type Config struct {
-	Server struct {
-		Port string `yaml:"port" envconfig:"SERVER_PORT"`
-	} `yaml:"server"`
-	DB          DBConfig `yaml:"db"`
-	Prefix      string   `yaml:"prefix" envconfig:"COLL_PREFIX"`
+	com.BaseConfig
+	Prefix      string `json:"prefix" envconfig:"COLL_PREFIX"`
 	Collections struct {
-		Dossiers string `yaml:"dossiers" envconfig:"COLL_DOSSIERS"`
-	} `yaml:"collections"`
+		Dossiers string `json:"dossiers" envconfig:"COLL_DOSSIERS"`
+	} `json:"collections"`
 	Services struct {
-		Users    string `yaml:"users" envconfig:"SERVICES_USERS"`
-		Accounts string `yaml:"accounts" envconfig:"SERVICES_ACCOUNTS"`
-		Security string `yaml:"security" envconfig:"SERVICES_SECURITY"`
-		Xchanger struct {
-			Host   string `yaml:"host" envconfig:"SERVICES_XCHANGER_HOST"`
-			ApiKey string `yaml:"api-key" envconfig:"SERVICES_XCHANGER_APIKEY"`
-		} `yaml:"xchanger"`
-		Timeout int `yaml:"timeout" envconfig:"SERVICES_TIMEOUT"`
-	} `yaml:"services"`
+		Users            string `json:"users" envconfig:"SERVICES_USERS"`
+		Accounts         string `json:"accounts" envconfig:"SERVICES_ACCOUNTS"`
+		CheckingAccounts string `json:"ck-accounts" envconfig:"SERVICES_CKACCOUNTS"`
+		Security         string `json:"security" envconfig:"SERVICES_SECURITY"`
+		Xchanger         struct {
+			Host   string `json:"host" envconfig:"SERVICES_XCHANGER_HOST"`
+			ApiKey string `json:"api-key" envconfig:"SERVICES_XCHANGER_APIKEY"`
+		} `json:"xchanger"`
+		Timeout int `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
+	} `json:"services"`
 }
 
-func readConfig(path string) (Config, error) {
-	//Read entire config file
-	f, err := os.Open(path)
-	if err != nil {
-		return Config{}, err
-	}
-	defer f.Close()
+// Path and query parameters
+const ContextDossier com.ContextKey = "dossier"
 
-	// Conversion of the yaml to struct
-	var config Config
-
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&config)
-	return config, err
-}
-
-func readEnv(config Config) (Config, error) {
-	// Loads the enviromental variables
-	err := envconfig.Process("", &config)
-	return config, err
-}
-
-func LoadConfig(path string) (Config, error) {
-	// Reading config file
-	config, err := readConfig(path)
-	if err != nil {
-		return Config{}, err
-	}
-
-	// Setting environmental variables
-	config, err = readEnv(config)
-
-	return config, err
-}
+const ContextFrom com.ContextKey = "from"
+const ContextLimit com.ContextKey = "limit"

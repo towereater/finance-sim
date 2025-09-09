@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	mw "mainframe-lib/common/middleware"
 	"mainframe/dossier/config"
-	mw "mainframe/dossier/middleware"
 )
 
 func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
@@ -15,10 +15,10 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 
 	// Dossiers handler
 	mux.Handle("/dossiers",
-		mw.AuthorizedLoggerMiddleware(dossiersHandler(), cfg))
+		mw.AuthorizedLoggerMiddleware(dossiersHandler(), cfg, securityAuth()))
 	mux.Handle(fmt.Sprintf("/dossiers/{%s}",
 		config.ContextDossier),
-		mw.AuthorizedLoggerMiddleware(dossiersByIdHandler(), cfg))
+		mw.AuthorizedLoggerMiddleware(dossiersByIdHandler(), cfg, securityAuth()))
 }
 
 func homeHandler() http.Handler {

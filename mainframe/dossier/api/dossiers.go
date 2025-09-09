@@ -5,10 +5,17 @@ import (
 	"fmt"
 	"mainframe/dossier/config"
 	"mainframe/dossier/db"
-	"mainframe/dossier/model"
-	"mainframe/dossier/service"
 	"net/http"
 	"strconv"
+
+	acc "mainframe-lib/account/model"
+	sacc "mainframe-lib/account/service"
+	scha "mainframe-lib/checking-account/service"
+	com "mainframe-lib/common/config"
+	dos "mainframe-lib/dossier/model"
+	susr "mainframe-lib/user/service"
+	xch "mainframe-lib/xchanger/model"
+	sxch "mainframe-lib/xchanger/service"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,8 +31,8 @@ func GetDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
 	dossier, err := db.SelectDossier(cfg, abi, dossierId)
@@ -73,12 +80,12 @@ func GetDossiers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build the filter
-	var filter model.Dossier
+	var filter dos.Dossier
 	filter.Owner = queryParams.Get("owner")
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
 	dossiers, err := db.SelectDossiers(cfg, abi, filter, from, limit)
@@ -105,7 +112,7 @@ func GetDossiers(w http.ResponseWriter, r *http.Request) {
 
 func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	// Parse the request
-	var req model.InsertDossierInput
+	var req dos.InsertDossierInput
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		fmt.Printf("Could not convert request body\n")
@@ -132,12 +139,12 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-	auth := r.Context().Value(config.ContextAuth).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get checking account data
-	ckAccount, err := service.GetAccount(cfg, auth, req.CheckingAccount)
+	ckAccount, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req.CheckingAccount.Account)
 	if err != nil {
 		fmt.Printf("Error while searching checking account %+v: %s\n",
 			req.CheckingAccount, err.Error())
@@ -152,7 +159,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user data
-	user, err := service.GetUser(cfg, auth, req.Owner)
+	user, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
 	if err != nil {
 		fmt.Printf("Error while searching user %s: %s\n", req.Owner, err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -160,22 +167,22 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Build the new document
-	dossier := model.Dossier{
+	dossier := dos.Dossier{
 		Id:              primitive.NewObjectID().Hex(),
 		Owner:           req.Owner,
 		CheckingAccount: req.CheckingAccount,
 	}
 
 	// Insert dossier into the accounts list
-	payload := model.InsertAccountInput{
-		Id: model.AccountId{
+	payload := acc.InsertAccountInput{
+		Id: acc.AccountId{
 			Account: dossier.Id,
 			Service: cfg.Prefix,
 		},
 		Owner: dossier.Owner,
 	}
 
-	err = service.InsertAccount(cfg, auth, payload)
+	err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding dossier %s: %s\n",
 			dossier.Id,
@@ -186,13 +193,13 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new dossier on xchanger service
-	xchangerPayload := model.InsertXChangerDossierInput{
+	xchangerPayload := xch.InsertXChangerDossierInput{
 		Name:    user.Name,
 		Surname: user.Surname,
 		Birth:   user.Birth,
 	}
 
-	xchangerDossier, err := service.InsertXChangerDossier(cfg, xchangerPayload)
+	xchangerDossier, err := sxch.InsertXChangerDossier(cfg.Services.Xchanger.Host, cfg.Services.Timeout, cfg.Services.Xchanger.ApiKey, xchangerPayload)
 	if err != nil {
 		fmt.Printf("Error while creating xchanger dossier %s: %s\n",
 			dossier.Id,
@@ -242,9 +249,9 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract context parameters
-	cfg := r.Context().Value(config.ContextConfig).(config.Config)
-	abi := r.Context().Value(config.ContextAbi).(string)
-	auth := r.Context().Value(config.ContextAuth).(string)
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Select the document
 	dossier, err := db.SelectDossier(cfg, abi, dossierId)
@@ -260,7 +267,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete dossier from xchanger service
-	err = service.DeleteXChangerDossier(cfg, dossier.XChangerDossier)
+	err = sxch.DeleteXChangerDossier(cfg.Services.Xchanger.Host, cfg.Services.Timeout, cfg.Services.Xchanger.ApiKey, dossier.XChangerDossier)
 	if err != nil {
 		fmt.Printf("Error while deleting xchanger dossier %s: %s\n",
 			dossier.Id,
@@ -271,7 +278,11 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete dossier from the accounts list
-	err = service.DeleteAccount(cfg, auth, dossierId)
+	accountId := acc.AccountId{
+		Account: dossierId,
+		Service: "DS",
+	}
+	err = sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accountId)
 	if err != nil {
 		fmt.Printf("Error while removing dossier %s: %s\n",
 			dossierId,
@@ -287,15 +298,15 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Insert dossier to the accounts list
-		payload := model.InsertAccountInput{
-			Id: model.AccountId{
+		payload := acc.InsertAccountInput{
+			Id: acc.AccountId{
 				Account: dossier.Id,
 				Service: cfg.Prefix,
 			},
 			Owner: dossier.Owner,
 		}
 
-		err = service.InsertAccount(cfg, auth, payload)
+		err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding dossier %s: %s\n",
 				dossier.Id,
