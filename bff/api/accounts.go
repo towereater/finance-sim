@@ -78,6 +78,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Response output
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(accountInfos)
 }
