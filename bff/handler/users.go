@@ -5,7 +5,6 @@ import (
 	"net/http"
 )
 
-// Handles users API functions
 func userRegisterHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
@@ -18,7 +17,6 @@ func userRegisterHandler() http.Handler {
 	})
 }
 
-// Handles users API functions
 func userLoginHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
@@ -31,7 +29,6 @@ func userLoginHandler() http.Handler {
 	})
 }
 
-// Handles users API functions
 func userPasswordHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
