@@ -10,7 +10,7 @@ import (
 
 	com "mainframe-lib/common/config"
 	usr "mainframe-lib/user/model"
-	srv "mainframe-lib/user/service"
+	susr "mainframe-lib/user/service"
 )
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Create a new user
-	_, err = srv.InsertUser(cfg.Services.Users, cfg.Services.Timeout, auth, req)
+	_, err = susr.InsertUser(cfg.Services.Users, cfg.Services.Timeout, auth, req)
 	if err != nil {
 		fmt.Printf("Error while creating user: %s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -55,7 +55,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Create a new user
-	user, err := srv.GetUserByUsername(cfg.Services.Users, cfg.Services.Timeout, auth, req.Username, req.Password)
+	user, err := susr.GetUserByUsername(cfg.Services.Users, cfg.Services.Timeout, auth, req.Username, req.Password)
 	if err != nil {
 		fmt.Printf("Error while getting user: %s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -95,7 +95,7 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(config.ContextUserId).(string)
 
 	// Create a new user
-	err = srv.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
+	err = susr.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
 	if err != nil {
 		fmt.Printf("Error while updating user: %s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
@@ -118,7 +118,7 @@ func ResetUserPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a new user
-	err := srv.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
+	err := susr.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
 	if err != nil {
 		fmt.Printf("Error while updating user: %s\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
