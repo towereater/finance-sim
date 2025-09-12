@@ -24,6 +24,13 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 	// Accounts handler
 	mux.Handle("/accounts",
 		mw.AuthorizedLoggerMiddleware(accountsHandler(), cfg, jwtAuth()))
+
+	// Payments handler
+	mux.Handle("/payments",
+		mw.AuthorizedLoggerMiddleware(paymentsHandler(), cfg, jwtAuth()))
+	mux.Handle(fmt.Sprintf("/payments/{%s}",
+		config.ContextPaymentId),
+		mw.AuthorizedLoggerMiddleware(paymentByIdHandler(), cfg, jwtAuth()))
 }
 
 func homeHandler() http.Handler {

@@ -21,7 +21,7 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 		mw.AuthorizedLoggerMiddleware(checkingAccountsByIdHandler(), cfg, securityAuth()))
 
 	// Transfers handler
-	mux.Handle("/payments/",
+	mux.Handle("/payments",
 		mw.AuthorizedLoggerMiddleware(paymentsHandler(), cfg, securityAuth()))
 	mux.Handle(fmt.Sprintf("/payments/{%s}",
 		config.ContextPaymentId),
