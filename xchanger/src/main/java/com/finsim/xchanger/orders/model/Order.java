@@ -1,6 +1,7 @@
 package com.finsim.xchanger.orders.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.finsim.xchanger.common.model.Price;
 
@@ -11,17 +12,20 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Document(collection = "orders")
 public class Order {
     @Id
-    public String id;
+    private String id;
 
-    public String dossier;
-    public String isin;
-    public String type;
+    private String dossier;
+    private String isin;
+    private String type;
 
-    public Price price;
-    public int quantity;
-    public String options;
+    private Price price;
+    private int quantity;
+    private String options;
+
+    private int leftQuantity;
 
     public OrderDto toDto() {
         return new OrderDto(
@@ -31,7 +35,8 @@ public class Order {
             this.type,
             this.price,
             this.quantity,
-            this.options
+            this.options,
+            this.leftQuantity
         );
     }
 }

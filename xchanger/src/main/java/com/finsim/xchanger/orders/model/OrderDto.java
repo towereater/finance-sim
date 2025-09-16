@@ -19,4 +19,6 @@ public class OrderDto {
     public Price price;
     public int quantity;
     public String options;
+
+    public int leftQuantity;
 }
