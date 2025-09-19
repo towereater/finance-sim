@@ -17,8 +17,7 @@ func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.Ch
 
 	// Get latest account payments
 	filter := cha.Payment{}
-	filter.Payer.AccountId.Account = id
-	filter.Payer.AccountId.Service = "CK"
+	filter.Payer.Account = id
 	payments, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, "", 5)
 	if err != nil {
 		return model.CheckingAccountInfo{}, err

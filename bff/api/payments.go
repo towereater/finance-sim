@@ -73,8 +73,7 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 	// Build the filter
 	var filter cha.Payment
 	filter.Type = queryParams.Get("paymenyType")
-	filter.Payer.AccountId.Account = queryParams.Get("account")
-	filter.Payer.AccountId.Service = queryParams.Get("service")
+	filter.Payer.Account = queryParams.Get("account")
 
 	// Get all accounts
 	payments, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, from, limit)
