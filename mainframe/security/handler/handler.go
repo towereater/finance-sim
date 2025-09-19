@@ -16,6 +16,13 @@ func SetupRoutes(cfg config.Config, mux *http.ServeMux) {
 	mux.Handle("/",
 		mw.LoggerMiddleware(homeHandler(), cfg))
 
+	// Banks handler
+	mux.Handle("/banks",
+		mw.AuthorizedLoggerMiddleware(banksHandler(), cfg, basicAuth()))
+	mux.Handle(fmt.Sprintf("/banks/{%s}",
+		config.ContextAbi),
+		mw.AuthorizedLoggerMiddleware(bankByIdHandler(), cfg, basicAuth()))
+
 	// Users handler
 	mux.Handle("/users",
 		mw.AuthorizedLoggerMiddleware(usersHandler(), cfg, basicAuth()))
