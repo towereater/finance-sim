@@ -41,11 +41,8 @@ func GetPayments(host string, timeout int, auth string, filter model.Payment, fr
 	if from != "" {
 		url = fmt.Sprintf("%s&from=%s", url, from)
 	}
-	if filter.Payer.AccountId.Account != "" {
-		url = fmt.Sprintf("%s&account=%s", url, filter.Payer.AccountId.Account)
-	}
-	if filter.Payer.AccountId.Service != "" {
-		url = fmt.Sprintf("%s&service=%s", url, filter.Payer.AccountId.Service)
+	if filter.Payer.Account != "" {
+		url = fmt.Sprintf("%s&account=%s", url, filter.Payer.Account)
 	}
 
 	// Execute the request

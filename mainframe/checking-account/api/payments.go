@@ -81,8 +81,7 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 		filter.Value.Amount = float32(amount)
 	}
 	filter.Value.Currency = queryParams.Get("currency")
-	filter.Payer.AccountId.Account = queryParams.Get("account")
-	filter.Payer.AccountId.Service = queryParams.Get("service")
+	filter.Payer.Account = queryParams.Get("account")
 	filter.Payee.Name = queryParams.Get("name")
 	filter.Payee.AccountIdentification.Type = queryParams.Get("accountIdType")
 	filter.Payee.AccountIdentification.Value = queryParams.Get("accountIdValue")
@@ -143,14 +142,8 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Payer.AccountId.Account) != 24 {
+	if len(req.Payer.Account) != 24 {
 		fmt.Printf("Invalid payer account id\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	if req.Payer.AccountId.Service != "CK" {
-		fmt.Printf("Invalid payer account service\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -178,19 +171,19 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Check payer cash availability
-	payerAccount, err := db.SelectAccount(cfg, abi, req.Payer.AccountId.Account)
+	payerAccount, err := db.SelectAccount(cfg, abi, req.Payer.Account)
 	if err != nil {
-		fmt.Printf("Error while searching payer account %s\n", req.Payer.AccountId.Account)
+		fmt.Printf("Error while searching payer account %s\n", req.Payer.Account)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if payerAccount.Id == "" {
-		fmt.Printf("Payer account %s not found\n", req.Payer.AccountId.Account)
+		fmt.Printf("Payer account %s not found\n", req.Payer.Account)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if payerAccount.Value.Amount < req.Value.Amount {
-		fmt.Printf("Payer account %s without enough funds\n", req.Payer.AccountId.Account)
+		fmt.Printf("Payer account %s without enough funds\n", req.Payer.Account)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
