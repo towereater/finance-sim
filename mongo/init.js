@@ -1,4 +1,4 @@
-use("06270-US")
+// use("06270-US")
 
-db.createCollection("users")
-db.users.createIndex({ username: 1 }, { unique: true })
+// db.createCollection("users")
+// db.users.createIndex({ username: 1 }, { unique: true })
