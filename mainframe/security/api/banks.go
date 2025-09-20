@@ -58,12 +58,6 @@ func InsertBank(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.XchangerApiKey != "" && len(req.XchangerApiKey) != 24 {
-		fmt.Printf("Invalid xchanger api key\n")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	// Extract context parameters
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 
