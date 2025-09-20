@@ -6,12 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.finsim.xchanger.banks.model.Bank;
+import com.finsim.xchanger.banks.model.InsertBankRequest;
 import com.finsim.xchanger.banks.repository.BankRepository;
 
 @Service
 public class BankService {
     @Autowired
     private BankRepository bankRepository;
+
+    public Optional<Bank> findBankByAbi(String abi) {
+        return bankRepository.findByAbi(abi);
+    }
 
     public Optional<Bank> findBankByApiToken(String apiToken) {
         return bankRepository.findByApiToken(apiToken);
@@ -21,7 +26,20 @@ public class BankService {
         return bankRepository.count();
     }
 
+    public Bank createBank(InsertBankRequest bankRequest) {
+        Bank bank = new Bank();
+        bank.setAbi(bankRequest.abi);
+        bank.setApiToken(bankRequest.apiToken);
+        bank.setExternalApiToken(bankRequest.externalApiToken);
+
+        return insertBank(bank);
+    }
+
     public Bank insertBank(Bank bank) {
         return bankRepository.insert(bank);
+    }
+
+    public void deleteBank(String abi) {
+        bankRepository.deleteByAbi(abi);
     }
 }
