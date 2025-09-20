@@ -14,12 +14,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class AuthorizerInterceptor implements HandlerInterceptor {
+public class AdminAuthorizerInterceptor implements HandlerInterceptor {
     @Autowired
     private BankService bankService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.printf("Middleware pre handling started\n");
+
+        Optional<Bank> bankOptional = bankService.findBankByAbi("09999");
+        if (!bankOptional.isPresent()) {
+            System.out.printf("Admin bank not present\n");
+            return true;
+        }
+        System.out.printf("Admin bank present\n");
+
         String apiToken = request.getHeader("Authorization");
         if (apiToken == null || apiToken.isEmpty()) {
             System.out.printf("Found no api token%n");
@@ -27,15 +36,12 @@ public class AuthorizerInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        Optional<Bank> bankOptional = bankService.findBankByApiToken(apiToken);
-        if (!bankOptional.isPresent()) {
-            System.out.printf("Found no bank with api token %s%n", apiToken);
+        Bank bank = bankOptional.get();
+        if (!bank.apiToken.equals(apiToken)) {
+            System.out.printf("Api token does not match with admin api token%n");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
-
-        Bank bank = bankOptional.get();
-        request.setAttribute("abi", bank.abi);
 
         return true;
     }

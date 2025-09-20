@@ -11,6 +11,9 @@ public class InterceptorConfigurator implements WebMvcConfigurer {
     private LoggerInterceptor loggerInterceptor;
 
     @Autowired
+    private AdminAuthorizerInterceptor adminAuthorizerInterceptor;
+
+    @Autowired
     private AuthorizerInterceptor authorizerInterceptor;
 
     @Override
@@ -19,6 +22,9 @@ public class InterceptorConfigurator implements WebMvcConfigurer {
         registry.addInterceptor(loggerInterceptor).addPathPatterns("/**");
 
         // API token authorizer
+        registry.addInterceptor(adminAuthorizerInterceptor).addPathPatterns(
+            "/banks", "/banks/**");
+
         registry.addInterceptor(authorizerInterceptor).addPathPatterns(
             "/dossiers", "/dossiers/**",
                         "/stocks", "/stocks/**",
