@@ -16,11 +16,8 @@ type Config struct {
 		Accounts         string `json:"accounts" envconfig:"SERVICES_ACCOUNTS"`
 		CheckingAccounts string `json:"ck-accounts" envconfig:"SERVICES_CKACCOUNTS"`
 		Security         string `json:"security" envconfig:"SERVICES_SECURITY"`
-		Xchanger         struct {
-			Host   string `json:"host" envconfig:"SERVICES_XCHANGER_HOST"`
-			ApiKey string `json:"api-key" envconfig:"SERVICES_XCHANGER_APIKEY"`
-		} `json:"xchanger"`
-		Timeout int `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
+		Xchanger         string `json:"xchanger" envconfig:"SERVICES_XCHANGER"`
+		Timeout          int    `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
 	} `json:"services"`
 }
 

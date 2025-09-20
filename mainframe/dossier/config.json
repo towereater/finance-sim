@@ -15,10 +15,7 @@
       "users": "users:12000",
       "accounts": "accounts:12000",
       "ck-accounts": "checking-accounts:12000",
-      "xchanger": {
-        "host": "xchanger:12000",
-        "api-key": "3cae43527ddbc85be07f711577e1fe48e0c5c70d6511432f2b0349f737a09d63"
-      },
+      "xchanger": "xchanger:12000",
       "timeout": 5
     }
 }

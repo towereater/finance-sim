@@ -24,11 +24,14 @@ public class DossierService {
         return dossierRepository.findById(id);
     }
 
-    public Dossier createDossier(InsertDossierRequest dossierRequest) {
+    public Dossier createDossier(InsertDossierRequest dossierRequest, String abi) {
         Dossier dossier = new Dossier();
         dossier.setName(dossierRequest.name);
         dossier.setSurname(dossierRequest.surname);
         dossier.setBirth(dossierRequest.birth);
+        dossier.setAbi(abi);
+        dossier.setExternalId(dossierRequest.externalId);
+        dossier.setIban(dossierRequest.iban);
 
         return insertDossier(dossier);
     }

@@ -19,12 +19,19 @@ public class Dossier {
     private String surname;
     private String birth;
 
+    private String abi;
+    private String externalId;
+    private String iban;
+
     public DossierDto toDto() {
         return new DossierDto(
             this.id,
             this.name,
             this.surname,
-            this.birth
+            this.birth,
+            this.abi,
+            this.externalId,
+            this.iban
         );
     }
 }

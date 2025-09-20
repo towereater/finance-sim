@@ -13,4 +13,8 @@ public class DossierDto {
     private String name;
     private String surname;
     private String birth;
+
+    private String abi;
+    private String externalId;
+    private String iban;
 }

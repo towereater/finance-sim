@@ -13,6 +13,7 @@ import (
 	scha "mainframe-lib/checking-account/service"
 	com "mainframe-lib/common/config"
 	dos "mainframe-lib/dossier/model"
+	ssec "mainframe-lib/security/service"
 	susr "mainframe-lib/user/service"
 	xch "mainframe-lib/xchanger/model"
 	sxch "mainframe-lib/xchanger/service"
@@ -143,6 +144,19 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 	auth := r.Context().Value(com.ContextAuth).(string)
 
+	// Get bank data
+	bank, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	if err != nil {
+		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if bank.XchangerApiKey == "" {
+		fmt.Printf("Bank with abi %s does not have access to XChanger\n", abi)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	// Get checking account data
 	ckAccount, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req.CheckingAccount.Account)
 	if err != nil {
@@ -194,12 +208,14 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 
 	// Create a new dossier on xchanger service
 	xchangerPayload := xch.InsertXChangerDossierInput{
-		Name:    user.Name,
-		Surname: user.Surname,
-		Birth:   user.Birth,
+		Name:       user.Name,
+		Surname:    user.Surname,
+		Birth:      user.Birth,
+		ExternalId: dossier.Id,
+		IBAN:       ckAccount.IBAN,
 	}
 
-	xchangerDossier, err := sxch.InsertXChangerDossier(cfg.Services.Xchanger.Host, cfg.Services.Timeout, cfg.Services.Xchanger.ApiKey, xchangerPayload)
+	xchangerDossier, err := sxch.InsertXChangerDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xchangerPayload)
 	if err != nil {
 		fmt.Printf("Error while creating xchanger dossier %s: %s\n",
 			dossier.Id,
@@ -266,8 +282,21 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get bank data
+	bank, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	if err != nil {
+		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if bank.XchangerApiKey == "" {
+		fmt.Printf("Bank with abi %s does not have access to XChanger\n", abi)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	// Delete dossier from xchanger service
-	err = sxch.DeleteXChangerDossier(cfg.Services.Xchanger.Host, cfg.Services.Timeout, cfg.Services.Xchanger.ApiKey, dossier.XChangerDossier)
+	err = sxch.DeleteXChangerDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, dossier.XChangerDossier)
 	if err != nil {
 		fmt.Printf("Error while deleting xchanger dossier %s: %s\n",
 			dossier.Id,

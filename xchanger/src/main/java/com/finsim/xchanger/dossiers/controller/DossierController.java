@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,9 +52,10 @@ public class DossierController {
 
     @PostMapping
     public ResponseEntity<DossierDto> createDossier(
-        @Valid @RequestBody InsertDossierRequest request
+        @Valid @RequestBody InsertDossierRequest request,
+        @RequestAttribute String abi
     ) {
-        Dossier dossier = dossierService.createDossier(request);
+        Dossier dossier = dossierService.createDossier(request, abi);
         return new ResponseEntity<>(dossier.toDto(), HttpStatus.CREATED);
     }
     
