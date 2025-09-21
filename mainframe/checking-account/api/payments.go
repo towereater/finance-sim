@@ -173,7 +173,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	// Check payer cash availability
 	payerAccount, err := db.SelectAccount(cfg, abi, req.Payer.Account)
 	if err != nil {
-		fmt.Printf("Error while searching payer account %s\n", req.Payer.Account)
+		fmt.Printf("Error while searching payer account %s: %s\n", req.Payer.Account, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
