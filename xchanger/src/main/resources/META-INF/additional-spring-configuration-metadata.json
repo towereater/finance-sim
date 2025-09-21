@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "xchanger.payments.host",
+  "type": "java.lang.String",
+  "description": "Host receiving payment requests'"
+}]}
