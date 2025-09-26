@@ -6,7 +6,7 @@ import (
 	com "mainframe-lib/common/config"
 	mw "mainframe-lib/common/middleware"
 	sec "mainframe-lib/security/service"
-	"mainframe/dossier/config"
+	"mainframe/checking-account/config"
 	"net/http"
 	"strings"
 )
@@ -31,7 +31,7 @@ func securityAuth() mw.Adapter {
 			apiKey := components[1]
 
 			// Check api key existence
-			_, err := sec.GetUserByApiKey(
+			_, _, err := sec.GetUserByApiKey(
 				cfg.Services.Security,
 				cfg.Services.Timeout,
 				auth,
