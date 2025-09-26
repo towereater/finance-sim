@@ -1,10 +1,10 @@
 package model
 
-type XChangerDossier struct {
+type Dossier struct {
 	Id string `json:"id"`
 }
 
-type InsertXChangerDossierInput struct {
+type InsertDossierInput struct {
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
 	Birth      string `json:"birth"`
