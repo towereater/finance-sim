@@ -2,14 +2,13 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	acc "mainframe-lib/account/model"
+	"mainframe-lib/account/model"
 	com "mainframe-lib/common/service"
 	"net/http"
 )
 
-func GetAccounts(host string, timeout int, auth string, filter acc.Account, from string, limit int) ([]acc.Account, error) {
+func GetAccounts(host string, timeout int, auth string, filter model.Account, from string, limit int) ([]model.Account, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/accounts", host)
 
@@ -27,43 +26,46 @@ func GetAccounts(host string, timeout int, auth string, filter acc.Account, from
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
 	if err != nil {
-		return []acc.Account{}, err
+		return []model.Account{}, http.StatusInternalServerError, err
 	}
 
 	// Check response
+	if res.StatusCode == http.StatusNotFound {
+		return []model.Account{}, res.StatusCode, nil
+	}
 	if res.StatusCode != http.StatusOK {
-		return []acc.Account{}, errors.New("get accounts failed")
+		return []model.Account{}, res.StatusCode, fmt.Errorf("get accounts returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
-	var accounts []acc.Account
+	var accounts []model.Account
 	err = json.NewDecoder(res.Body).Decode(&accounts)
 	if err != nil {
-		return []acc.Account{}, err
+		return []model.Account{}, http.StatusInternalServerError, err
 	}
 
-	return accounts, nil
+	return accounts, res.StatusCode, nil
 }
 
-func InsertAccount(host string, timeout int, auth string, payload acc.InsertAccountInput) error {
+func InsertAccount(host string, timeout int, auth string, payload model.InsertAccountInput) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/accounts", host)
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, err
 	}
 
 	// Check response
 	if res.StatusCode != http.StatusCreated {
-		return errors.New("insert account failed")
+		return res.StatusCode, fmt.Errorf("insert account returned status %d", res.StatusCode)
 	}
 
-	return nil
+	return res.StatusCode, nil
 }
 
-func DeleteAccount(host string, timeout int, auth string, accountId acc.AccountId) error {
+func DeleteAccount(host string, timeout int, auth string, accountId model.AccountId) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/accounts/services/%s/accounts/%s",
 		host, accountId.Service, accountId.Account)
@@ -71,13 +73,13 @@ func DeleteAccount(host string, timeout int, auth string, accountId acc.AccountI
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodDelete, url, timeout, auth, "")
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, err
 	}
 
 	// Check response
 	if res.StatusCode != http.StatusNoContent {
-		return errors.New("delete account failed")
+		return res.StatusCode, fmt.Errorf("delete account returned status %d", res.StatusCode)
 	}
 
-	return nil
+	return res.StatusCode, nil
 }
