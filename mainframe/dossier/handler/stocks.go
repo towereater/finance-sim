@@ -6,28 +6,24 @@ import (
 	"mainframe/dossier/api"
 )
 
-func dossiersHandler() http.Handler {
+func stocksHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
 		switch r.Method {
 		case "GET":
-			api.GetDossiers(w, r)
-		case "POST":
-			api.InsertDossier(w, r)
+			api.GetStocks(w, r)
 		default:
 			http.Error(w, r.Method, http.StatusMethodNotAllowed)
 		}
 	})
 }
 
-func dossierByIdHandler() http.Handler {
+func stockByIsinHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check of the method request
 		switch r.Method {
 		case "GET":
-			api.GetDossier(w, r)
-		case "DELETE":
-			api.DeleteDossier(w, r)
+			api.GetStock(w, r)
 		default:
 			http.Error(w, r.Method, http.StatusMethodNotAllowed)
 		}

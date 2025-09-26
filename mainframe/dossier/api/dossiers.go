@@ -24,7 +24,7 @@ import (
 
 func GetDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	dossierId := r.PathValue(string(config.ContextDossier))
+	dossierId := r.PathValue(string(config.ContextDossierId))
 	if len(dossierId) != 24 {
 		fmt.Printf("Invalid dossier id value\n")
 		w.WriteHeader(http.StatusBadRequest)
@@ -43,7 +43,7 @@ func GetDossier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		fmt.Printf("Error while searching account with id %s: %s\n", dossierId, err.Error())
+		fmt.Printf("Error while searching dossier with id %s: %s\n", dossierId, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -145,24 +145,24 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 	if bank.XchangerApiKey == "" {
-		fmt.Printf("Bank with abi %s does not have access to XChanger\n", abi)
+		fmt.Printf("Bank with abi %s does not have access to xchanger\n", abi)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
 	// Get checking account data
-	ckAccount, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req.CheckingAccount.Account)
+	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req.CheckingAccount.Account)
 	if err != nil {
 		fmt.Printf("Error while searching checking account %+v: %s\n",
 			req.CheckingAccount, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 	if ckAccount.Owner != req.Owner {
@@ -173,10 +173,10 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user data
-	user, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
+	user, status, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
 	if err != nil {
 		fmt.Printf("Error while searching user %s: %s\n", req.Owner, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -196,18 +196,18 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 		Owner: dossier.Owner,
 	}
 
-	err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+	status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding dossier %s: %s\n",
 			dossier.Id,
 			err.Error())
 
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
-	// Create a new dossier on xchanger service
-	xchangerPayload := xch.InsertXChangerDossierInput{
+	// Create a new dossier on xchanger
+	xchangerPayload := xch.InsertDossierInput{
 		Name:       user.Name,
 		Surname:    user.Surname,
 		Birth:      user.Birth,
@@ -215,7 +215,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 		IBAN:       ckAccount.IBAN,
 	}
 
-	xchangerDossier, err := sxch.InsertXChangerDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xchangerPayload)
+	xchangerDossier, status, err := sxch.InsertDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xchangerPayload)
 	if err != nil {
 		fmt.Printf("Error while creating xchanger dossier %s: %s\n",
 			dossier.Id,
@@ -231,7 +231,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -257,7 +257,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 
 func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
-	dossierId := r.PathValue(string(config.ContextDossier))
+	dossierId := r.PathValue(string(config.ContextDossierId))
 	if len(dossierId) != 24 {
 		fmt.Printf("Invalid dossier id value\n")
 		w.WriteHeader(http.StatusBadRequest)
@@ -283,26 +283,26 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get bank data
-	bank, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 	if bank.XchangerApiKey == "" {
-		fmt.Printf("Bank with abi %s does not have access to XChanger\n", abi)
+		fmt.Printf("Bank with abi %s does not have access to xchanger\n", abi)
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
-	// Delete dossier from xchanger service
-	err = sxch.DeleteXChangerDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, dossier.XChangerDossier)
+	// Delete dossier from xchanger
+	status, err = sxch.DeleteDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, dossier.XChangerDossier)
 	if err != nil {
 		fmt.Printf("Error while deleting xchanger dossier %s: %s\n",
 			dossier.Id,
 			err.Error())
 
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -311,12 +311,12 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 		Account: dossierId,
 		Service: "DS",
 	}
-	err = sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accountId)
+	status, err = sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accountId)
 	if err != nil {
 		fmt.Printf("Error while removing dossier %s: %s\n",
 			dossierId,
 			err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -335,12 +335,12 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 			Owner: dossier.Owner,
 		}
 
-		err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+		status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding dossier %s: %s\n",
 				dossier.Id,
 				err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(status)
 			return
 		}
 

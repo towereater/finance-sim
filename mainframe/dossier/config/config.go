@@ -22,7 +22,10 @@ type Config struct {
 }
 
 // Path and query parameters
-const ContextDossier com.ContextKey = "dossier"
+const ContextIsin com.ContextKey = "isin"
+const ContextDossierId com.ContextKey = "dossierId"
+const ContextOrderId com.ContextKey = "orderId"
 
 const ContextFrom com.ContextKey = "from"
 const ContextLimit com.ContextKey = "limit"
+const ContextPage com.ContextKey = "page"
