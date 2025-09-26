@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Payer {
-    private String account;
+    private AccountIdentification accountIdentification;
 }

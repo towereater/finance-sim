@@ -14,12 +14,8 @@ import com.finsim.xchanger.dossiers.repository.DossierRepository;
 import com.finsim.xchanger.orders.model.InsertOrderRequest;
 import com.finsim.xchanger.orders.model.Order;
 import com.finsim.xchanger.orders.repository.OrderRepository;
-import com.finsim.xchanger.payments.model.AccountIdentification;
 import com.finsim.xchanger.payments.model.InsertPaymentRequest;
-import com.finsim.xchanger.payments.model.Payee;
-import com.finsim.xchanger.payments.model.Payer;
 import com.finsim.xchanger.payments.model.Payment;
-import com.finsim.xchanger.payments.model.PaymentValue;
 import com.finsim.xchanger.payments.service.PaymentService;
 
 import java.util.List;
@@ -96,28 +92,15 @@ public class OrderService {
             && sellOrder != null
             && order.getPrice().getAmount() >= sellOrder.getPrice().getAmount()) {
             if (order.getLeftQuantity() <= sellOrder.getLeftQuantity()) {
-                InsertPaymentRequest paymentRequest = new InsertPaymentRequest(
-                    "BANK_TRANSFER",
-                    new PaymentValue(
-                        order.getLeftQuantity() * sellOrder.getPrice().getAmount(),
-                        sellOrder.getPrice().getCurrency()
-                    ),
-                    new Payer(
-                        //dossier.getExternalId()
-                        "68cdc56cf132fad9a325c1cc"
-                    ),
-                    new Payee(
-                        sellDossier.getName() + ' ' + sellDossier.getSurname(),
-                        new AccountIdentification(
-                            "IBAN",
-                            sellDossier.getIban()
-                        )
-                    ),
-                    String.format("Buy %d %s stocks for %f %s",
+                InsertPaymentRequest paymentRequest = paymentService.createBankTransfer(
+                    sellOrder.getPrice().multiplyBy(order.getLeftQuantity()).toPaymentValue(),
+                    dossier.getIban(),
+                    sellDossier.getName() + ' ' + sellDossier.getSurname(),
+                    sellDossier.getIban(),
+                    String.format("Buy %d %s stocks for %s",
                         order.getLeftQuantity(),
                         order.getIsin(),
-                        sellOrder.getPrice().getAmount(),
-                        sellOrder.getPrice().getCurrency()
+                        sellOrder.getPrice().toString()
                     )
                 );
                 ResponseEntity<Payment> res = paymentService.insertPayment(bank.externalApiToken, paymentRequest);
@@ -131,28 +114,15 @@ public class OrderService {
                 order.setLeftQuantity(0);
                 order = orderRepository.save(order);
             } else {
-                InsertPaymentRequest paymentRequest = new InsertPaymentRequest(
-                    "BANK_TRANSFER",
-                    new PaymentValue(
-                        sellOrder.getLeftQuantity() * sellOrder.getPrice().getAmount(),
-                        sellOrder.getPrice().getCurrency()
-                    ),
-                    new Payer(
-                        //dossier.getExternalId()
-                        "68cdc56cf132fad9a325c1cc"
-                    ),
-                    new Payee(
-                        sellDossier.getName() + ' ' + sellDossier.getSurname(),
-                        new AccountIdentification(
-                            "IBAN",
-                            sellDossier.getIban()
-                        )
-                    ),
-                    String.format("Buy %d %s stocks for %f %s",
+                InsertPaymentRequest paymentRequest = paymentService.createBankTransfer(
+                    sellOrder.getPrice().multiplyBy(sellOrder.getLeftQuantity()).toPaymentValue(),
+                    dossier.getIban(),
+                    sellDossier.getName() + ' ' + sellDossier.getSurname(),
+                    sellDossier.getIban(),
+                    String.format("Buy %d %s stocks for %s",
                         sellOrder.getLeftQuantity(),
                         order.getIsin(),
-                        sellOrder.getPrice().getAmount(),
-                        sellOrder.getPrice().getCurrency()
+                        sellOrder.getPrice().toString()
                     )
                 );
                 ResponseEntity<Payment> res = paymentService.insertPayment(bank.externalApiToken, paymentRequest);
@@ -185,16 +155,57 @@ public class OrderService {
         }
         Order buyOrder = buyOrders.getFirst();
 
+        Optional<Dossier> dossierOptional = dossierRepository.findById(order.getDossier());
+        Dossier dossier = dossierOptional.get();
+
+        Optional<Bank> bankOptional = bankRepository.findByAbi(dossier.getAbi());
+        Bank bank = bankOptional.get();
+
+        Optional<Dossier> buyDossierOptional = dossierRepository.findById(buyOrder.getDossier());
+        Dossier buyDossier = buyDossierOptional.get();
+
         while (order.getLeftQuantity() > 0
             && buyOrder != null
             && order.getPrice().getAmount() <= buyOrder.getPrice().getAmount()) {
             if (order.getLeftQuantity() <= buyOrder.getLeftQuantity()) {
+                InsertPaymentRequest paymentRequest = paymentService.createBankTransfer(
+                    order.getPrice().multiplyBy(order.getLeftQuantity()).toPaymentValue(),
+                    buyDossier.getIban(),
+                    dossier.getName() + ' ' + dossier.getSurname(),
+                    dossier.getIban(),
+                    String.format("Buy %d %s stocks for %s",
+                        order.getLeftQuantity(),
+                        order.getIsin(),
+                        order.getPrice().toString()
+                    )
+                );
+                ResponseEntity<Payment> res = paymentService.insertPayment(bank.externalApiToken, paymentRequest);
+                if (res.getStatusCode() != HttpStatus.CREATED) {
+                    return;
+                }
+
                 buyOrder.setLeftQuantity(buyOrder.getLeftQuantity() - order.getLeftQuantity());
                 orderRepository.save(buyOrder);
 
                 order.setLeftQuantity(0);
                 order = orderRepository.save(order);
             } else {
+                InsertPaymentRequest paymentRequest = paymentService.createBankTransfer(
+                    order.getPrice().multiplyBy(buyOrder.getLeftQuantity()).toPaymentValue(),
+                    buyDossier.getIban(),
+                    dossier.getName() + ' ' + dossier.getSurname(),
+                    dossier.getIban(),
+                    String.format("Buy %d %s stocks for %s",
+                        buyOrder.getLeftQuantity(),
+                        order.getIsin(),
+                        order.getPrice().toString()
+                    )
+                );
+                ResponseEntity<Payment> res = paymentService.insertPayment(bank.externalApiToken, paymentRequest);
+                if (res.getStatusCode() != HttpStatus.CREATED) {
+                    return;
+                }
+
                 order.setLeftQuantity(order.getLeftQuantity() - buyOrder.getLeftQuantity());
                 order = orderRepository.save(order);
 
@@ -206,6 +217,9 @@ public class OrderService {
                     return;
                 }
                 buyOrder = buyOrders.getFirst();
+
+                buyDossierOptional = dossierRepository.findById(buyOrder.getDossier());
+                buyDossier = buyDossierOptional.get();
             }
         }
     }
