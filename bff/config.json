@@ -7,6 +7,7 @@
       "users": "users:12000",
       "accounts": "accounts:12000",
       "checking-accounts": "checking-accounts:12000",
+      "dossiers": "dossiers:12000",
       "timeout": 5
     }
 }
