@@ -15,7 +15,7 @@ type PaymentValue struct {
 }
 
 type Payer struct {
-	Account string `json:"account" bson:"account"`
+	AccountIdentification AccountIdentification `json:"accountIdentification" bson:"accountIdentification"`
 }
 
 type Payee struct {

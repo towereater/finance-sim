@@ -8,32 +8,35 @@ import (
 	"net/http"
 )
 
-func GetPayment(host string, timeout int, auth string, paymentId string) (model.Payment, error) {
+func GetPayment(host string, timeout int, auth string, paymentId string) (model.Payment, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/payments/%s", host, paymentId)
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
 	if err != nil {
-		return model.Payment{}, err
+		return model.Payment{}, http.StatusInternalServerError, err
 	}
 
 	// Check response
+	if res.StatusCode == http.StatusNotFound {
+		return model.Payment{}, res.StatusCode, nil
+	}
 	if res.StatusCode != http.StatusOK {
-		return model.Payment{}, fmt.Errorf("get payment returned status %d", res.StatusCode)
+		return model.Payment{}, res.StatusCode, fmt.Errorf("get payment returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
 	var payment model.Payment
 	err = json.NewDecoder(res.Body).Decode(&payment)
 	if err != nil {
-		return model.Payment{}, err
+		return model.Payment{}, http.StatusInternalServerError, err
 	}
 
-	return payment, nil
+	return payment, res.StatusCode, nil
 }
 
-func GetPayments(host string, timeout int, auth string, filter model.Payment, from string, limit int) ([]model.Payment, error) {
+func GetPayments(host string, timeout int, auth string, filter model.Payment, from string, limit int) ([]model.Payment, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/payments", host)
 
@@ -41,52 +44,58 @@ func GetPayments(host string, timeout int, auth string, filter model.Payment, fr
 	if from != "" {
 		url = fmt.Sprintf("%s&from=%s", url, from)
 	}
-	if filter.Payer.Account != "" {
-		url = fmt.Sprintf("%s&account=%s", url, filter.Payer.Account)
+	if filter.Payer.AccountIdentification.Type != "" {
+		url = fmt.Sprintf("%s&payerType=%s", url, filter.Payer.AccountIdentification.Type)
+	}
+	if filter.Payer.AccountIdentification.Value != "" {
+		url = fmt.Sprintf("%s&payerValue=%s", url, filter.Payer.AccountIdentification.Value)
 	}
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
 	if err != nil {
-		return []model.Payment{}, err
+		return []model.Payment{}, http.StatusInternalServerError, err
 	}
 
 	// Check response
+	if res.StatusCode == http.StatusNotFound {
+		return []model.Payment{}, res.StatusCode, nil
+	}
 	if res.StatusCode != http.StatusOK {
-		return []model.Payment{}, fmt.Errorf("get payments returned status %d", res.StatusCode)
+		return []model.Payment{}, res.StatusCode, fmt.Errorf("get payments returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
 	var payments []model.Payment
 	err = json.NewDecoder(res.Body).Decode(&payments)
 	if err != nil {
-		return []model.Payment{}, err
+		return []model.Payment{}, http.StatusInternalServerError, err
 	}
 
-	return payments, nil
+	return payments, res.StatusCode, nil
 }
 
-func InsertPayment(host string, timeout int, auth string, payload model.InsertPayment) (model.Payment, error) {
+func InsertPayment(host string, timeout int, auth string, payload model.InsertPayment) (model.Payment, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("http://%s/payments", host)
 
 	// Execute the request
 	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
 	if err != nil {
-		return model.Payment{}, err
+		return model.Payment{}, http.StatusInternalServerError, err
 	}
 
 	// Check response
 	if res.StatusCode != http.StatusCreated {
-		return model.Payment{}, fmt.Errorf("insert payment returned status %d", res.StatusCode)
+		return model.Payment{}, res.StatusCode, fmt.Errorf("insert payment returned status %d", res.StatusCode)
 	}
 
 	// Parse the response
 	var payment model.Payment
 	err = json.NewDecoder(res.Body).Decode(&payment)
 	if err != nil {
-		return model.Payment{}, err
+		return model.Payment{}, http.StatusInternalServerError, err
 	}
 
-	return payment, nil
+	return payment, res.StatusCode, nil
 }
