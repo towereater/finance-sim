@@ -27,7 +27,7 @@ func GetBank(w http.ResponseWriter, r *http.Request) {
 	// Select the document
 	bank, err := db.SelectBankByAbi(cfg, abi)
 	if err == mongo.ErrNoDocuments {
-		fmt.Printf("No abis with abi %s\n", abi)
+		fmt.Printf("No banks with abi %s\n", abi)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
