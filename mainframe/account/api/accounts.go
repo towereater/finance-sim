@@ -196,7 +196,7 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err = susr.AddAccountToUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
+	status, err := susr.AddAccountToUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %+v to user %s: %s\n",
 			account.Id,
@@ -214,7 +214,7 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -272,13 +272,13 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err = susr.RemoveAccountFromUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
+	status, err := susr.RemoveAccountFromUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
 	if err != nil {
 		fmt.Printf("Error while removing account %+v from user %s: %s\n",
 			account.Id,
 			account.Owner,
 			err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -297,13 +297,13 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = susr.AddAccountToUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
+		status, err = susr.AddAccountToUser(cfg.Services.Users, cfg.Services.Timeout, auth, account.Owner, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s to user %s: %s\n",
 				account.Id,
 				account.Owner,
 				err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(status)
 			return
 		}
 
