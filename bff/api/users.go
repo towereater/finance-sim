@@ -27,11 +27,11 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	auth := r.Context().Value(com.ContextAuth).(string)
 
-	// Create a new user
-	_, err = susr.InsertUser(cfg.Services.Users, cfg.Services.Timeout, auth, req)
+	// Create a new document
+	_, status, err := susr.InsertUser(cfg.Services.Users, cfg.Services.Timeout, auth, req)
 	if err != nil {
 		fmt.Printf("Error while creating user: %s\n", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -54,11 +54,11 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	auth := r.Context().Value(com.ContextAuth).(string)
 
-	// Create a new user
-	user, err := susr.GetUserByUsername(cfg.Services.Users, cfg.Services.Timeout, auth, req.Username, req.Password)
+	// Get the document
+	user, status, err := susr.GetUserByUsername(cfg.Services.Users, cfg.Services.Timeout, auth, req.Username, req.Password)
 	if err != nil {
 		fmt.Printf("Error while getting user: %s\n", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -94,11 +94,11 @@ func ChangeUserPassword(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 	userId := r.Context().Value(config.ContextUserId).(string)
 
-	// Create a new user
-	err = susr.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
+	// Update the document
+	_, status, err := susr.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
 	if err != nil {
 		fmt.Printf("Error while updating user: %s\n", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -112,16 +112,15 @@ func ResetUserPassword(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 	userId := r.Context().Value(config.ContextUserId).(string)
 
-	// Update user password
+	// Update the document
 	req := usr.UpdateUserInput{
 		Password: "password",
 	}
 
-	// Create a new user
-	err := susr.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
+	_, status, err := susr.UpdateUser(cfg.Services.Users, cfg.Services.Timeout, auth, userId, req)
 	if err != nil {
 		fmt.Printf("Error while updating user: %s\n", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 

@@ -33,7 +33,7 @@ func securityAuth() mw.Adapter {
 			apiKey := components[1]
 
 			// Check api key existence
-			_, err := sec.GetUserByApiKey(
+			_, _, err := sec.GetUserByApiKey(
 				cfg.Services.Security,
 				cfg.Services.Timeout,
 				auth,
@@ -75,7 +75,7 @@ func jwtAuth() mw.Adapter {
 			apiKey := components[1]
 
 			// Check api key existence
-			_, err := sec.GetUserByApiKey(
+			_, _, err := sec.GetUserByApiKey(
 				cfg.Services.Security,
 				cfg.Services.Timeout,
 				fmt.Sprintf("%s:%s", components[0], components[1]),

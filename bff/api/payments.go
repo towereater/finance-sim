@@ -24,11 +24,11 @@ func GetPayment(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	auth := r.Context().Value(com.ContextAuth).(string)
 
-	// Create a new user
-	payment, err := scha.GetPayment(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, paymentId)
+	// Get the document
+	payment, status, err := scha.GetPayment(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, paymentId)
 	if err != nil {
 		fmt.Printf("Error while getting payment: %s\n", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -72,19 +72,25 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 
 	// Build the filter
 	var filter cha.Payment
-	filter.Type = queryParams.Get("paymenyType")
-	filter.Payer.Account = queryParams.Get("account")
+	filter.Type = queryParams.Get("paymentType")
+	filter.Payer.AccountIdentification.Type = queryParams.Get("payerType")
+	filter.Payer.AccountIdentification.Value = queryParams.Get("payerValue")
 
-	// Get all accounts
-	payments, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, from, limit)
+	// Get all documents
+	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, from, limit)
 	if err != nil {
 		fmt.Printf("Error while searching payments with filter %+v: %s\n",
 			filter, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
 	// Response output
+	if len(payments) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(payments)
 }
@@ -103,11 +109,11 @@ func CreatePayment(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	auth := r.Context().Value(com.ContextAuth).(string)
 
-	// Create a new payment
-	payment, err := scha.InsertPayment(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req)
+	// Create a new document
+	payment, status, err := scha.InsertPayment(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req)
 	if err != nil {
 		fmt.Printf("Error while creating payment: %s\n", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 

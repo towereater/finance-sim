@@ -8,19 +8,20 @@ import (
 	scha "mainframe-lib/checking-account/service"
 )
 
-func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.CheckingAccountInfo, error) {
+func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.CheckingAccountInfo, int, error) {
 	// Get account main details
-	ckAccount, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, id)
+	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, id)
 	if err != nil {
-		return model.CheckingAccountInfo{}, err
+		return model.CheckingAccountInfo{}, status, err
 	}
 
 	// Get latest account payments
 	filter := cha.Payment{}
-	filter.Payer.Account = id
-	payments, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, "", 5)
+	filter.Payer.AccountIdentification.Type = "ID"
+	filter.Payer.AccountIdentification.Value = id
+	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, "", 5)
 	if err != nil {
-		return model.CheckingAccountInfo{}, err
+		return model.CheckingAccountInfo{}, status, err
 	}
 
 	// Construct account info
@@ -38,5 +39,5 @@ func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.Ch
 		ckAccountInfo.LatestPayments = payments
 	}
 
-	return ckAccountInfo, nil
+	return ckAccountInfo, status, nil
 }

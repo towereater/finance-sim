@@ -50,20 +50,20 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	filter.Id.Service = queryParams.Get(string(config.ContextService))
 	filter.Owner = userId
 
-	// Get all accounts
-	accounts, err := sacc.GetAccounts(cfg.Services.Accounts, cfg.Services.Timeout, auth, filter, from, limit)
+	// Get all documents
+	accounts, status, err := sacc.GetAccounts(cfg.Services.Accounts, cfg.Services.Timeout, auth, filter, from, limit)
 	if err != nil {
 		fmt.Printf("Error while searching accounts with filter %+v: %s\n",
 			filter, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
-	// Get account additional data
+	// Get accounts additional data
 	var accountInfos model.GetAccountsOutput
 	for _, a := range accounts {
 		if a.Id.Service == "CK" {
-			ckAccount, err := service.GetCheckingAccountInfo(cfg, auth, a.Id.Account)
+			ckAccount, _, err := service.GetCheckingAccountInfo(cfg, auth, a.Id.Account)
 			if err != nil {
 				fmt.Printf("Error while searching checking account %+v: %s\n",
 					a.Id, err.Error())
