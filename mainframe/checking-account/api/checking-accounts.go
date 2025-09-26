@@ -131,10 +131,10 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get user details
-	user, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
+	user, status, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
 	if err != nil {
 		fmt.Printf("Error while getting user %s: %s\n", req.Owner, err.Error())
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -173,7 +173,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 		Owner: account.Owner,
 	}
 
-	err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+	status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %s: %s\n",
 			account.Id,
@@ -189,7 +189,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -231,12 +231,12 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 		Service: "CK",
 	}
 
-	err = sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accId)
+	status, err := sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accId)
 	if err != nil {
 		fmt.Printf("Error while removing account %s: %s\n",
 			accountId,
 			err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		return
 	}
 
@@ -255,12 +255,12 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 			Owner: account.Owner,
 		}
 
-		err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+		status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s: %s\n",
 				account.Id,
 				err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(status)
 			return
 		}
 

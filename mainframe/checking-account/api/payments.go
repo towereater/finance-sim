@@ -81,10 +81,11 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 		filter.Value.Amount = float32(amount)
 	}
 	filter.Value.Currency = queryParams.Get("currency")
-	filter.Payer.Account = queryParams.Get("account")
+	filter.Payer.AccountIdentification.Type = queryParams.Get("payerType")
+	filter.Payer.AccountIdentification.Value = queryParams.Get("payerValue")
 	filter.Payee.Name = queryParams.Get("name")
-	filter.Payee.AccountIdentification.Type = queryParams.Get("accountIdType")
-	filter.Payee.AccountIdentification.Value = queryParams.Get("accountIdValue")
+	filter.Payee.AccountIdentification.Type = queryParams.Get("payeeType")
+	filter.Payee.AccountIdentification.Value = queryParams.Get("payeeValue")
 	filter.Details = queryParams.Get("details")
 
 	// Extract context parameters
@@ -142,8 +143,16 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Payer.Account) != 24 {
-		fmt.Printf("Invalid payer account id\n")
+	if req.Payer.AccountIdentification.Type != "ID" &&
+		req.Payer.AccountIdentification.Type != "IBAN" {
+		fmt.Printf("Invalid payer account identification type\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(req.Payer.AccountIdentification.Value) != 24 &&
+		len(req.Payer.AccountIdentification.Value) != 27 {
+		fmt.Printf("Invalid payer account value\n")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -170,21 +179,41 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	abi := r.Context().Value(com.ContextAbi).(string)
 
-	// Check payer cash availability
-	payerAccount, err := db.SelectAccount(cfg, abi, req.Payer.Account)
-	if err != nil {
-		fmt.Printf("Error while searching payer account %s: %s\n", req.Payer.Account, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	// Obtain payer account and check its cash availability
+	var payerAccount cha.CheckingAccount
+
+	switch req.Payer.AccountIdentification.Type {
+	case "ID":
+		payerAccount, err = db.SelectAccount(cfg, abi, req.Payer.AccountIdentification.Value)
+		if err != nil {
+			fmt.Printf("Error while searching payer account with id %s: %s\n",
+				req.Payer.AccountIdentification.Value, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if payerAccount.Id == "" {
+			fmt.Printf("Payer account with id %s not found\n", req.Payer.AccountIdentification.Value)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+	case "IBAN":
+		payerAccount, err = db.SelectAccountByIBAN(cfg, abi, req.Payer.AccountIdentification.Value)
+		if err != nil {
+			fmt.Printf("Error while searching payer account with IBAN %s: %s\n",
+				req.Payer.AccountIdentification.Value, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if payerAccount.Id == "" {
+			fmt.Printf("Payer account with IBAN %s not found\n", req.Payer.AccountIdentification.Value)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 	}
-	if payerAccount.Id == "" {
-		fmt.Printf("Payer account %s not found\n", req.Payer.Account)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+
 	if payerAccount.Value.Amount < req.Value.Amount {
-		fmt.Printf("Payer account %s without enough funds\n", req.Payer.Account)
-		w.WriteHeader(http.StatusForbidden)
+		fmt.Printf("Payer account %s without enough funds\n", payerAccount.Id)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

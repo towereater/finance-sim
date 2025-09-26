@@ -53,8 +53,11 @@ func SelectPayments(cfg config.Config, abi string, paymentFilter cha.Payment, fr
 	if paymentFilter.Value.Currency != "" {
 		filter["value.currency"] = paymentFilter.Value.Currency
 	}
-	if paymentFilter.Payer.Account != "" {
-		filter["payer.account"] = paymentFilter.Payer.Account
+	if paymentFilter.Payer.AccountIdentification.Type != "" {
+		filter["payer.accountIdentification.type"] = paymentFilter.Payer.AccountIdentification.Type
+	}
+	if paymentFilter.Payer.AccountIdentification.Value != "" {
+		filter["payer.accountIdentification.value"] = paymentFilter.Payer.AccountIdentification.Value
 	}
 	if paymentFilter.Payee.Name != "" {
 		filter["payee.name"] = paymentFilter.Payee.Name
