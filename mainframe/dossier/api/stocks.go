@@ -31,7 +31,7 @@ func GetStock(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -44,7 +44,7 @@ func GetStock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select the document
-	xchangerStock, status, err := sxch.GetStock(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, isin)
+	xchangerStock, status, err := sxch.GetStock(cfg.Services.Xchanger, bank.XchangerApiKey, isin)
 	if err != nil {
 		fmt.Printf("Error while searching isin %s on xchanger: %s\n",
 			isin,
@@ -98,7 +98,7 @@ func GetStocks(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -111,7 +111,7 @@ func GetStocks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select all documents
-	xchangerStocks, status, err := sxch.GetStocks(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xch.Stock{}, page, limit)
+	xchangerStocks, status, err := sxch.GetStocks(cfg.Services.Xchanger, bank.XchangerApiKey, xch.Stock{}, page, limit)
 	if err != nil {
 		fmt.Printf("Error while searching stocks on xchanger: %s\n", err.Error())
 		w.WriteHeader(status)

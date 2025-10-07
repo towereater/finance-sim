@@ -48,12 +48,10 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Build the new document
-	account := usr.Account{
-		Id: req.Id,
-	}
+	account := usr.Account(req)
 
 	// Check user existence
-	_, err = db.SelectUser(cfg, abi, userId)
+	_, err = db.SelectUser(cfg.DBConfig, abi, userId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No users with id %s\n", userId)
 		w.WriteHeader(http.StatusBadRequest)
@@ -66,7 +64,7 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new document
-	err = db.AddAccount(cfg, abi, userId, account)
+	err = db.AddAccount(cfg.DBConfig, abi, userId, account)
 	if err != nil {
 		fmt.Printf("Error while inserting account %+v to user %s: %s\n",
 			account, userId, err.Error())
@@ -113,12 +111,10 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Build the new document
-	account := usr.Account{
-		Id: req.Id,
-	}
+	account := usr.Account(req)
 
 	// Check user existence
-	_, err = db.SelectUser(cfg, abi, userId)
+	_, err = db.SelectUser(cfg.DBConfig, abi, userId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No users with id %s\n", userId)
 		w.WriteHeader(http.StatusBadRequest)
@@ -131,7 +127,7 @@ func RemoveAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remove the document
-	err = db.RemoveAccount(cfg, abi, userId, account.Id)
+	err = db.RemoveAccount(cfg.DBConfig, abi, userId, account.Id)
 	if err != nil {
 		fmt.Printf("Error while removing account %+v from user %s: %s\n",
 			account.Id, userId, err.Error())

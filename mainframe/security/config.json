@@ -4,11 +4,11 @@
     },
     "db": {
         "host": "mongo:27017",
-        "timeout": 5
-    },
-    "prefix": "SR",
-    "collections": {
-        "banks": "banks",
-        "users": "users"
+        "timeout": 5,
+        "prefix": "SR",
+        "collections": {
+            "banks": "banks",
+            "users": "users"
+        }
     }
 }

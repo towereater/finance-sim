@@ -9,13 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectAccount(cfg config.Config, abi string, accountId acc.AccountId) (acc.Account, error) {
+func SelectAccount(cfg config.DBConfig, abi string, accountId acc.AccountId) (acc.Account, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return acc.Account{}, err
 	}
@@ -27,13 +27,13 @@ func SelectAccount(cfg config.Config, abi string, accountId acc.AccountId) (acc.
 	return account, err
 }
 
-func SelectAccounts(cfg config.Config, abi string, accountFilter acc.Account, from string, limit int) ([]acc.Account, error) {
+func SelectAccounts(cfg config.DBConfig, abi string, accountFilter acc.Account, from string, limit int) ([]acc.Account, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return []acc.Account{}, err
 	}
@@ -74,13 +74,13 @@ func SelectAccounts(cfg config.Config, abi string, accountFilter acc.Account, fr
 	return accounts, err
 }
 
-func InsertAccount(cfg config.Config, abi string, account acc.Account) error {
+func InsertAccount(cfg config.DBConfig, abi string, account acc.Account) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}
@@ -91,13 +91,13 @@ func InsertAccount(cfg config.Config, abi string, account acc.Account) error {
 	return err
 }
 
-func DeleteAccount(cfg config.Config, abi string, accountId acc.AccountId) error {
+func DeleteAccount(cfg config.DBConfig, abi string, accountId acc.AccountId) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}

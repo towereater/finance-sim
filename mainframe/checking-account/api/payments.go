@@ -29,7 +29,7 @@ func GetPayment(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	payment, err := db.SelectPayment(cfg, abi, paymentId)
+	payment, err := db.SelectPayment(cfg.DBConfig, abi, paymentId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No payments with id %s\n", paymentId)
 		w.WriteHeader(http.StatusNotFound)
@@ -93,7 +93,7 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
-	payments, err := db.SelectPayments(cfg, abi, filter, from, limit)
+	payments, err := db.SelectPayments(cfg.DBConfig, abi, filter, from, limit)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No payments with filter %+v\n", filter)
 		w.WriteHeader(http.StatusNotFound)
@@ -184,7 +184,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 
 	switch req.Payer.AccountIdentification.Type {
 	case "ID":
-		payerAccount, err = db.SelectAccount(cfg, abi, req.Payer.AccountIdentification.Value)
+		payerAccount, err = db.SelectAccount(cfg.DBConfig, abi, req.Payer.AccountIdentification.Value)
 		if err != nil {
 			fmt.Printf("Error while searching payer account with id %s: %s\n",
 				req.Payer.AccountIdentification.Value, err.Error())
@@ -197,7 +197,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "IBAN":
-		payerAccount, err = db.SelectAccountByIBAN(cfg, abi, req.Payer.AccountIdentification.Value)
+		payerAccount, err = db.SelectAccountByIBAN(cfg.DBConfig, abi, req.Payer.AccountIdentification.Value)
 		if err != nil {
 			fmt.Printf("Error while searching payer account with IBAN %s: %s\n",
 				req.Payer.AccountIdentification.Value, err.Error())
@@ -221,7 +221,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	payeeAccount := cha.CheckingAccount{}
 	if req.Payee.AccountIdentification.Type == "IBAN" &&
 		req.Payee.AccountIdentification.Value[5:10] == abi {
-		payeeAccount, err = db.SelectAccountByIBAN(cfg, abi, req.Payee.AccountIdentification.Value)
+		payeeAccount, err = db.SelectAccountByIBAN(cfg.DBConfig, abi, req.Payee.AccountIdentification.Value)
 		if err != nil {
 			fmt.Printf("Error while searching payee account %s: %s\n",
 				req.Payee.AccountIdentification.Value, err.Error())
@@ -237,7 +237,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 
 	// Remove cash from payer account
 	payerAccount.Value.Amount -= req.Value.Amount
-	err = db.UpdateAccount(cfg, abi, payerAccount)
+	err = db.UpdateAccount(cfg.DBConfig, abi, payerAccount)
 	if err != nil {
 		fmt.Printf("Error while updating payer account %s: %s\n", payerAccount.Id, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -246,7 +246,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 
 	// Add cash to payer account
 	payeeAccount.Value.Amount += req.Value.Amount
-	err = db.UpdateAccount(cfg, abi, payeeAccount)
+	err = db.UpdateAccount(cfg.DBConfig, abi, payeeAccount)
 	if err != nil {
 		fmt.Printf("Error while updating payee account %s: %s\n", payeeAccount.Id, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -265,7 +265,7 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new document
-	err = db.InsertPayment(cfg, abi, payment)
+	err = db.InsertPayment(cfg.DBConfig, abi, payment)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("Payment %+v already exists\n", payment)
 		w.WriteHeader(http.StatusConflict)

@@ -25,7 +25,7 @@ func GetStock(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get the document
-	stock, status, err := sdos.GetStock(cfg.Services.Dossiers, cfg.Services.Timeout, auth, isin)
+	stock, status, err := sdos.GetStock(cfg.Services.Dossiers, auth, isin)
 	if err != nil {
 		fmt.Printf("Error while getting stock with isin %s: %s\n", isin, err.Error())
 		w.WriteHeader(status)
@@ -75,7 +75,7 @@ func GetStocks(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get all documents
-	stocks, status, err := sdos.GetStocks(cfg.Services.Dossiers, cfg.Services.Timeout, auth, dos.Stock{}, page, limit)
+	stocks, status, err := sdos.GetStocks(cfg.Services.Dossiers, auth, dos.Stock{}, page, limit)
 	if err != nil {
 		fmt.Printf("Error while searching stocks: %s\n", err.Error())
 		w.WriteHeader(status)

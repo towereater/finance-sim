@@ -51,7 +51,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	filter.Owner = userId
 
 	// Get all documents
-	accounts, status, err := sacc.GetAccounts(cfg.Services.Accounts, cfg.Services.Timeout, auth, filter, from, limit)
+	accounts, status, err := sacc.GetAccounts(cfg.Services.Accounts, auth, filter, from, limit)
 	if err != nil {
 		fmt.Printf("Error while searching accounts with filter %+v: %s\n",
 			filter, err.Error())

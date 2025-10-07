@@ -8,13 +8,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func AddAccount(cfg config.Config, abi string, userId string, account usr.Account) error {
+func AddAccount(cfg config.DBConfig, abi string, userId string, account usr.Account) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -31,13 +31,13 @@ func AddAccount(cfg config.Config, abi string, userId string, account usr.Accoun
 	return err
 }
 
-func RemoveAccount(cfg config.Config, abi string, userId string, accountId usr.AccountId) error {
+func RemoveAccount(cfg config.DBConfig, abi string, userId string, accountId usr.AccountId) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}

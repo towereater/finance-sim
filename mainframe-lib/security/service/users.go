@@ -3,17 +3,18 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"mainframe-lib/security/model"
 	"net/http"
 )
 
-func GetUserByApiKey(host string, timeout int, auth string, apiKey string) (model.User, int, error) {
+func GetUserByApiKey(service ccom.ServiceConfig, auth string, apiKey string) (model.User, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/api-keys/%s", host, apiKey)
+	url := fmt.Sprintf("/api-keys/%s", apiKey)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.User{}, http.StatusInternalServerError, err
 	}

@@ -7,16 +7,19 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
+type ServerConfig struct {
+	Port string `json:"port" envconfig:"SERVER_PORT"`
+}
+
 type DBConfig struct {
 	Host    string `json:"host" envconfig:"DB_HOST"`
 	Timeout int    `json:"timeout" envconfig:"DB_TIMEOUT"`
+	Prefix  string `json:"prefix" envconfig:"DB_PREFIX"`
 }
 
-type BaseConfig struct {
-	Server struct {
-		Port string `json:"port" envconfig:"SERVER_PORT"`
-	} `json:"server"`
-	DB DBConfig `json:"db"`
+type ServiceConfig struct {
+	Host    string `json:"host"`
+	Timeout int    `json:"timeout"`
 }
 
 func loadFromFile(path string, config any) error {

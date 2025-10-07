@@ -25,7 +25,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get the document
-	order, status, err := sdos.GetOrder(cfg.Services.Dossiers, cfg.Services.Timeout, auth, orderId)
+	order, status, err := sdos.GetOrder(cfg.Services.Dossiers, auth, orderId)
 	if err != nil {
 		fmt.Printf("Error while getting order with id %s: %s\n", orderId, err.Error())
 		w.WriteHeader(status)
@@ -75,7 +75,7 @@ func GetOrders(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get all documents
-	orders, status, err := sdos.GetOrders(cfg.Services.Dossiers, cfg.Services.Timeout, auth, dos.Order{}, page, limit)
+	orders, status, err := sdos.GetOrders(cfg.Services.Dossiers, auth, dos.Order{}, page, limit)
 	if err != nil {
 		fmt.Printf("Error while searching stocks: %s\n", err.Error())
 		w.WriteHeader(status)
@@ -107,7 +107,7 @@ func CreateOrder(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Create a new document
-	status, err := sdos.InsertOrder(cfg.Services.Dossiers, cfg.Services.Timeout, auth, req)
+	status, err := sdos.InsertOrder(cfg.Services.Dossiers, auth, req)
 	if err != nil {
 		fmt.Printf("Error while creating order: %s\n", err.Error())
 		w.WriteHeader(status)
@@ -133,7 +133,7 @@ func DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Create a new document
-	status, err := sdos.DeleteOrder(cfg.Services.Dossiers, cfg.Services.Timeout, auth, orderId)
+	status, err := sdos.DeleteOrder(cfg.Services.Dossiers, auth, orderId)
 	if err != nil {
 		fmt.Printf("Error while deleting order: %s\n", err.Error())
 		w.WriteHeader(status)

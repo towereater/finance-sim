@@ -25,7 +25,7 @@ func GetPayment(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get the document
-	payment, status, err := scha.GetPayment(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, paymentId)
+	payment, status, err := scha.GetPayment(cfg.Services.CheckingAccounts, auth, paymentId)
 	if err != nil {
 		fmt.Printf("Error while getting payment: %s\n", err.Error())
 		w.WriteHeader(status)
@@ -77,7 +77,7 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 	filter.Payer.AccountIdentification.Value = queryParams.Get("payerValue")
 
 	// Get all documents
-	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, from, limit)
+	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, auth, filter, from, limit)
 	if err != nil {
 		fmt.Printf("Error while searching payments with filter %+v: %s\n",
 			filter, err.Error())
@@ -110,7 +110,7 @@ func CreatePayment(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Create a new document
-	payment, status, err := scha.InsertPayment(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req)
+	payment, status, err := scha.InsertPayment(cfg.Services.CheckingAccounts, auth, req)
 	if err != nil {
 		fmt.Printf("Error while creating payment: %s\n", err.Error())
 		w.WriteHeader(status)

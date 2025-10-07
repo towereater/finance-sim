@@ -8,13 +8,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func SelectUserByApiKey(cfg config.Config, abi string, apiKey string) (sec.User, error) {
+func SelectUserByApiKey(cfg config.DBConfig, abi string, apiKey string) (sec.User, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
 	if err != nil {
 		return sec.User{}, err
 	}
@@ -26,13 +26,13 @@ func SelectUserByApiKey(cfg config.Config, abi string, apiKey string) (sec.User,
 	return user, err
 }
 
-func InsertUser(cfg config.Config, abi string, user sec.User) error {
+func InsertUser(cfg config.DBConfig, abi string, user sec.User) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -43,13 +43,13 @@ func InsertUser(cfg config.Config, abi string, user sec.User) error {
 	return err
 }
 
-func DeleteUser(cfg config.Config, abi string, userId string) error {
+func DeleteUser(cfg config.DBConfig, abi string, userId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Users)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
 	if err != nil {
 		return err
 	}

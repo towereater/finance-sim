@@ -34,7 +34,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -47,7 +47,7 @@ func GetOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select the document
-	xchangerOrder, status, err := sxch.GetOrder(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, orderId)
+	xchangerOrder, status, err := sxch.GetOrder(cfg.Services.Xchanger, bank.XchangerApiKey, orderId)
 	if err != nil {
 		fmt.Printf("Error while searching order %s on xchanger: %s\n",
 			orderId,
@@ -105,7 +105,7 @@ func GetOrders(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -118,7 +118,7 @@ func GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select all documents
-	xchangerOrders, status, err := sxch.GetOrders(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xch.Order{}, page, limit)
+	xchangerOrders, status, err := sxch.GetOrders(cfg.Services.Xchanger, bank.XchangerApiKey, xch.Order{}, page, limit)
 	if err != nil {
 		fmt.Printf("Error while searching orders on xchanger: %s\n", err.Error())
 		w.WriteHeader(status)
@@ -168,7 +168,7 @@ func InsertOrder(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -181,7 +181,7 @@ func InsertOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get dossier data
-	dossier, err := db.SelectDossier(cfg, abi, req.Dossier)
+	dossier, err := db.SelectDossier(cfg.DBConfig, abi, req.Dossier)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with id %s\n", req.Dossier)
 		w.WriteHeader(http.StatusNotFound)
@@ -206,7 +206,7 @@ func InsertOrder(w http.ResponseWriter, r *http.Request) {
 		Options:  req.Options,
 	}
 
-	xchangerOrder, status, err := sxch.InsertOrder(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xchangerPayload)
+	xchangerOrder, status, err := sxch.InsertOrder(cfg.Services.Xchanger, bank.XchangerApiKey, xchangerPayload)
 	if err != nil {
 		fmt.Printf("Error while creating order %+v on xchanger: %s\n",
 			xchangerPayload,
@@ -238,7 +238,7 @@ func DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -251,7 +251,7 @@ func DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete order from xchanger
-	status, err = sxch.DeleteOrder(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, orderId)
+	status, err = sxch.DeleteOrder(cfg.Services.Xchanger, bank.XchangerApiKey, orderId)
 	if err != nil {
 		fmt.Printf("Error while deleting xchanger order %s: %s\n",
 			orderId,

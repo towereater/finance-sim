@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"mainframe-lib/checking-account/model"
-
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"net/http"
 )
 
-func GetAccount(host string, timeout int, auth string, accountId string) (model.CheckingAccount, int, error) {
+func GetAccount(service ccom.ServiceConfig, auth string, accountId string) (model.CheckingAccount, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/checking-accounts/%s", host, accountId)
+	url := fmt.Sprintf("/checking-accounts/%s", accountId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.CheckingAccount{}, http.StatusInternalServerError, err
 	}

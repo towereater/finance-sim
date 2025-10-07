@@ -4,17 +4,25 @@
     },
     "db": {
         "host": "mongo:27017",
-        "timeout": 5
-    },
-    "prefix": "CK",
-    "collections": {
-        "accounts": "accounts",
-        "payments": "payments"
+        "timeout": 5,
+        "prefix": "CK",
+        "collections": {
+            "accounts": "accounts",
+            "payments": "payments"
+        }
     },
     "services": {
-      "security": "security:12000",
-      "users": "users:12000",
-      "accounts": "accounts:12000",
-      "timeout": 5
+        "security": {
+            "host": "http://security:12000",
+            "timeout": 5
+        },
+        "users": {
+            "host": "http://users:12000",
+            "timeout": 5
+        },
+        "accounts": {
+            "host": "http://accounts:12000",
+            "timeout": 5
+        }
     }
 }

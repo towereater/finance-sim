@@ -9,13 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectAccount(cfg config.Config, abi string, accountId string) (cha.CheckingAccount, error) {
+func SelectAccount(cfg config.DBConfig, abi string, accountId string) (cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return cha.CheckingAccount{}, err
 	}
@@ -27,13 +27,13 @@ func SelectAccount(cfg config.Config, abi string, accountId string) (cha.Checkin
 	return account, err
 }
 
-func SelectAccountByIBAN(cfg config.Config, abi string, iban string) (cha.CheckingAccount, error) {
+func SelectAccountByIBAN(cfg config.DBConfig, abi string, iban string) (cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return cha.CheckingAccount{}, err
 	}
@@ -45,13 +45,13 @@ func SelectAccountByIBAN(cfg config.Config, abi string, iban string) (cha.Checki
 	return account, err
 }
 
-func SelectAccounts(cfg config.Config, abi string, accountFilter cha.CheckingAccount, from string, limit int) ([]cha.CheckingAccount, error) {
+func SelectAccounts(cfg config.DBConfig, abi string, accountFilter cha.CheckingAccount, from string, limit int) ([]cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return []cha.CheckingAccount{}, err
 	}
@@ -89,13 +89,13 @@ func SelectAccounts(cfg config.Config, abi string, accountFilter cha.CheckingAcc
 	return accounts, err
 }
 
-func InsertAccount(cfg config.Config, abi string, account cha.CheckingAccount) error {
+func InsertAccount(cfg config.DBConfig, abi string, account cha.CheckingAccount) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}
@@ -106,13 +106,13 @@ func InsertAccount(cfg config.Config, abi string, account cha.CheckingAccount) e
 	return err
 }
 
-func UpdateAccount(cfg config.Config, abi string, account cha.CheckingAccount) error {
+func UpdateAccount(cfg config.DBConfig, abi string, account cha.CheckingAccount) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}
@@ -123,13 +123,13 @@ func UpdateAccount(cfg config.Config, abi string, account cha.CheckingAccount) e
 	return err
 }
 
-func DeleteAccount(cfg config.Config, abi string, accountId string) error {
+func DeleteAccount(cfg config.DBConfig, abi string, accountId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Accounts)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
 	if err != nil {
 		return err
 	}

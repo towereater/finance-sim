@@ -3,17 +3,18 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"mainframe-lib/dossier/model"
 	"net/http"
 )
 
-func GetStock(host string, timeout int, auth string, isin string) (model.Stock, int, error) {
+func GetStock(service ccom.ServiceConfig, auth string, isin string) (model.Stock, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/stocks/%s", host, isin)
+	url := fmt.Sprintf("/stocks/%s", isin)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.Stock{}, http.StatusInternalServerError, err
 	}
@@ -36,15 +37,15 @@ func GetStock(host string, timeout int, auth string, isin string) (model.Stock, 
 	return stock, res.StatusCode, nil
 }
 
-func GetStocks(host string, timeout int, auth string, filter model.Stock, page int, limit int) ([]model.Stock, int, error) {
+func GetStocks(service ccom.ServiceConfig, auth string, filter model.Stock, page int, limit int) ([]model.Stock, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/stocks", host)
+	url := "/stocks"
 
 	url = fmt.Sprintf("%s?limit=%d", url, limit)
 	url = fmt.Sprintf("%s&page=%d", url, page)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return []model.Stock{}, http.StatusInternalServerError, err
 	}

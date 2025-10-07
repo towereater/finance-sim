@@ -3,17 +3,18 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"mainframe-lib/security/model"
 	"net/http"
 )
 
-func GetBankByAbi(host string, timeout int, auth string, abi string) (model.Bank, int, error) {
+func GetBankByAbi(service ccom.ServiceConfig, auth string, abi string) (model.Bank, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/banks/%s", host, abi)
+	url := fmt.Sprintf("/banks/%s", abi)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.Bank{}, http.StatusInternalServerError, err
 	}

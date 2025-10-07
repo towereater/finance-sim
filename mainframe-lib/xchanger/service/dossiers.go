@@ -3,17 +3,18 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"mainframe-lib/xchanger/model"
 	"net/http"
 )
 
-func InsertDossier(host string, timeout int, auth string, payload model.InsertDossierInput) (model.Dossier, int, error) {
+func InsertDossier(service ccom.ServiceConfig, auth string, payload model.InsertDossierInput) (model.Dossier, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/dossiers", host)
+	url := "/dossiers"
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return model.Dossier{}, http.StatusInternalServerError, err
 	}
@@ -33,12 +34,12 @@ func InsertDossier(host string, timeout int, auth string, payload model.InsertDo
 	return dossier, res.StatusCode, nil
 }
 
-func DeleteDossier(host string, timeout int, auth string, dossierId string) (int, error) {
+func DeleteDossier(service ccom.ServiceConfig, auth string, dossierId string) (int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/dossiers/%s", host, dossierId)
+	url := fmt.Sprintf("/dossiers/%s", dossierId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodDelete, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodDelete, url, auth, "")
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

@@ -9,13 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectDossier(cfg config.Config, abi string, dossierId string) (dos.Dossier, error) {
+func SelectDossier(cfg config.DBConfig, abi string, dossierId string) (dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
 	if err != nil {
 		return dos.Dossier{}, err
 	}
@@ -27,13 +27,13 @@ func SelectDossier(cfg config.Config, abi string, dossierId string) (dos.Dossier
 	return dossier, err
 }
 
-func SelectDossiers(cfg config.Config, abi string, dossierFilter dos.Dossier, from string, limit int) ([]dos.Dossier, error) {
+func SelectDossiers(cfg config.DBConfig, abi string, dossierFilter dos.Dossier, from string, limit int) ([]dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
 	if err != nil {
 		return []dos.Dossier{}, err
 	}
@@ -68,13 +68,13 @@ func SelectDossiers(cfg config.Config, abi string, dossierFilter dos.Dossier, fr
 	return dossiers, err
 }
 
-func InsertDossier(cfg config.Config, abi string, dossier dos.Dossier) error {
+func InsertDossier(cfg config.DBConfig, abi string, dossier dos.Dossier) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
 	if err != nil {
 		return err
 	}
@@ -85,13 +85,13 @@ func InsertDossier(cfg config.Config, abi string, dossier dos.Dossier) error {
 	return err
 }
 
-func DeleteDossier(cfg config.Config, abi string, dossierId string) error {
+func DeleteDossier(cfg config.DBConfig, abi string, dossierId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Dossiers)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
 	if err != nil {
 		return err
 	}

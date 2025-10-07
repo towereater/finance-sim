@@ -9,13 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectPayment(cfg config.Config, abi string, paymentId string) (cha.Payment, error) {
+func SelectPayment(cfg config.DBConfig, abi string, paymentId string) (cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Payments)
 	if err != nil {
 		return cha.Payment{}, err
 	}
@@ -27,13 +27,13 @@ func SelectPayment(cfg config.Config, abi string, paymentId string) (cha.Payment
 	return payment, err
 }
 
-func SelectPayments(cfg config.Config, abi string, paymentFilter cha.Payment, from string, limit int) ([]cha.Payment, error) {
+func SelectPayments(cfg config.DBConfig, abi string, paymentFilter cha.Payment, from string, limit int) ([]cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Payments)
 	if err != nil {
 		return []cha.Payment{}, err
 	}
@@ -92,13 +92,13 @@ func SelectPayments(cfg config.Config, abi string, paymentFilter cha.Payment, fr
 	return payments, err
 }
 
-func InsertPayment(cfg config.Config, abi string, payment cha.Payment) error {
+func InsertPayment(cfg config.DBConfig, abi string, payment cha.Payment) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, abi, cfg.Prefix, cfg.Collections.Payments)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Payments)
 	if err != nil {
 		return err
 	}

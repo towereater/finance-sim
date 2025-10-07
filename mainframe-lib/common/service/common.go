@@ -3,11 +3,12 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"mainframe-lib/common/config"
 	"net/http"
 	"time"
 )
 
-func ExecuteHttpRequest(method string, url string, timeout int, auth string, payload any) (*http.Response, error) {
+func ExecuteHttpRequest(service config.ServiceConfig, method string, url string, auth string, payload any) (*http.Response, error) {
 	// Convert the payload
 	bytesPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -15,7 +16,7 @@ func ExecuteHttpRequest(method string, url string, timeout int, auth string, pay
 	}
 
 	// Construct the request
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(bytesPayload))
+	req, err := http.NewRequest(method, service.Host+url, bytes.NewBuffer(bytesPayload))
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +24,7 @@ func ExecuteHttpRequest(method string, url string, timeout int, auth string, pay
 	req.Header.Set("Authorization", auth)
 
 	client := &http.Client{
-		Timeout: time.Duration(timeout) * time.Second,
+		Timeout: time.Duration(service.Timeout) * time.Second,
 	}
 
 	// Execute the request

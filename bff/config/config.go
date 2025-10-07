@@ -4,16 +4,16 @@ import (
 	com "mainframe-lib/common/config"
 )
 
+// Base config extension
 type Config struct {
-	com.BaseConfig
+	Server   com.ServerConfig `json:"server"`
 	Services struct {
-		Security         string `json:"security" envconfig:"SERVICES_SECURITY"`
-		Users            string `json:"users" envconfig:"SERVICES_USERS"`
-		Accounts         string `json:"accounts" envconfig:"SERVICES_ACCOUNTS"`
-		CheckingAccounts string `json:"checking-accounts" envconfig:"SERVICES_CKACCOUNTS"`
-		Dossiers         string `json:"dossiers" envconfig:"SERVICES_DOSSIERS"`
-		Timeout          int    `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
-	} `yaml:"services"`
+		Security         com.ServiceConfig `json:"security"`
+		Users            com.ServiceConfig `json:"users"`
+		Accounts         com.ServiceConfig `json:"accounts"`
+		CheckingAccounts com.ServiceConfig `json:"ck-accounts"`
+		Dossiers         com.ServiceConfig `json:"dossiers"`
+	} `json:"services"`
 }
 
 // Path and query parameters

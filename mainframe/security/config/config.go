@@ -5,13 +5,17 @@ import (
 )
 
 // Base config extension
-type Config struct {
-	com.BaseConfig
-	Prefix      string `json:"prefix" envconfig:"COLL_PREFIX"`
+type DBConfig struct {
+	com.DBConfig
 	Collections struct {
 		Banks string `json:"banks" envconfig:"COLL_BANKS"`
 		Users string `json:"users" envconfig:"COLL_USERS"`
 	} `json:"collections"`
+}
+
+type Config struct {
+	Server   com.ServerConfig `json:"server"`
+	DBConfig DBConfig         `json:"db"`
 }
 
 // Path and query parameters

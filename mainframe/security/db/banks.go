@@ -8,13 +8,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func SelectBankByAbi(cfg config.Config, abi string) (sec.Bank, error) {
+func SelectBankByAbi(cfg config.DBConfig, abi string) (sec.Bank, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, "09999", cfg.Prefix, cfg.Collections.Banks)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, "09999", cfg.Collections.Banks)
 	if err != nil {
 		return sec.Bank{}, err
 	}
@@ -26,13 +26,13 @@ func SelectBankByAbi(cfg config.Config, abi string) (sec.Bank, error) {
 	return bank, err
 }
 
-func InsertBank(cfg config.Config, bank sec.Bank) error {
+func InsertBank(cfg config.DBConfig, bank sec.Bank) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, "09999", cfg.Prefix, cfg.Collections.Banks)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, "09999", cfg.Collections.Banks)
 	if err != nil {
 		return err
 	}
@@ -43,13 +43,13 @@ func InsertBank(cfg config.Config, bank sec.Bank) error {
 	return err
 }
 
-func DeleteBank(cfg config.Config, abi string) error {
+func DeleteBank(cfg config.DBConfig, abi string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DB)
+	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DB, "09999", cfg.Prefix, cfg.Collections.Banks)
+	coll, err := com.GetCollection(ctx, cfg.DBConfig, "09999", cfg.Collections.Banks)
 	if err != nil {
 		return err
 	}

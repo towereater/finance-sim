@@ -36,7 +36,7 @@ func GetDossier(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	dossier, err := db.SelectDossier(cfg, abi, dossierId)
+	dossier, err := db.SelectDossier(cfg.DBConfig, abi, dossierId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with id %s\n", dossierId)
 		w.WriteHeader(http.StatusNotFound)
@@ -89,7 +89,7 @@ func GetDossiers(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
-	dossiers, err := db.SelectDossiers(cfg, abi, filter, from, limit)
+	dossiers, err := db.SelectDossiers(cfg.DBConfig, abi, filter, from, limit)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with filter %+v\n", filter)
 		w.WriteHeader(http.StatusNotFound)
@@ -145,7 +145,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -158,7 +158,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get checking account data
-	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, req.CheckingAccount.Account)
+	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, auth, req.CheckingAccount.Account)
 	if err != nil {
 		fmt.Printf("Error while searching checking account %+v: %s\n",
 			req.CheckingAccount, err.Error())
@@ -173,7 +173,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user data
-	user, status, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
+	user, status, err := susr.GetUser(cfg.Services.Users, auth, req.Owner)
 	if err != nil {
 		fmt.Printf("Error while searching user %s: %s\n", req.Owner, err.Error())
 		w.WriteHeader(status)
@@ -191,12 +191,12 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	payload := acc.InsertAccountInput{
 		Id: acc.AccountId{
 			Account: dossier.Id,
-			Service: cfg.Prefix,
+			Service: cfg.DBConfig.Prefix,
 		},
 		Owner: dossier.Owner,
 	}
 
-	status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+	status, err = sacc.InsertAccount(cfg.Services.Accounts, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding dossier %s: %s\n",
 			dossier.Id,
@@ -215,7 +215,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 		IBAN:       ckAccount.IBAN,
 	}
 
-	xchangerDossier, status, err := sxch.InsertDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, xchangerPayload)
+	xchangerDossier, status, err := sxch.InsertDossier(cfg.Services.Xchanger, bank.XchangerApiKey, xchangerPayload)
 	if err != nil {
 		fmt.Printf("Error while creating xchanger dossier %s: %s\n",
 			dossier.Id,
@@ -223,7 +223,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Delete dossier from the accounts list
-		err = db.DeleteDossier(cfg, abi, dossier.Id)
+		err = db.DeleteDossier(cfg.DBConfig, abi, dossier.Id)
 		if err != nil {
 			fmt.Printf("Error while deleting dossier with id %s: %s\n", dossier.Id, err.Error())
 
@@ -238,7 +238,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	// Insert the new document
 	dossier.XChangerDossier = xchangerDossier.Id
 
-	err = db.InsertDossier(cfg, abi, dossier)
+	err = db.InsertDossier(cfg.DBConfig, abi, dossier)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("Dossier %+v already exists\n", dossier)
 		w.WriteHeader(http.StatusConflict)
@@ -270,7 +270,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Select the document
-	dossier, err := db.SelectDossier(cfg, abi, dossierId)
+	dossier, err := db.SelectDossier(cfg.DBConfig, abi, dossierId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with id %s\n", dossierId)
 		w.WriteHeader(http.StatusNoContent)
@@ -283,7 +283,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get bank data
-	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, cfg.Services.Timeout, auth, abi)
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
 	if err != nil {
 		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
 		w.WriteHeader(status)
@@ -296,7 +296,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete dossier from xchanger
-	status, err = sxch.DeleteDossier(cfg.Services.Xchanger, cfg.Services.Timeout, bank.XchangerApiKey, dossier.XChangerDossier)
+	status, err = sxch.DeleteDossier(cfg.Services.Xchanger, bank.XchangerApiKey, dossier.XChangerDossier)
 	if err != nil {
 		fmt.Printf("Error while deleting xchanger dossier %s: %s\n",
 			dossier.Id,
@@ -311,7 +311,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 		Account: dossierId,
 		Service: "DS",
 	}
-	status, err = sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accountId)
+	status, err = sacc.DeleteAccount(cfg.Services.Accounts, auth, accountId)
 	if err != nil {
 		fmt.Printf("Error while removing dossier %s: %s\n",
 			dossierId,
@@ -321,7 +321,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the document
-	err = db.DeleteDossier(cfg, abi, dossierId)
+	err = db.DeleteDossier(cfg.DBConfig, abi, dossierId)
 	if err != nil {
 		fmt.Printf("Error while deleting dossier with id %s: %s\n", dossierId, err.Error())
 
@@ -330,12 +330,12 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 		payload := acc.InsertAccountInput{
 			Id: acc.AccountId{
 				Account: dossier.Id,
-				Service: cfg.Prefix,
+				Service: cfg.DBConfig.Prefix,
 			},
 			Owner: dossier.Owner,
 		}
 
-		status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+		status, err = sacc.InsertAccount(cfg.Services.Accounts, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding dossier %s: %s\n",
 				dossier.Id,

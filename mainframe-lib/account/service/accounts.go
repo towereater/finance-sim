@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"mainframe-lib/account/model"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"net/http"
 )
 
-func GetAccounts(host string, timeout int, auth string, filter model.Account, from string, limit int) ([]model.Account, int, error) {
+func GetAccounts(service ccom.ServiceConfig, auth string, filter model.Account, from string, limit int) ([]model.Account, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/accounts", host)
+	url := "/accounts"
 
 	url = fmt.Sprintf("%s?limit=%d", url, limit)
 	if from != "" {
@@ -24,7 +25,7 @@ func GetAccounts(host string, timeout int, auth string, filter model.Account, fr
 	}
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return []model.Account{}, http.StatusInternalServerError, err
 	}
@@ -47,12 +48,12 @@ func GetAccounts(host string, timeout int, auth string, filter model.Account, fr
 	return accounts, res.StatusCode, nil
 }
 
-func InsertAccount(host string, timeout int, auth string, payload model.InsertAccountInput) (int, error) {
+func InsertAccount(service ccom.ServiceConfig, auth string, payload model.InsertAccountInput) (int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/accounts", host)
+	url := "/accounts"
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -65,13 +66,12 @@ func InsertAccount(host string, timeout int, auth string, payload model.InsertAc
 	return res.StatusCode, nil
 }
 
-func DeleteAccount(host string, timeout int, auth string, accountId model.AccountId) (int, error) {
+func DeleteAccount(service ccom.ServiceConfig, auth string, accountId model.AccountId) (int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/accounts/services/%s/accounts/%s",
-		host, accountId.Service, accountId.Account)
+	url := fmt.Sprintf("/accounts/services/%s/accounts/%s", accountId.Service, accountId.Account)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodDelete, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodDelete, url, auth, "")
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

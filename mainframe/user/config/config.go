@@ -5,15 +5,18 @@ import (
 )
 
 // Base config extension
-type Config struct {
-	com.BaseConfig
-	Prefix      string `json:"prefix" envconfig:"COLL_PREFIX"`
+type DBConfig struct {
+	com.DBConfig
 	Collections struct {
 		Users string `json:"users" envconfig:"COLL_USERS"`
 	} `json:"collections"`
+}
+
+type Config struct {
+	Server   com.ServerConfig `json:"server"`
+	DBConfig DBConfig         `json:"db"`
 	Services struct {
-		Security string `json:"security" envconfig:"SERVICES_SECURITY"`
-		Timeout  int    `json:"timeout" envconfig:"SERVICES_TIMEOUT"`
+		Security com.ServiceConfig `json:"security"`
 	} `json:"services"`
 }
 

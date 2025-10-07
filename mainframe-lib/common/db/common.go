@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetCollection(ctx context.Context, cfg config.DBConfig, abi string, db string, coll string) (*mongo.Collection, error) {
+func GetCollection(ctx context.Context, cfg config.DBConfig, abi string, coll string) (*mongo.Collection, error) {
 	// Connect to the db
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+cfg.Host))
 	if err != nil {
@@ -19,7 +19,7 @@ func GetCollection(ctx context.Context, cfg config.DBConfig, abi string, db stri
 	}
 
 	// Retrieve the collection
-	return client.Database(getAbiDBName(abi, db)).Collection(coll), nil
+	return client.Database(getAbiDBName(abi, cfg.Prefix)).Collection(coll), nil
 }
 
 func GetContextFromConfig(cfg config.DBConfig) (context.Context, context.CancelFunc) {

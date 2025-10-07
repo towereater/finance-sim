@@ -33,12 +33,7 @@ func securityAuth() mw.Adapter {
 			apiKey := components[1]
 
 			// Check api key existence
-			_, _, err := sec.GetUserByApiKey(
-				cfg.Services.Security,
-				cfg.Services.Timeout,
-				auth,
-				apiKey,
-			)
+			_, _, err := sec.GetUserByApiKey(cfg.Services.Security, auth, apiKey)
 			if err != nil {
 				fmt.Printf("Error while validating api key %s: %s\n", apiKey, err.Error())
 				w.WriteHeader(http.StatusUnauthorized)
@@ -77,7 +72,6 @@ func jwtAuth() mw.Adapter {
 			// Check api key existence
 			_, _, err := sec.GetUserByApiKey(
 				cfg.Services.Security,
-				cfg.Services.Timeout,
 				fmt.Sprintf("%s:%s", components[0], components[1]),
 				apiKey,
 			)

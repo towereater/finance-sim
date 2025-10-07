@@ -29,7 +29,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	user, err := db.SelectUser(cfg, abi, userId)
+	user, err := db.SelectUser(cfg.DBConfig, abi, userId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No users with id %s\n", userId)
 		w.WriteHeader(http.StatusNotFound)
@@ -83,7 +83,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
-	users, err := db.SelectUsers(cfg, abi, filter, from, limit)
+	users, err := db.SelectUsers(cfg.DBConfig, abi, filter, from, limit)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No users with filter %+v\n", filter)
 		w.WriteHeader(http.StatusNotFound)
@@ -167,7 +167,7 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new document
-	err = db.InsertUser(cfg, abi, user)
+	err = db.InsertUser(cfg.DBConfig, abi, user)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("User %+v already exists\n", user)
 		w.WriteHeader(http.StatusConflict)
@@ -207,7 +207,7 @@ func PatchUser(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	user, err := db.SelectUser(cfg, abi, userId)
+	user, err := db.SelectUser(cfg.DBConfig, abi, userId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No users with id %s\n", userId)
 		w.WriteHeader(http.StatusNotFound)
@@ -225,7 +225,7 @@ func PatchUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update the document
-	err = db.UpdateUser(cfg, abi, userId, user)
+	err = db.UpdateUser(cfg.DBConfig, abi, userId, user)
 	if err != nil {
 		fmt.Printf("Error while updating user %+v: %s\n", user, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -251,7 +251,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Delete the document
-	err := db.DeleteUser(cfg, abi, userId)
+	err := db.DeleteUser(cfg.DBConfig, abi, userId)
 	if err != nil {
 		fmt.Printf("Error while deleting user with id %s: %s\n", userId, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

@@ -10,7 +10,7 @@ import (
 
 func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.CheckingAccountInfo, int, error) {
 	// Get account main details
-	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, id)
+	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, auth, id)
 	if err != nil {
 		return model.CheckingAccountInfo{}, status, err
 	}
@@ -19,7 +19,7 @@ func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.Ch
 	filter := cha.Payment{}
 	filter.Payer.AccountIdentification.Type = "ID"
 	filter.Payer.AccountIdentification.Value = id
-	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, cfg.Services.Timeout, auth, filter, "", 5)
+	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, auth, filter, "", 5)
 	if err != nil {
 		return model.CheckingAccountInfo{}, status, err
 	}

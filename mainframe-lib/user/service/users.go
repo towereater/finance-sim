@@ -3,17 +3,18 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"mainframe-lib/user/model"
 	"net/http"
 )
 
-func GetUser(host string, timeout int, auth string, userId string) (model.User, int, error) {
+func GetUser(service ccom.ServiceConfig, auth string, userId string) (model.User, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users/%s", host, userId)
+	url := fmt.Sprintf("/users/%s", userId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.User{}, http.StatusInternalServerError, err
 	}
@@ -36,12 +37,12 @@ func GetUser(host string, timeout int, auth string, userId string) (model.User, 
 	return user, res.StatusCode, nil
 }
 
-func GetUserByUsername(host string, timeout int, auth string, username string, password string) (model.User, int, error) {
+func GetUserByUsername(service ccom.ServiceConfig, auth string, username string, password string) (model.User, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users?username=%s&password=%s", host, username, password)
+	url := fmt.Sprintf("/users?username=%s&password=%s", username, password)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.User{}, http.StatusInternalServerError, err
 	}
@@ -68,12 +69,12 @@ func GetUserByUsername(host string, timeout int, auth string, username string, p
 	return users[0], res.StatusCode, nil
 }
 
-func InsertUser(host string, timeout int, auth string, payload model.InsertUserInput) (model.User, int, error) {
+func InsertUser(service ccom.ServiceConfig, auth string, payload model.InsertUserInput) (model.User, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users", host)
+	url := "/users"
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return model.User{}, http.StatusInternalServerError, err
 	}
@@ -93,12 +94,12 @@ func InsertUser(host string, timeout int, auth string, payload model.InsertUserI
 	return user, res.StatusCode, nil
 }
 
-func UpdateUser(host string, timeout int, auth string, userId string, payload model.UpdateUserInput) (model.User, int, error) {
+func UpdateUser(service ccom.ServiceConfig, auth string, userId string, payload model.UpdateUserInput) (model.User, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users/%s", host, userId)
+	url := fmt.Sprintf("/users/%s", userId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPatch, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPatch, url, auth, payload)
 	if err != nil {
 		return model.User{}, http.StatusInternalServerError, err
 	}
@@ -118,12 +119,12 @@ func UpdateUser(host string, timeout int, auth string, userId string, payload mo
 	return user, res.StatusCode, nil
 }
 
-func AddAccountToUser(host string, timeout int, auth string, userId string, payload model.InsertAccountInput) (int, error) {
+func AddAccountToUser(service ccom.ServiceConfig, auth string, userId string, payload model.InsertAccountInput) (int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users/%s/accounts", host, userId)
+	url := fmt.Sprintf("/users/%s/accounts", userId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -136,12 +137,12 @@ func AddAccountToUser(host string, timeout int, auth string, userId string, payl
 	return res.StatusCode, nil
 }
 
-func RemoveAccountFromUser(host string, timeout int, auth string, userId string, payload model.DeleteAccountInput) (int, error) {
+func RemoveAccountFromUser(service ccom.ServiceConfig, auth string, userId string, payload model.DeleteAccountInput) (int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/users/%s/accounts", host, userId)
+	url := fmt.Sprintf("/users/%s/accounts", userId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodDelete, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodDelete, url, auth, payload)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

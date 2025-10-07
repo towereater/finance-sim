@@ -3,17 +3,19 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	ccom "mainframe-lib/common/config"
 	com "mainframe-lib/common/service"
+	scom "mainframe-lib/common/service"
 	"mainframe-lib/xchanger/model"
 	"net/http"
 )
 
-func GetOrder(host string, timeout int, auth string, orderId string) (model.Order, int, error) {
+func GetOrder(service ccom.ServiceConfig, auth string, orderId string) (model.Order, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/orders/%s", host, orderId)
+	url := fmt.Sprintf("/orders/%s", orderId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.Order{}, http.StatusInternalServerError, err
 	}
@@ -36,15 +38,15 @@ func GetOrder(host string, timeout int, auth string, orderId string) (model.Orde
 	return order, res.StatusCode, nil
 }
 
-func GetOrders(host string, timeout int, auth string, filter model.Order, page int, size int) ([]model.Order, int, error) {
+func GetOrders(service ccom.ServiceConfig, auth string, filter model.Order, page int, size int) ([]model.Order, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/orders", host)
+	url := "/orders"
 
 	url = fmt.Sprintf("%s?page=%d", url, page)
 	url = fmt.Sprintf("%s&size=%d", url, size)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := com.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return []model.Order{}, http.StatusInternalServerError, err
 	}
@@ -67,12 +69,12 @@ func GetOrders(host string, timeout int, auth string, filter model.Order, page i
 	return orders, res.StatusCode, nil
 }
 
-func InsertOrder(host string, timeout int, auth string, payload model.InsertOrderInput) (model.Order, int, error) {
+func InsertOrder(service ccom.ServiceConfig, auth string, payload model.InsertOrderInput) (model.Order, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/orders", host)
+	url := "/orders"
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
+	res, err := com.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return model.Order{}, http.StatusInternalServerError, err
 	}
@@ -92,12 +94,12 @@ func InsertOrder(host string, timeout int, auth string, payload model.InsertOrde
 	return order, res.StatusCode, nil
 }
 
-func DeleteOrder(host string, timeout int, auth string, orderId string) (int, error) {
+func DeleteOrder(service ccom.ServiceConfig, auth string, orderId string) (int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/orders/%s", host, orderId)
+	url := fmt.Sprintf("/orders/%s", orderId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodDelete, url, timeout, auth, "")
+	res, err := com.ExecuteHttpRequest(service, http.MethodDelete, url, auth, "")
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

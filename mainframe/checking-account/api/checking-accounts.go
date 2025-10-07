@@ -33,7 +33,7 @@ func GetCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	account, err := db.SelectAccount(cfg, abi, accountId)
+	account, err := db.SelectAccount(cfg.DBConfig, abi, accountId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No accounts with id %s\n", accountId)
 		w.WriteHeader(http.StatusNotFound)
@@ -87,7 +87,7 @@ func GetCheckingAccounts(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
-	accounts, err := db.SelectAccounts(cfg, abi, filter, from, limit)
+	accounts, err := db.SelectAccounts(cfg.DBConfig, abi, filter, from, limit)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No accounts with filter %+v\n", filter)
 		w.WriteHeader(http.StatusNotFound)
@@ -131,7 +131,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Get user details
-	user, status, err := susr.GetUser(cfg.Services.Users, cfg.Services.Timeout, auth, req.Owner)
+	user, status, err := susr.GetUser(cfg.Services.Users, auth, req.Owner)
 	if err != nil {
 		fmt.Printf("Error while getting user %s: %s\n", req.Owner, err.Error())
 		w.WriteHeader(status)
@@ -152,7 +152,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new document
-	err = db.InsertAccount(cfg, abi, account)
+	err = db.InsertAccount(cfg.DBConfig, abi, account)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("Account %+v already exists\n", account)
 		w.WriteHeader(http.StatusConflict)
@@ -168,12 +168,12 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	payload := acc.InsertAccountInput{
 		Id: acc.AccountId{
 			Account: account.Id,
-			Service: cfg.Prefix,
+			Service: cfg.DBConfig.Prefix,
 		},
 		Owner: account.Owner,
 	}
 
-	status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+	status, err = sacc.InsertAccount(cfg.Services.Accounts, auth, payload)
 	if err != nil {
 		fmt.Printf("Error while adding account %s: %s\n",
 			account.Id,
@@ -181,7 +181,7 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Delete the document
-		err = db.DeleteAccount(cfg, abi, account.Id)
+		err = db.DeleteAccount(cfg.DBConfig, abi, account.Id)
 		if err != nil {
 			fmt.Printf("Error while deleting account with id %s: %s\n", account.Id, err.Error())
 
@@ -213,7 +213,7 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Select the document
-	account, err := db.SelectAccount(cfg, abi, accountId)
+	account, err := db.SelectAccount(cfg.DBConfig, abi, accountId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No accounts with id %s\n", accountId)
 		w.WriteHeader(http.StatusNoContent)
@@ -231,7 +231,7 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 		Service: "CK",
 	}
 
-	status, err := sacc.DeleteAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, accId)
+	status, err := sacc.DeleteAccount(cfg.Services.Accounts, auth, accId)
 	if err != nil {
 		fmt.Printf("Error while removing account %s: %s\n",
 			accountId,
@@ -241,7 +241,7 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the document
-	err = db.DeleteAccount(cfg, abi, accountId)
+	err = db.DeleteAccount(cfg.DBConfig, abi, accountId)
 	if err != nil {
 		fmt.Printf("Error while deleting account with id %s: %s\n", accountId, err.Error())
 
@@ -250,12 +250,12 @@ func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 		payload := acc.InsertAccountInput{
 			Id: acc.AccountId{
 				Account: account.Id,
-				Service: cfg.Prefix,
+				Service: cfg.DBConfig.Prefix,
 			},
 			Owner: account.Owner,
 		}
 
-		status, err = sacc.InsertAccount(cfg.Services.Accounts, cfg.Services.Timeout, auth, payload)
+		status, err = sacc.InsertAccount(cfg.Services.Accounts, auth, payload)
 		if err != nil {
 			fmt.Printf("Error while adding account %s: %s\n",
 				account.Id,

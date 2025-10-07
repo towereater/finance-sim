@@ -4,16 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"mainframe-lib/checking-account/model"
-	com "mainframe-lib/common/service"
+	ccom "mainframe-lib/common/config"
+	scom "mainframe-lib/common/service"
 	"net/http"
 )
 
-func GetPayment(host string, timeout int, auth string, paymentId string) (model.Payment, int, error) {
+func GetPayment(service ccom.ServiceConfig, auth string, paymentId string) (model.Payment, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/payments/%s", host, paymentId)
+	url := fmt.Sprintf("/payments/%s", paymentId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return model.Payment{}, http.StatusInternalServerError, err
 	}
@@ -36,9 +37,9 @@ func GetPayment(host string, timeout int, auth string, paymentId string) (model.
 	return payment, res.StatusCode, nil
 }
 
-func GetPayments(host string, timeout int, auth string, filter model.Payment, from string, limit int) ([]model.Payment, int, error) {
+func GetPayments(service ccom.ServiceConfig, auth string, filter model.Payment, from string, limit int) ([]model.Payment, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/payments", host)
+	url := "/payments"
 
 	url = fmt.Sprintf("%s?limit=%d", url, limit)
 	if from != "" {
@@ -52,7 +53,7 @@ func GetPayments(host string, timeout int, auth string, filter model.Payment, fr
 	}
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodGet, url, timeout, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return []model.Payment{}, http.StatusInternalServerError, err
 	}
@@ -75,12 +76,12 @@ func GetPayments(host string, timeout int, auth string, filter model.Payment, fr
 	return payments, res.StatusCode, nil
 }
 
-func InsertPayment(host string, timeout int, auth string, payload model.InsertPayment) (model.Payment, int, error) {
+func InsertPayment(service ccom.ServiceConfig, auth string, payload model.InsertPayment) (model.Payment, int, error) {
 	// Construct the request
-	url := fmt.Sprintf("http://%s/payments", host)
+	url := "/payments"
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(http.MethodPost, url, timeout, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return model.Payment{}, http.StatusInternalServerError, err
 	}
