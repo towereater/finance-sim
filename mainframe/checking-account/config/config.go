@@ -13,9 +13,17 @@ type DB struct {
 	} `json:"collections"`
 }
 
+type Queue struct {
+	com.Queue
+	Topics struct {
+		Payments string `json:"payments" envconfig:"TOPIC_PAYMENTS"`
+	} `json:"topics"`
+}
+
 type Config struct {
 	Server   com.Server `json:"server"`
-	DBConfig DB         `json:"db"`
+	DB       DB         `json:"db"`
+	Queue    Queue      `json:"queue"`
 	Services struct {
 		Security com.Service `json:"security"`
 		Users    com.Service `json:"users"`
