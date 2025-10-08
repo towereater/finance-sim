@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetStock(service ccom.ServiceConfig, auth string, isin string) (model.Stock, int, error) {
+func GetStock(service ccom.Service, auth string, isin string) (model.Stock, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/stocks/%s", isin)
 
@@ -37,7 +37,7 @@ func GetStock(service ccom.ServiceConfig, auth string, isin string) (model.Stock
 	return stock, res.StatusCode, nil
 }
 
-func GetStocks(service ccom.ServiceConfig, auth string, filter model.Stock, page int, size int) ([]model.Stock, int, error) {
+func GetStocks(service ccom.Service, auth string, filter model.Stock, page int, size int) ([]model.Stock, int, error) {
 	// Construct the request
 	url := "/stocks"
 

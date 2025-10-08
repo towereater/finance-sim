@@ -6,13 +6,13 @@ import (
 
 // Base config extension
 type Config struct {
-	Server   com.ServerConfig `json:"server"`
+	Server   com.Server `json:"server"`
 	Services struct {
-		Security         com.ServiceConfig `json:"security"`
-		Users            com.ServiceConfig `json:"users"`
-		Accounts         com.ServiceConfig `json:"accounts"`
-		CheckingAccounts com.ServiceConfig `json:"ck-accounts"`
-		Dossiers         com.ServiceConfig `json:"dossiers"`
+		Security         com.Service `json:"security"`
+		Users            com.Service `json:"users"`
+		Accounts         com.Service `json:"accounts"`
+		CheckingAccounts com.Service `json:"ck-accounts"`
+		Dossiers         com.Service `json:"dossiers"`
 	} `json:"services"`
 }
 

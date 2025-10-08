@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetPayment(service ccom.ServiceConfig, auth string, paymentId string) (model.Payment, int, error) {
+func GetPayment(service ccom.Service, auth string, paymentId string) (model.Payment, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/payments/%s", paymentId)
 
@@ -37,7 +37,7 @@ func GetPayment(service ccom.ServiceConfig, auth string, paymentId string) (mode
 	return payment, res.StatusCode, nil
 }
 
-func GetPayments(service ccom.ServiceConfig, auth string, filter model.Payment, from string, limit int) ([]model.Payment, int, error) {
+func GetPayments(service ccom.Service, auth string, filter model.Payment, from string, limit int) ([]model.Payment, int, error) {
 	// Construct the request
 	url := "/payments"
 
@@ -76,7 +76,7 @@ func GetPayments(service ccom.ServiceConfig, auth string, filter model.Payment, 
 	return payments, res.StatusCode, nil
 }
 
-func InsertPayment(service ccom.ServiceConfig, auth string, payload model.InsertPayment) (model.Payment, int, error) {
+func InsertPayment(service ccom.Service, auth string, payload model.InsertPayment) (model.Payment, int, error) {
 	// Construct the request
 	url := "/payments"
 

@@ -5,19 +5,19 @@ import (
 )
 
 // Base config extension
-type DBConfig struct {
-	com.DBConfig
+type DB struct {
+	com.DB
 	Collections struct {
 		Accounts string `json:"accounts" envconfig:"COLL_ACCOUNTS"`
 	} `json:"collections"`
 }
 
 type Config struct {
-	Server   com.ServerConfig `json:"server"`
-	DBConfig DBConfig         `json:"db"`
+	Server   com.Server `json:"server"`
+	DBConfig DB         `json:"db"`
 	Services struct {
-		Security com.ServiceConfig `json:"security"`
-		Users    com.ServiceConfig `json:"users"`
+		Security com.Service `json:"security"`
+		Users    com.Service `json:"users"`
 	} `json:"services"`
 }
 

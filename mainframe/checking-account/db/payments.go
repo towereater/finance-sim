@@ -2,20 +2,21 @@ package db
 
 import (
 	cha "mainframe-lib/checking-account/model"
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	"mainframe/checking-account/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectPayment(cfg config.DBConfig, abi string, paymentId string) (cha.Payment, error) {
+func SelectPayment(db config.DB, abi string, paymentId string) (cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Payments)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Payments)
 	if err != nil {
 		return cha.Payment{}, err
 	}
@@ -27,13 +28,13 @@ func SelectPayment(cfg config.DBConfig, abi string, paymentId string) (cha.Payme
 	return payment, err
 }
 
-func SelectPayments(cfg config.DBConfig, abi string, paymentFilter cha.Payment, from string, limit int) ([]cha.Payment, error) {
+func SelectPayments(db config.DB, abi string, paymentFilter cha.Payment, from string, limit int) ([]cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Payments)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Payments)
 	if err != nil {
 		return []cha.Payment{}, err
 	}
@@ -92,13 +93,13 @@ func SelectPayments(cfg config.DBConfig, abi string, paymentFilter cha.Payment, 
 	return payments, err
 }
 
-func InsertPayment(cfg config.DBConfig, abi string, payment cha.Payment) error {
+func InsertPayment(db config.DB, abi string, payment cha.Payment) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Payments)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Payments)
 	if err != nil {
 		return err
 	}

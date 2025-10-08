@@ -1,20 +1,21 @@
 package db
 
 import (
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	sec "mainframe-lib/security/model"
 	"mainframe/security/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func SelectBankByAbi(cfg config.DBConfig, abi string) (sec.Bank, error) {
+func SelectBankByAbi(db config.DB, abi string) (sec.Bank, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, "09999", cfg.Collections.Banks)
+	coll, err := dcom.GetCollection(ctx, db.DB, "09999", db.Collections.Banks)
 	if err != nil {
 		return sec.Bank{}, err
 	}
@@ -26,13 +27,13 @@ func SelectBankByAbi(cfg config.DBConfig, abi string) (sec.Bank, error) {
 	return bank, err
 }
 
-func InsertBank(cfg config.DBConfig, bank sec.Bank) error {
+func InsertBank(db config.DB, bank sec.Bank) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, "09999", cfg.Collections.Banks)
+	coll, err := dcom.GetCollection(ctx, db.DB, "09999", db.Collections.Banks)
 	if err != nil {
 		return err
 	}
@@ -43,13 +44,13 @@ func InsertBank(cfg config.DBConfig, bank sec.Bank) error {
 	return err
 }
 
-func DeleteBank(cfg config.DBConfig, abi string) error {
+func DeleteBank(db config.DB, abi string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, "09999", cfg.Collections.Banks)
+	coll, err := dcom.GetCollection(ctx, db.DB, "09999", db.Collections.Banks)
 	if err != nil {
 		return err
 	}

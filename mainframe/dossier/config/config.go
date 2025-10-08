@@ -5,22 +5,22 @@ import (
 )
 
 // Base config extension
-type DBConfig struct {
-	com.DBConfig
+type DB struct {
+	com.DB
 	Collections struct {
 		Dossiers string `json:"dossiers" envconfig:"COLL_DOSSIERS"`
 	} `json:"collections"`
 }
 
 type Config struct {
-	Server   com.ServerConfig `json:"server"`
-	DBConfig DBConfig         `json:"db"`
+	Server   com.Server `json:"server"`
+	DBConfig DB         `json:"db"`
 	Services struct {
-		Security         com.ServiceConfig `json:"security"`
-		Users            com.ServiceConfig `json:"users"`
-		Accounts         com.ServiceConfig `json:"accounts"`
-		CheckingAccounts com.ServiceConfig `json:"ck-accounts"`
-		Xchanger         com.ServiceConfig `json:"xchanger"`
+		Security         com.Service `json:"security"`
+		Users            com.Service `json:"users"`
+		Accounts         com.Service `json:"accounts"`
+		CheckingAccounts com.Service `json:"ck-accounts"`
+		Xchanger         com.Service `json:"xchanger"`
 	} `json:"services"`
 }
 

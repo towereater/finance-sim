@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func InsertDossier(service ccom.ServiceConfig, auth string, payload model.InsertDossierInput) (model.Dossier, int, error) {
+func InsertDossier(service ccom.Service, auth string, payload model.InsertDossierInput) (model.Dossier, int, error) {
 	// Construct the request
 	url := "/dossiers"
 
@@ -34,7 +34,7 @@ func InsertDossier(service ccom.ServiceConfig, auth string, payload model.Insert
 	return dossier, res.StatusCode, nil
 }
 
-func DeleteDossier(service ccom.ServiceConfig, auth string, dossierId string) (int, error) {
+func DeleteDossier(service ccom.Service, auth string, dossierId string) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/dossiers/%s", dossierId)
 

@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	ccom "mainframe-lib/common/config"
-	com "mainframe-lib/common/service"
 	scom "mainframe-lib/common/service"
 	"mainframe-lib/xchanger/model"
 	"net/http"
 )
 
-func GetOrder(service ccom.ServiceConfig, auth string, orderId string) (model.Order, int, error) {
+func GetOrder(service ccom.Service, auth string, orderId string) (model.Order, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/orders/%s", orderId)
 
@@ -38,7 +37,7 @@ func GetOrder(service ccom.ServiceConfig, auth string, orderId string) (model.Or
 	return order, res.StatusCode, nil
 }
 
-func GetOrders(service ccom.ServiceConfig, auth string, filter model.Order, page int, size int) ([]model.Order, int, error) {
+func GetOrders(service ccom.Service, auth string, filter model.Order, page int, size int) ([]model.Order, int, error) {
 	// Construct the request
 	url := "/orders"
 
@@ -46,7 +45,7 @@ func GetOrders(service ccom.ServiceConfig, auth string, filter model.Order, page
 	url = fmt.Sprintf("%s&size=%d", url, size)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodGet, url, auth, "")
 	if err != nil {
 		return []model.Order{}, http.StatusInternalServerError, err
 	}
@@ -69,12 +68,12 @@ func GetOrders(service ccom.ServiceConfig, auth string, filter model.Order, page
 	return orders, res.StatusCode, nil
 }
 
-func InsertOrder(service ccom.ServiceConfig, auth string, payload model.InsertOrderInput) (model.Order, int, error) {
+func InsertOrder(service ccom.Service, auth string, payload model.InsertOrderInput) (model.Order, int, error) {
 	// Construct the request
 	url := "/orders"
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
+	res, err := scom.ExecuteHttpRequest(service, http.MethodPost, url, auth, payload)
 	if err != nil {
 		return model.Order{}, http.StatusInternalServerError, err
 	}
@@ -94,12 +93,12 @@ func InsertOrder(service ccom.ServiceConfig, auth string, payload model.InsertOr
 	return order, res.StatusCode, nil
 }
 
-func DeleteOrder(service ccom.ServiceConfig, auth string, orderId string) (int, error) {
+func DeleteOrder(service ccom.Service, auth string, orderId string) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/orders/%s", orderId)
 
 	// Execute the request
-	res, err := com.ExecuteHttpRequest(service, http.MethodDelete, url, auth, "")
+	res, err := scom.ExecuteHttpRequest(service, http.MethodDelete, url, auth, "")
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

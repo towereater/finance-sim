@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetAccount(service ccom.ServiceConfig, auth string, accountId string) (model.CheckingAccount, int, error) {
+func GetAccount(service ccom.Service, auth string, accountId string) (model.CheckingAccount, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/checking-accounts/%s", accountId)
 

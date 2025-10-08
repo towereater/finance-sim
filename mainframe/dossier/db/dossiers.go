@@ -1,7 +1,8 @@
 package db
 
 import (
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	dos "mainframe-lib/dossier/model"
 	"mainframe/dossier/config"
 
@@ -9,13 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectDossier(cfg config.DBConfig, abi string, dossierId string) (dos.Dossier, error) {
+func SelectDossier(db config.DB, abi string, dossierId string) (dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Dossiers)
 	if err != nil {
 		return dos.Dossier{}, err
 	}
@@ -27,13 +28,13 @@ func SelectDossier(cfg config.DBConfig, abi string, dossierId string) (dos.Dossi
 	return dossier, err
 }
 
-func SelectDossiers(cfg config.DBConfig, abi string, dossierFilter dos.Dossier, from string, limit int) ([]dos.Dossier, error) {
+func SelectDossiers(db config.DB, abi string, dossierFilter dos.Dossier, from string, limit int) ([]dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Dossiers)
 	if err != nil {
 		return []dos.Dossier{}, err
 	}
@@ -68,13 +69,13 @@ func SelectDossiers(cfg config.DBConfig, abi string, dossierFilter dos.Dossier, 
 	return dossiers, err
 }
 
-func InsertDossier(cfg config.DBConfig, abi string, dossier dos.Dossier) error {
+func InsertDossier(db config.DB, abi string, dossier dos.Dossier) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Dossiers)
 	if err != nil {
 		return err
 	}
@@ -85,13 +86,13 @@ func InsertDossier(cfg config.DBConfig, abi string, dossier dos.Dossier) error {
 	return err
 }
 
-func DeleteDossier(cfg config.DBConfig, abi string, dossierId string) error {
+func DeleteDossier(db config.DB, abi string, dossierId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Dossiers)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Dossiers)
 	if err != nil {
 		return err
 	}

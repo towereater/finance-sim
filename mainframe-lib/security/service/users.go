@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetUserByApiKey(service ccom.ServiceConfig, auth string, apiKey string) (model.User, int, error) {
+func GetUserByApiKey(service ccom.Service, auth string, apiKey string) (model.User, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/api-keys/%s", apiKey)
 

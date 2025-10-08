@@ -2,20 +2,21 @@ package db
 
 import (
 	cha "mainframe-lib/checking-account/model"
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	"mainframe/checking-account/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectAccount(cfg config.DBConfig, abi string, accountId string) (cha.CheckingAccount, error) {
+func SelectAccount(db config.DB, abi string, accountId string) (cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Accounts)
 	if err != nil {
 		return cha.CheckingAccount{}, err
 	}
@@ -27,13 +28,13 @@ func SelectAccount(cfg config.DBConfig, abi string, accountId string) (cha.Check
 	return account, err
 }
 
-func SelectAccountByIBAN(cfg config.DBConfig, abi string, iban string) (cha.CheckingAccount, error) {
+func SelectAccountByIBAN(db config.DB, abi string, iban string) (cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Accounts)
 	if err != nil {
 		return cha.CheckingAccount{}, err
 	}
@@ -45,13 +46,13 @@ func SelectAccountByIBAN(cfg config.DBConfig, abi string, iban string) (cha.Chec
 	return account, err
 }
 
-func SelectAccounts(cfg config.DBConfig, abi string, accountFilter cha.CheckingAccount, from string, limit int) ([]cha.CheckingAccount, error) {
+func SelectAccounts(db config.DB, abi string, accountFilter cha.CheckingAccount, from string, limit int) ([]cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Accounts)
 	if err != nil {
 		return []cha.CheckingAccount{}, err
 	}
@@ -89,13 +90,13 @@ func SelectAccounts(cfg config.DBConfig, abi string, accountFilter cha.CheckingA
 	return accounts, err
 }
 
-func InsertAccount(cfg config.DBConfig, abi string, account cha.CheckingAccount) error {
+func InsertAccount(db config.DB, abi string, account cha.CheckingAccount) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Accounts)
 	if err != nil {
 		return err
 	}
@@ -106,13 +107,13 @@ func InsertAccount(cfg config.DBConfig, abi string, account cha.CheckingAccount)
 	return err
 }
 
-func UpdateAccount(cfg config.DBConfig, abi string, account cha.CheckingAccount) error {
+func UpdateAccount(db config.DB, abi string, account cha.CheckingAccount) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Accounts)
 	if err != nil {
 		return err
 	}
@@ -123,13 +124,13 @@ func UpdateAccount(cfg config.DBConfig, abi string, account cha.CheckingAccount)
 	return err
 }
 
-func DeleteAccount(cfg config.DBConfig, abi string, accountId string) error {
+func DeleteAccount(db config.DB, abi string, accountId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Accounts)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Accounts)
 	if err != nil {
 		return err
 	}

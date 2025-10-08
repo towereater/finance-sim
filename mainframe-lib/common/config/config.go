@@ -7,17 +7,23 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-type ServerConfig struct {
+type Server struct {
 	Port string `json:"port" envconfig:"SERVER_PORT"`
 }
 
-type DBConfig struct {
+type DB struct {
 	Host    string `json:"host" envconfig:"DB_HOST"`
 	Timeout int    `json:"timeout" envconfig:"DB_TIMEOUT"`
 	Prefix  string `json:"prefix" envconfig:"DB_PREFIX"`
 }
 
-type ServiceConfig struct {
+type Queue struct {
+	Brokers []string `json:"brokers" envconfig:"QUEUE_BROKER"`
+	Timeout int      `json:"timeout" envconfig:"QUEUE_TIMEOUT"`
+	Group   string   `json:"group" envconfig:"QUEUE_GROUP"`
+}
+
+type Service struct {
 	Host    string `json:"host"`
 	Timeout int    `json:"timeout"`
 }

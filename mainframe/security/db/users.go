@@ -1,20 +1,21 @@
 package db
 
 import (
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	sec "mainframe-lib/security/model"
 	"mainframe/security/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func SelectUserByApiKey(cfg config.DBConfig, abi string, apiKey string) (sec.User, error) {
+func SelectUserByApiKey(db config.DB, abi string, apiKey string) (sec.User, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return sec.User{}, err
 	}
@@ -26,13 +27,13 @@ func SelectUserByApiKey(cfg config.DBConfig, abi string, apiKey string) (sec.Use
 	return user, err
 }
 
-func InsertUser(cfg config.DBConfig, abi string, user sec.User) error {
+func InsertUser(db config.DB, abi string, user sec.User) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -43,13 +44,13 @@ func InsertUser(cfg config.DBConfig, abi string, user sec.User) error {
 	return err
 }
 
-func DeleteUser(cfg config.DBConfig, abi string, userId string) error {
+func DeleteUser(db config.DB, abi string, userId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}

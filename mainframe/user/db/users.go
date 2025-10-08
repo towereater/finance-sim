@@ -1,7 +1,8 @@
 package db
 
 import (
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	usr "mainframe-lib/user/model"
 	"mainframe/user/config"
 
@@ -9,13 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SelectUser(cfg config.DBConfig, abi string, userId string) (usr.User, error) {
+func SelectUser(db config.DB, abi string, userId string) (usr.User, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return usr.User{}, err
 	}
@@ -27,13 +28,13 @@ func SelectUser(cfg config.DBConfig, abi string, userId string) (usr.User, error
 	return user, err
 }
 
-func SelectUsers(cfg config.DBConfig, abi string, userFilter usr.User, from string, limit int) ([]usr.User, error) {
+func SelectUsers(db config.DB, abi string, userFilter usr.User, from string, limit int) ([]usr.User, error) {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return []usr.User{}, err
 	}
@@ -74,13 +75,13 @@ func SelectUsers(cfg config.DBConfig, abi string, userFilter usr.User, from stri
 	return users, err
 }
 
-func InsertUser(cfg config.DBConfig, abi string, user usr.User) error {
+func InsertUser(db config.DB, abi string, user usr.User) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -91,13 +92,13 @@ func InsertUser(cfg config.DBConfig, abi string, user usr.User) error {
 	return err
 }
 
-func UpdateUser(cfg config.DBConfig, abi string, userId string, user usr.User) error {
+func UpdateUser(db config.DB, abi string, userId string, user usr.User) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -116,13 +117,13 @@ func UpdateUser(cfg config.DBConfig, abi string, userId string, user usr.User) e
 	return err
 }
 
-func DeleteUser(cfg config.DBConfig, abi string, userId string) error {
+func DeleteUser(db config.DB, abi string, userId string) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}

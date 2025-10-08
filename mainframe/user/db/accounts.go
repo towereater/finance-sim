@@ -1,20 +1,21 @@
 package db
 
 import (
-	com "mainframe-lib/common/db"
+	dcom "mainframe-lib/common/db"
+	scom "mainframe-lib/common/service"
 	usr "mainframe-lib/user/model"
 	"mainframe/user/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func AddAccount(cfg config.DBConfig, abi string, userId string, account usr.Account) error {
+func AddAccount(db config.DB, abi string, userId string, account usr.Account) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}
@@ -31,13 +32,13 @@ func AddAccount(cfg config.DBConfig, abi string, userId string, account usr.Acco
 	return err
 }
 
-func RemoveAccount(cfg config.DBConfig, abi string, userId string, accountId usr.AccountId) error {
+func RemoveAccount(db config.DB, abi string, userId string, accountId usr.AccountId) error {
 	// Setup timeout
-	ctx, cancel := com.GetContextFromConfig(cfg.DBConfig)
+	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
-	coll, err := com.GetCollection(ctx, cfg.DBConfig, abi, cfg.Collections.Users)
+	coll, err := dcom.GetCollection(ctx, db.DB, abi, db.Collections.Users)
 	if err != nil {
 		return err
 	}

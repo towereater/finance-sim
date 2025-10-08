@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetBankByAbi(service ccom.ServiceConfig, auth string, abi string) (model.Bank, int, error) {
+func GetBankByAbi(service ccom.Service, auth string, abi string) (model.Bank, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/banks/%s", abi)
 

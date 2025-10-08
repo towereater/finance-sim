@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetAccounts(service ccom.ServiceConfig, auth string, filter model.Account, from string, limit int) ([]model.Account, int, error) {
+func GetAccounts(service ccom.Service, auth string, filter model.Account, from string, limit int) ([]model.Account, int, error) {
 	// Construct the request
 	url := "/accounts"
 
@@ -48,7 +48,7 @@ func GetAccounts(service ccom.ServiceConfig, auth string, filter model.Account, 
 	return accounts, res.StatusCode, nil
 }
 
-func InsertAccount(service ccom.ServiceConfig, auth string, payload model.InsertAccountInput) (int, error) {
+func InsertAccount(service ccom.Service, auth string, payload model.InsertAccountInput) (int, error) {
 	// Construct the request
 	url := "/accounts"
 
@@ -66,7 +66,7 @@ func InsertAccount(service ccom.ServiceConfig, auth string, payload model.Insert
 	return res.StatusCode, nil
 }
 
-func DeleteAccount(service ccom.ServiceConfig, auth string, accountId model.AccountId) (int, error) {
+func DeleteAccount(service ccom.Service, auth string, accountId model.AccountId) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/accounts/services/%s/accounts/%s", accountId.Service, accountId.Account)
 

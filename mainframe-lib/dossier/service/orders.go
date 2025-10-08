@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetOrder(service ccom.ServiceConfig, auth string, orderId string) (model.Order, int, error) {
+func GetOrder(service ccom.Service, auth string, orderId string) (model.Order, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/orders/%s", orderId)
 
@@ -37,7 +37,7 @@ func GetOrder(service ccom.ServiceConfig, auth string, orderId string) (model.Or
 	return order, res.StatusCode, nil
 }
 
-func GetOrders(service ccom.ServiceConfig, auth string, filter model.Order, page int, limit int) ([]model.Order, int, error) {
+func GetOrders(service ccom.Service, auth string, filter model.Order, page int, limit int) ([]model.Order, int, error) {
 	// Construct the request
 	url := "/orders"
 
@@ -68,7 +68,7 @@ func GetOrders(service ccom.ServiceConfig, auth string, filter model.Order, page
 	return orders, res.StatusCode, nil
 }
 
-func InsertOrder(service ccom.ServiceConfig, auth string, payload model.InsertOrderInput) (int, error) {
+func InsertOrder(service ccom.Service, auth string, payload model.InsertOrderInput) (int, error) {
 	// Construct the request
 	url := "/orders"
 
@@ -86,7 +86,7 @@ func InsertOrder(service ccom.ServiceConfig, auth string, payload model.InsertOr
 	return res.StatusCode, nil
 }
 
-func DeleteOrder(service ccom.ServiceConfig, auth string, orderId string) (int, error) {
+func DeleteOrder(service ccom.Service, auth string, orderId string) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/orders/%s", orderId)
 

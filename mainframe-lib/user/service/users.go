@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func GetUser(service ccom.ServiceConfig, auth string, userId string) (model.User, int, error) {
+func GetUser(service ccom.Service, auth string, userId string) (model.User, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/users/%s", userId)
 
@@ -37,7 +37,7 @@ func GetUser(service ccom.ServiceConfig, auth string, userId string) (model.User
 	return user, res.StatusCode, nil
 }
 
-func GetUserByUsername(service ccom.ServiceConfig, auth string, username string, password string) (model.User, int, error) {
+func GetUserByUsername(service ccom.Service, auth string, username string, password string) (model.User, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/users?username=%s&password=%s", username, password)
 
@@ -69,7 +69,7 @@ func GetUserByUsername(service ccom.ServiceConfig, auth string, username string,
 	return users[0], res.StatusCode, nil
 }
 
-func InsertUser(service ccom.ServiceConfig, auth string, payload model.InsertUserInput) (model.User, int, error) {
+func InsertUser(service ccom.Service, auth string, payload model.InsertUserInput) (model.User, int, error) {
 	// Construct the request
 	url := "/users"
 
@@ -94,7 +94,7 @@ func InsertUser(service ccom.ServiceConfig, auth string, payload model.InsertUse
 	return user, res.StatusCode, nil
 }
 
-func UpdateUser(service ccom.ServiceConfig, auth string, userId string, payload model.UpdateUserInput) (model.User, int, error) {
+func UpdateUser(service ccom.Service, auth string, userId string, payload model.UpdateUserInput) (model.User, int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/users/%s", userId)
 
@@ -119,7 +119,7 @@ func UpdateUser(service ccom.ServiceConfig, auth string, userId string, payload 
 	return user, res.StatusCode, nil
 }
 
-func AddAccountToUser(service ccom.ServiceConfig, auth string, userId string, payload model.InsertAccountInput) (int, error) {
+func AddAccountToUser(service ccom.Service, auth string, userId string, payload model.InsertAccountInput) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/users/%s/accounts", userId)
 
@@ -137,7 +137,7 @@ func AddAccountToUser(service ccom.ServiceConfig, auth string, userId string, pa
 	return res.StatusCode, nil
 }
 
-func RemoveAccountFromUser(service ccom.ServiceConfig, auth string, userId string, payload model.DeleteAccountInput) (int, error) {
+func RemoveAccountFromUser(service ccom.Service, auth string, userId string, payload model.DeleteAccountInput) (int, error) {
 	// Construct the request
 	url := fmt.Sprintf("/users/%s/accounts", userId)
 
