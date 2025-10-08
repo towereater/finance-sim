@@ -11,6 +11,13 @@
             "payments": "payments"
         }
     },
+    "queue": {
+        "brokers": ["kafka:9092"],
+        "timeout": 5,
+        "topics": {
+            "payments": "payments"
+        }
+    },
     "services": {
         "security": {
             "host": "http://security:12000",
