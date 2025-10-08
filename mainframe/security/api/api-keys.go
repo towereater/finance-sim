@@ -26,7 +26,7 @@ func GetApiKey(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	user, err := db.SelectUserByApiKey(cfg.DBConfig, abi, apiKey)
+	user, err := db.SelectUserByApiKey(cfg.DB, abi, apiKey)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No users with api key %s\n", apiKey)
 		w.WriteHeader(http.StatusNotFound)

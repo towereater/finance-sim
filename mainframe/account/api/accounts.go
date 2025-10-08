@@ -43,7 +43,7 @@ func GetAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select the document
-	account, err := db.SelectAccount(cfg.DBConfig, abi, accountId)
+	account, err := db.SelectAccount(cfg.DB, abi, accountId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No accounts with id %+v\n", accountId)
 		w.WriteHeader(http.StatusNotFound)
@@ -110,7 +110,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
-	accounts, err := db.SelectAccounts(cfg.DBConfig, abi, filter, from, limit)
+	accounts, err := db.SelectAccounts(cfg.DB, abi, filter, from, limit)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No accounts with filter %+v\n", filter)
 		w.WriteHeader(http.StatusNotFound)
@@ -176,7 +176,7 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new document
-	err = db.InsertAccount(cfg.DBConfig, abi, account)
+	err = db.InsertAccount(cfg.DB, abi, account)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("Account %+v already exists\n", account)
 		w.WriteHeader(http.StatusConflict)
@@ -205,7 +205,7 @@ func InsertAccount(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Delete the document
-		err = db.DeleteAccount(cfg.DBConfig, abi, account.Id)
+		err = db.DeleteAccount(cfg.DB, abi, account.Id)
 		if err != nil {
 			fmt.Printf("Error while deleting account with id %+v: %s\n",
 				account.Id, err.Error())
@@ -251,7 +251,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Select the document
-	account, err := db.SelectAccount(cfg.DBConfig, abi, accountId)
+	account, err := db.SelectAccount(cfg.DB, abi, accountId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No accounts with id %s\n", accountId)
 		w.WriteHeader(http.StatusNoContent)
@@ -283,7 +283,7 @@ func DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the document
-	err = db.DeleteAccount(cfg.DBConfig, abi, accountId)
+	err = db.DeleteAccount(cfg.DB, abi, accountId)
 	if err != nil {
 		fmt.Printf("Error while deleting account with id %+v: %s\n",
 			accountId, err.Error())

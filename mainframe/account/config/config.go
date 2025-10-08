@@ -14,7 +14,7 @@ type DB struct {
 
 type Config struct {
 	Server   com.Server `json:"server"`
-	DBConfig DB         `json:"db"`
+	DB       DB         `json:"db"`
 	Services struct {
 		Security com.Service `json:"security"`
 		Users    com.Service `json:"users"`

@@ -181,7 +181,7 @@ func InsertOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get dossier data
-	dossier, err := db.SelectDossier(cfg.DBConfig, abi, req.Dossier)
+	dossier, err := db.SelectDossier(cfg.DB, abi, req.Dossier)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with id %s\n", req.Dossier)
 		w.WriteHeader(http.StatusNotFound)

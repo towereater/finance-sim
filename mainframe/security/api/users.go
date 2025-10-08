@@ -54,7 +54,7 @@ func InsertUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new document
-	err = db.InsertUser(cfg.DBConfig, abi, user)
+	err = db.InsertUser(cfg.DB, abi, user)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("User %+v already exists\n", user)
 		w.WriteHeader(http.StatusConflict)
@@ -85,7 +85,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Delete the document
-	err := db.DeleteUser(cfg.DBConfig, abi, userId)
+	err := db.DeleteUser(cfg.DB, abi, userId)
 	if err != nil {
 		fmt.Printf("Error while deleting user with id %s: %s\n", userId, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

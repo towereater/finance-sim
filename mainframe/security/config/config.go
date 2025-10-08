@@ -14,8 +14,8 @@ type DB struct {
 }
 
 type Config struct {
-	Server   com.Server `json:"server"`
-	DBConfig DB         `json:"db"`
+	Server com.Server `json:"server"`
+	DB     DB         `json:"db"`
 }
 
 // Path and query parameters

@@ -36,7 +36,7 @@ func GetDossier(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select the document
-	dossier, err := db.SelectDossier(cfg.DBConfig, abi, dossierId)
+	dossier, err := db.SelectDossier(cfg.DB, abi, dossierId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with id %s\n", dossierId)
 		w.WriteHeader(http.StatusNotFound)
@@ -89,7 +89,7 @@ func GetDossiers(w http.ResponseWriter, r *http.Request) {
 	abi := r.Context().Value(com.ContextAbi).(string)
 
 	// Select all documents
-	dossiers, err := db.SelectDossiers(cfg.DBConfig, abi, filter, from, limit)
+	dossiers, err := db.SelectDossiers(cfg.DB, abi, filter, from, limit)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with filter %+v\n", filter)
 		w.WriteHeader(http.StatusNotFound)
@@ -191,7 +191,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	payload := acc.InsertAccountInput{
 		Id: acc.AccountId{
 			Account: dossier.Id,
-			Service: cfg.DBConfig.Prefix,
+			Service: cfg.DB.Prefix,
 		},
 		Owner: dossier.Owner,
 	}
@@ -223,7 +223,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 
 		// Rollback
 		// Delete dossier from the accounts list
-		err = db.DeleteDossier(cfg.DBConfig, abi, dossier.Id)
+		err = db.DeleteDossier(cfg.DB, abi, dossier.Id)
 		if err != nil {
 			fmt.Printf("Error while deleting dossier with id %s: %s\n", dossier.Id, err.Error())
 
@@ -238,7 +238,7 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 	// Insert the new document
 	dossier.XChangerDossier = xchangerDossier.Id
 
-	err = db.InsertDossier(cfg.DBConfig, abi, dossier)
+	err = db.InsertDossier(cfg.DB, abi, dossier)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("Dossier %+v already exists\n", dossier)
 		w.WriteHeader(http.StatusConflict)
@@ -270,7 +270,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Select the document
-	dossier, err := db.SelectDossier(cfg.DBConfig, abi, dossierId)
+	dossier, err := db.SelectDossier(cfg.DB, abi, dossierId)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No dossiers with id %s\n", dossierId)
 		w.WriteHeader(http.StatusNoContent)
@@ -321,7 +321,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete the document
-	err = db.DeleteDossier(cfg.DBConfig, abi, dossierId)
+	err = db.DeleteDossier(cfg.DB, abi, dossierId)
 	if err != nil {
 		fmt.Printf("Error while deleting dossier with id %s: %s\n", dossierId, err.Error())
 
@@ -330,7 +330,7 @@ func DeleteDossier(w http.ResponseWriter, r *http.Request) {
 		payload := acc.InsertAccountInput{
 			Id: acc.AccountId{
 				Account: dossier.Id,
-				Service: cfg.DBConfig.Prefix,
+				Service: cfg.DB.Prefix,
 			},
 			Owner: dossier.Owner,
 		}

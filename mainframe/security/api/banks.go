@@ -25,7 +25,7 @@ func GetBank(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 
 	// Select the document
-	bank, err := db.SelectBankByAbi(cfg.DBConfig, abi)
+	bank, err := db.SelectBankByAbi(cfg.DB, abi)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No banks with abi %s\n", abi)
 		w.WriteHeader(http.StatusNotFound)
@@ -65,7 +65,7 @@ func InsertBank(w http.ResponseWriter, r *http.Request) {
 	bank := sec.Bank(req)
 
 	// Insert the new document
-	err = db.InsertBank(cfg.DBConfig, bank)
+	err = db.InsertBank(cfg.DB, bank)
 	if mongo.IsDuplicateKeyError(err) {
 		fmt.Printf("Bank %+v already exists\n", bank)
 		w.WriteHeader(http.StatusConflict)
@@ -95,7 +95,7 @@ func DeleteBank(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 
 	// Delete the document
-	err := db.DeleteBank(cfg.DBConfig, abi)
+	err := db.DeleteBank(cfg.DB, abi)
 	if err != nil {
 		fmt.Printf("Error while deleting bank with id %s: %s\n", abi, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
