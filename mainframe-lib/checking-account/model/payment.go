@@ -1,12 +1,13 @@
 package model
 
 type Payment struct {
-	Id      string       `json:"id" bson:"_id"`
-	Type    string       `json:"type" bson:"type"`
-	Value   PaymentValue `json:"value" bson:"value"`
-	Payer   Payer        `json:"payer" bson:"payer"`
-	Payee   Payee        `json:"payee" bson:"payee"`
-	Details string       `json:"details,omitempty" bson:"details,omitempty"`
+	Id      string         `json:"id" bson:"_id"`
+	Type    string         `json:"type" bson:"type"`
+	Value   PaymentValue   `json:"value" bson:"value"`
+	Payer   Payer          `json:"payer" bson:"payer"`
+	Payee   Payee          `json:"payee" bson:"payee"`
+	Details string         `json:"details,omitempty" bson:"details,omitempty"`
+	Outcome PaymentOutcome `json:"outcome,omitempty" bson:"outcome,omitempty"`
 }
 
 type PaymentValue struct {
@@ -26,6 +27,12 @@ type Payee struct {
 type AccountIdentification struct {
 	Type  string `json:"type" bson:"type"`
 	Value string `json:"value" bson:"value"`
+}
+
+type PaymentOutcome struct {
+	Status    string `json:"status" bson:"status"`
+	Message   string `json:"message" bson:"message"`
+	Timestamp string `json:"ts" bson:"ts"`
 }
 
 type InsertPayment struct {
