@@ -11,7 +11,7 @@ import (
 
 func AddAccount(db config.DB, abi string, userId string, account usr.Account) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -34,7 +34,7 @@ func AddAccount(db config.DB, abi string, userId string, account usr.Account) er
 
 func RemoveAccount(db config.DB, abi string, userId string, accountId usr.AccountId) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

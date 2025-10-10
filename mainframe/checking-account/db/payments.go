@@ -12,7 +12,7 @@ import (
 
 func SelectPayment(db config.DB, abi string, paymentId string) (cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -30,7 +30,7 @@ func SelectPayment(db config.DB, abi string, paymentId string) (cha.Payment, err
 
 func SelectPayments(db config.DB, abi string, paymentFilter cha.Payment, from string, limit int) ([]cha.Payment, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -95,7 +95,7 @@ func SelectPayments(db config.DB, abi string, paymentFilter cha.Payment, from st
 
 func InsertPayment(db config.DB, abi string, payment cha.Payment) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

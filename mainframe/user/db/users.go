@@ -12,7 +12,7 @@ import (
 
 func SelectUser(db config.DB, abi string, userId string) (usr.User, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -30,7 +30,7 @@ func SelectUser(db config.DB, abi string, userId string) (usr.User, error) {
 
 func SelectUsers(db config.DB, abi string, userFilter usr.User, from string, limit int) ([]usr.User, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -77,7 +77,7 @@ func SelectUsers(db config.DB, abi string, userFilter usr.User, from string, lim
 
 func InsertUser(db config.DB, abi string, user usr.User) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -94,7 +94,7 @@ func InsertUser(db config.DB, abi string, user usr.User) error {
 
 func UpdateUser(db config.DB, abi string, userId string, user usr.User) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -119,7 +119,7 @@ func UpdateUser(db config.DB, abi string, userId string, user usr.User) error {
 
 func DeleteUser(db config.DB, abi string, userId string) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

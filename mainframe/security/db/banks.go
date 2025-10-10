@@ -11,7 +11,7 @@ import (
 
 func SelectBankByAbi(db config.DB, abi string) (sec.Bank, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -29,7 +29,7 @@ func SelectBankByAbi(db config.DB, abi string) (sec.Bank, error) {
 
 func InsertBank(db config.DB, bank sec.Bank) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -46,7 +46,7 @@ func InsertBank(db config.DB, bank sec.Bank) error {
 
 func DeleteBank(db config.DB, abi string) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

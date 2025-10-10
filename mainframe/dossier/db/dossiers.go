@@ -12,7 +12,7 @@ import (
 
 func SelectDossier(db config.DB, abi string, dossierId string) (dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -30,7 +30,7 @@ func SelectDossier(db config.DB, abi string, dossierId string) (dos.Dossier, err
 
 func SelectDossiers(db config.DB, abi string, dossierFilter dos.Dossier, from string, limit int) ([]dos.Dossier, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -71,7 +71,7 @@ func SelectDossiers(db config.DB, abi string, dossierFilter dos.Dossier, from st
 
 func InsertDossier(db config.DB, abi string, dossier dos.Dossier) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -88,7 +88,7 @@ func InsertDossier(db config.DB, abi string, dossier dos.Dossier) error {
 
 func DeleteDossier(db config.DB, abi string, dossierId string) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

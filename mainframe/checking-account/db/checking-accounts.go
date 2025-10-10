@@ -12,7 +12,7 @@ import (
 
 func SelectAccount(db config.DB, abi string, accountId string) (cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -30,7 +30,7 @@ func SelectAccount(db config.DB, abi string, accountId string) (cha.CheckingAcco
 
 func SelectAccountByIBAN(db config.DB, abi string, iban string) (cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -48,7 +48,7 @@ func SelectAccountByIBAN(db config.DB, abi string, iban string) (cha.CheckingAcc
 
 func SelectAccounts(db config.DB, abi string, accountFilter cha.CheckingAccount, from string, limit int) ([]cha.CheckingAccount, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -92,7 +92,7 @@ func SelectAccounts(db config.DB, abi string, accountFilter cha.CheckingAccount,
 
 func InsertAccount(db config.DB, abi string, account cha.CheckingAccount) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -109,7 +109,7 @@ func InsertAccount(db config.DB, abi string, account cha.CheckingAccount) error 
 
 func UpdateAccount(db config.DB, abi string, account cha.CheckingAccount) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -126,7 +126,7 @@ func UpdateAccount(db config.DB, abi string, account cha.CheckingAccount) error 
 
 func DeleteAccount(db config.DB, abi string, accountId string) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

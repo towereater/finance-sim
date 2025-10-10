@@ -11,7 +11,7 @@ import (
 
 func SelectUserByApiKey(db config.DB, abi string, apiKey string) (sec.User, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -29,7 +29,7 @@ func SelectUserByApiKey(db config.DB, abi string, apiKey string) (sec.User, erro
 
 func InsertUser(db config.DB, abi string, user sec.User) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -46,7 +46,7 @@ func InsertUser(db config.DB, abi string, user sec.User) error {
 
 func DeleteUser(db config.DB, abi string, userId string) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection

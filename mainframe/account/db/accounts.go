@@ -12,7 +12,7 @@ import (
 
 func SelectAccount(db config.DB, abi string, accountId acc.AccountId) (acc.Account, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -30,7 +30,7 @@ func SelectAccount(db config.DB, abi string, accountId acc.AccountId) (acc.Accou
 
 func SelectAccounts(db config.DB, abi string, accountFilter acc.Account, from string, limit int) ([]acc.Account, error) {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -77,7 +77,7 @@ func SelectAccounts(db config.DB, abi string, accountFilter acc.Account, from st
 
 func InsertAccount(db config.DB, abi string, account acc.Account) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
@@ -94,7 +94,7 @@ func InsertAccount(db config.DB, abi string, account acc.Account) error {
 
 func DeleteAccount(db config.DB, abi string, accountId acc.AccountId) error {
 	// Setup timeout
-	ctx, cancel := scom.GetContextWithTimeout(db.DB.Timeout)
+	ctx, cancel := scom.GetContextWithTimeout(db.Timeout)
 	defer cancel()
 
 	// Retrieve the collection
