@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mainframe/checking-account/config"
 	"mainframe/checking-account/db"
+	"mainframe/checking-account/service"
 	"net/http"
 	"strconv"
 
@@ -218,39 +219,20 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check payee existance on local system
-	payeeAccount := cha.CheckingAccount{}
 	if req.Payee.AccountIdentification.Type == "IBAN" &&
 		req.Payee.AccountIdentification.Value[5:10] == abi {
-		payeeAccount, err = db.SelectAccountByIBAN(cfg.DB, abi, req.Payee.AccountIdentification.Value)
+		_, err = db.SelectAccountByIBAN(cfg.DB, abi, req.Payee.AccountIdentification.Value)
+		if err == mongo.ErrNoDocuments {
+			fmt.Printf("Payee account %s not found\n", req.Payee.AccountIdentification.Value)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		if err != nil {
 			fmt.Printf("Error while searching payee account %s: %s\n",
 				req.Payee.AccountIdentification.Value, err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-	}
-	if payeeAccount.Id == "" {
-		fmt.Printf("Payee account %s not found\n", req.Payee.AccountIdentification.Value)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	// Remove cash from payer account
-	payerAccount.Value.Amount -= req.Value.Amount
-	err = db.UpdateAccount(cfg.DB, abi, payerAccount)
-	if err != nil {
-		fmt.Printf("Error while updating payer account %s: %s\n", payerAccount.Id, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	// Add cash to payer account
-	payeeAccount.Value.Amount += req.Value.Amount
-	err = db.UpdateAccount(cfg.DB, abi, payeeAccount)
-	if err != nil {
-		fmt.Printf("Error while updating payee account %s: %s\n", payeeAccount.Id, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 
 	// Build the new document
@@ -273,6 +255,14 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		fmt.Printf("Error while inserting payment %+v: %s\n", payment, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Add document to queue
+	err = service.QueuePayment(cfg.Queue, abi, payment)
+	if err != nil {
+		fmt.Printf("Error while queueing payment %+v: %s\n", payment, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
