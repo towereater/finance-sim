@@ -84,3 +84,20 @@ go mod tidy
 go mod vendor
 cd ..
 echo "Done."
+echo ""
+
+## Processors ##
+echo "Cleaning processor project"
+cd "processor"
+
+echo "Payment..."
+cd "payment"
+go mod tidy
+go mod vendor
+cd ..
+
+cd ..
+echo "Done."
+echo ""
+
+echo "Finish."
