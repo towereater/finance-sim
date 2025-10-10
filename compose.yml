@@ -1,6 +1,7 @@
 name: bankapp
 
 services:
+  # Mainframe microservices
   security:
     build: ./mainframe/security
     container_name: security
@@ -12,8 +13,8 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - back-tier
-      - db-tier
+      - back-net
+      - db-net
 
   user:
     build: ./mainframe/user
@@ -26,8 +27,8 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - back-tier
-      - db-tier
+      - back-net
+      - db-net
   
   account:
     build: ./mainframe/account
@@ -42,8 +43,8 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - back-tier
-      - db-tier
+      - back-net
+      - db-net
   
   checking-account:
     build: ./mainframe/checking-account
@@ -58,8 +59,9 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - back-tier
-      - db-tier
+      - back-net
+      - db-net
+      - queue-net
   
   dossier:
     build: ./mainframe/dossier
@@ -76,9 +78,23 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - back-tier
-      - db-tier
+      - back-net
+      - db-net
+  
+  # Mainframe processors
+  payment-processor:
+    build: ./processor/payment
+    container_name: payment-processor
+    env_file:
+      - ".env"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - db-net
+      - queue-net
 
+  # App BFF
   bff:
     build: ./bff
     container_name: bff
@@ -87,8 +103,9 @@ services:
     ports:
       - "${BFF_SERVER_PORT}:${SERVER_PORT}"
     networks:
-      - back-tier
+      - back-net
 
+  # External servics
   xchanger:
     build: ./xchanger
     container_name: xchanger
@@ -100,29 +117,40 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - back-tier
-      - db-tier
+      - back-net
+      - db-net
   
+  # Support services
   mongo:
     image: mongo:8.0.9
     container_name: mongo
-    command: mongod --quiet
     ports:
       - "${MONGO_PORT}:27017"
     volumes:
       - ./mongo/init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     #volumes:
     #  - type: bind
-    #    source: /Users/andnic/Documents/mongo-data
+    #    source: /...
     #    target: /etc/mongo-data
     networks:
-      - db-tier
+      - db-net
+    command: mongod --quiet
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
       interval: 5s
       timeout: 5s
       retries: 10
 
+  kafka:
+    image: apache/kafka:4.1.0
+    env_file:
+      - "./kafka/config.env"
+    ports:
+      - "${KAFKA_PORT}:9092"
+    networks:
+      - queue-net
+
 networks:
-  back-tier: {}
-  db-tier: {}
+  back-net: {}
+  db-net: {}
+  queue-net: {}
