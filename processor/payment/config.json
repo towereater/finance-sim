@@ -1,0 +1,19 @@
+{
+    "db": {
+        "host": "mongo:27017",
+        "timeout": 5,
+        "prefix": "CK",
+        "collections": {
+            "accounts": "accounts",
+            "payments": "payments"
+        }
+    },
+    "queue": {
+        "brokers": ["kafka:9092"],
+        "timeout": 5,
+        "group": "payment-processor",
+        "topics": {
+            "payments": "payments"
+        }
+    }
+}
