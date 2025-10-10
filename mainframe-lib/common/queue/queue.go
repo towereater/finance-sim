@@ -2,13 +2,14 @@ package queue
 
 import (
 	"context"
+	"fmt"
 	"mainframe-lib/common/config"
 	"time"
 
 	"github.com/segmentio/kafka-go"
 )
 
-func QueueContent(ctx context.Context, queue config.Queue, topic string, payload string) error {
+func QueueContent(ctx context.Context, queue config.Queue, topic string, abi string, payload string) error {
 	// Create topic writer
 	w := &kafka.Writer{
 		Addr:                   kafka.TCP(queue.Brokers...),
@@ -17,7 +18,7 @@ func QueueContent(ctx context.Context, queue config.Queue, topic string, payload
 	}
 
 	// Prepare data for queue
-	key := []byte(time.Now().Format(time.DateTime))
+	key := []byte(fmt.Sprintf("%s:%s", abi, time.Now().Format(time.DateTime)))
 	value := []byte(payload)
 
 	// Write data on queue
@@ -31,7 +32,7 @@ func QueueContent(ctx context.Context, queue config.Queue, topic string, payload
 	return err
 }
 
-func UnqueueContent(ctx context.Context, queue config.Queue, topic string) (string, error) {
+func UnqueueContent(ctx context.Context, queue config.Queue, topic string) (string, string, error) {
 	// Create topic reader
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: queue.Brokers,
@@ -43,8 +44,8 @@ func UnqueueContent(ctx context.Context, queue config.Queue, topic string) (stri
 	// Read the message from queue
 	m, err := r.ReadMessage(ctx)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return string(m.Value), nil
+	return string(m.Key), string(m.Value), nil
 }
