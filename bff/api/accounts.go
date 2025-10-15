@@ -63,18 +63,23 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	var accountInfos model.GetAccountsOutput
 	for _, a := range accounts {
 		if a.Id.Service == "CK" {
-			ckAccount, _, err := service.GetCheckingAccountInfo(cfg, auth, a.Id.Account)
+			ckAccount, status, err := service.GetCheckingAccountInfo(cfg, auth, userId, a.Id.Account)
 			if err != nil {
-				fmt.Printf("Error while searching checking account %+v: %s\n",
-					a.Id, err.Error())
+				fmt.Printf("Error while searching checking account %s, status %d: %s\n",
+					a.Id.Account, status, err.Error())
 				continue
 			}
 
 			accountInfos.Accounts = append(accountInfos.Accounts, ckAccount)
-		} else {
-			accountInfos.Accounts = append(accountInfos.Accounts, model.AccountInfo{
-				AccountId: a.Id,
-			})
+		} else if a.Id.Service == "DS" {
+			dossier, status, err := service.GetDossierInfo(cfg, auth, userId, a.Id.Account)
+			if err != nil {
+				fmt.Printf("Error while searching dossier account %s, status %d: %s\n",
+					a.Id.Account, status, err.Error())
+				continue
+			}
+
+			accountInfos.Accounts = append(accountInfos.Accounts, dossier)
 		}
 	}
 

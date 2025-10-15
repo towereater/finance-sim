@@ -11,9 +11,13 @@ type AccountInfo struct {
 
 type CheckingAccountInfo struct {
 	AccountInfo
-	IBAN           string            `json:"iban"`
-	Value          cha.CheckingValue `json:"value"`
-	LatestPayments []cha.Payment     `json:"latestPayments,omitempty"`
+	IBAN         string                `json:"iban"`
+	Value        cha.CheckingValue     `json:"value"`
+	LastPayments []cha.CheckingPayment `json:"lastPayments,omitempty"`
+}
+
+type DossierInfo struct {
+	AccountInfo
 }
 
 type GetAccountsOutput struct {

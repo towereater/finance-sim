@@ -3,41 +3,58 @@ package service
 import (
 	"bff/config"
 	"bff/model"
+	"fmt"
 	acc "mainframe-lib/account/model"
-	cha "mainframe-lib/checking-account/model"
 	scha "mainframe-lib/checking-account/service"
+	sdos "mainframe-lib/dossier/service"
+	"net/http"
 )
 
-func GetCheckingAccountInfo(cfg config.Config, auth string, id string) (model.CheckingAccountInfo, int, error) {
+func GetCheckingAccountInfo(cfg config.Config, auth string, userId string, accountId string) (model.CheckingAccountInfo, int, error) {
 	// Get account main details
-	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, auth, id)
+	ckAccount, status, err := scha.GetAccount(cfg.Services.CheckingAccounts, auth, accountId)
 	if err != nil {
 		return model.CheckingAccountInfo{}, status, err
 	}
-
-	// Get latest account payments
-	filter := cha.Payment{}
-	filter.Payer.AccountIdentification.Type = "ID"
-	filter.Payer.AccountIdentification.Value = id
-	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, auth, filter, "", 5)
-	if err != nil {
-		return model.CheckingAccountInfo{}, status, err
+	if status != http.StatusOK {
+		return model.CheckingAccountInfo{}, status, fmt.Errorf("account not found")
 	}
 
 	// Construct account info
 	ckAccountInfo := model.CheckingAccountInfo{
 		AccountInfo: model.AccountInfo{
 			AccountId: acc.AccountId{
-				Account: id,
+				Account: accountId,
 				Service: "CK",
 			},
 		},
-		IBAN:  ckAccount.IBAN,
-		Value: ckAccount.Value,
-	}
-	if len(payments) > 0 {
-		ckAccountInfo.LatestPayments = payments
+		IBAN:         ckAccount.IBAN,
+		Value:        ckAccount.Value,
+		LastPayments: ckAccount.LastPayments,
 	}
 
 	return ckAccountInfo, status, nil
+}
+
+func GetDossierInfo(cfg config.Config, auth string, userId string, dossierId string) (model.DossierInfo, int, error) {
+	// Get account main details
+	_, status, err := sdos.GetDossier(cfg.Services.Dossiers, auth, dossierId)
+	if err != nil {
+		return model.DossierInfo{}, status, err
+	}
+	if status != http.StatusOK {
+		return model.DossierInfo{}, status, fmt.Errorf("account not found")
+	}
+
+	// Construct account info
+	dossierInfo := model.DossierInfo{
+		AccountInfo: model.AccountInfo{
+			AccountId: acc.AccountId{
+				Account: dossierId,
+				Service: "DS",
+			},
+		},
+	}
+
+	return dossierInfo, status, nil
 }
