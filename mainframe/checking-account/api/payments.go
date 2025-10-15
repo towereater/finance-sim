@@ -76,18 +76,16 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 
 	// Build the filter
 	var filter cha.Payment
-	filter.Type = queryParams.Get("paymenyType")
-	amount, err := strconv.ParseFloat(queryParams.Get("amount"), 32)
+	filter.Type = queryParams.Get(string(config.ContextPaymentType))
+	amount, err := strconv.ParseFloat(queryParams.Get(string(config.ContextPaymentAmount)), 32)
 	if err != nil {
 		filter.Value.Amount = float32(amount)
 	}
-	filter.Value.Currency = queryParams.Get("currency")
-	filter.Payer.AccountIdentification.Type = queryParams.Get("payerType")
-	filter.Payer.AccountIdentification.Value = queryParams.Get("payerValue")
-	filter.Payee.Name = queryParams.Get("name")
-	filter.Payee.AccountIdentification.Type = queryParams.Get("payeeType")
-	filter.Payee.AccountIdentification.Value = queryParams.Get("payeeValue")
-	filter.Details = queryParams.Get("details")
+	filter.Value.Currency = queryParams.Get(string(config.ContextPaymentCurrency))
+	filter.Payer.Account.Id = queryParams.Get(string(config.ContextPayerAccount))
+	filter.Payer.Account.Owner = queryParams.Get(string(config.ContextPayerOwner))
+	filter.Payee.Account.Id = queryParams.Get(string(config.ContextPayeeAccount))
+	filter.Payee.Account.Owner = queryParams.Get(string(config.ContextPayeeOwner))
 
 	// Extract context parameters
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
@@ -180,6 +178,17 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	abi := r.Context().Value(com.ContextAbi).(string)
 
+	// Build the new document
+	paymentId := primitive.NewObjectID().Hex()
+	payment := cha.Payment{
+		Id:      paymentId,
+		Type:    req.Type,
+		Value:   req.Value,
+		Payer:   req.Payer,
+		Payee:   req.Payee,
+		Details: req.Details,
+	}
+
 	// Obtain payer account and check its cash availability
 	var payerAccount cha.CheckingAccount
 
@@ -218,10 +227,17 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Save payer details
+	payment.Payer.Account = cha.PaymentAccount{
+		Id:    payerAccount.Id,
+		IBAN:  payerAccount.IBAN,
+		Owner: payerAccount.Owner,
+	}
+
 	// Check payee existance on local system
 	if req.Payee.AccountIdentification.Type == "IBAN" &&
 		req.Payee.AccountIdentification.Value[5:10] == abi {
-		_, err = db.SelectAccountByIBAN(cfg.DB, abi, req.Payee.AccountIdentification.Value)
+		payeeAccount, err := db.SelectAccountByIBAN(cfg.DB, abi, req.Payee.AccountIdentification.Value)
 		if err == mongo.ErrNoDocuments {
 			fmt.Printf("Payee account %s not found\n", req.Payee.AccountIdentification.Value)
 			w.WriteHeader(http.StatusNotFound)
@@ -233,17 +249,20 @@ func InsertPayment(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-	}
 
-	// Build the new document
-	paymentId := primitive.NewObjectID().Hex()
-	payment := cha.Payment{
-		Id:      paymentId,
-		Type:    req.Type,
-		Value:   req.Value,
-		Payer:   req.Payer,
-		Payee:   req.Payee,
-		Details: req.Details,
+		// Check payer and payee equality
+		if payerAccount.Id == payeeAccount.Id {
+			fmt.Printf("Payer and payee accounts can't be the same\n")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// Save payee details
+		payment.Payee.Account = cha.PaymentAccount{
+			Id:    payeeAccount.Id,
+			IBAN:  payeeAccount.IBAN,
+			Owner: payeeAccount.Owner,
+		}
 	}
 
 	// Insert the new document

@@ -7,7 +7,7 @@ type Payment struct {
 	Payer   Payer          `json:"payer" bson:"payer"`
 	Payee   Payee          `json:"payee" bson:"payee"`
 	Details string         `json:"details,omitempty" bson:"details,omitempty"`
-	Outcome PaymentOutcome `json:"outcome,omitempty" bson:"outcome,omitempty"`
+	Outcome PaymentOutcome `json:"outcome" bson:"outcome,omitempty"`
 }
 
 type PaymentValue struct {
@@ -17,16 +17,24 @@ type PaymentValue struct {
 
 type Payer struct {
 	AccountIdentification AccountIdentification `json:"accountIdentification" bson:"accountIdentification"`
+	Account               PaymentAccount        `json:"account" bson:"account,omitempty"`
 }
 
 type Payee struct {
 	Name                  string                `json:"name" bson:"name"`
 	AccountIdentification AccountIdentification `json:"accountIdentification" bson:"accountIdentification"`
+	Account               PaymentAccount        `json:"account" bson:"account,omitempty"`
 }
 
 type AccountIdentification struct {
 	Type  string `json:"type" bson:"type"`
 	Value string `json:"value" bson:"value"`
+}
+
+type PaymentAccount struct {
+	Id    string `json:"id" bson:"_id"`
+	IBAN  string `json:"iban" bson:"iban"`
+	Owner string `json:"owner" bson:"owner"`
 }
 
 type PaymentOutcome struct {

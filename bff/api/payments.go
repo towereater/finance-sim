@@ -69,12 +69,12 @@ func GetPayments(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	auth := r.Context().Value(com.ContextAuth).(string)
+	userId := r.Context().Value(config.ContextUserId).(string)
 
 	// Build the filter
 	var filter cha.Payment
-	filter.Type = queryParams.Get("paymentType")
-	filter.Payer.AccountIdentification.Type = queryParams.Get("payerType")
-	filter.Payer.AccountIdentification.Value = queryParams.Get("payerValue")
+	filter.Type = queryParams.Get(string(config.ContextPaymentType))
+	filter.Payer.Account.Owner = userId
 
 	// Get all documents
 	payments, status, err := scha.GetPayments(cfg.Services.CheckingAccounts, auth, filter, from, limit)

@@ -45,11 +45,26 @@ func GetPayments(service ccom.Service, auth string, filter model.Payment, from s
 	if from != "" {
 		url = fmt.Sprintf("%s&from=%s", url, from)
 	}
-	if filter.Payer.AccountIdentification.Type != "" {
-		url = fmt.Sprintf("%s&payerType=%s", url, filter.Payer.AccountIdentification.Type)
+	if filter.Type != "" {
+		url = fmt.Sprintf("%s&paymentType=%s", url, filter.Type)
 	}
-	if filter.Payer.AccountIdentification.Value != "" {
-		url = fmt.Sprintf("%s&payerValue=%s", url, filter.Payer.AccountIdentification.Value)
+	if filter.Value.Amount != 0 {
+		url = fmt.Sprintf("%s&amount=%f", url, filter.Value.Amount)
+	}
+	if filter.Value.Currency != "" {
+		url = fmt.Sprintf("%s&currency=%s", url, filter.Value.Currency)
+	}
+	if filter.Payer.Account.Id != "" {
+		url = fmt.Sprintf("%s&payerAccount=%s", url, filter.Payer.Account.Id)
+	}
+	if filter.Payer.Account.Owner != "" {
+		url = fmt.Sprintf("%s&payerOwner=%s", url, filter.Payer.Account.Owner)
+	}
+	if filter.Payee.Account.Id != "" {
+		url = fmt.Sprintf("%s&payeeAccount=%s", url, filter.Payee.Account.Id)
+	}
+	if filter.Payee.Account.Owner != "" {
+		url = fmt.Sprintf("%s&payeeOwner=%s", url, filter.Payee.Account.Owner)
 	}
 
 	// Execute the request

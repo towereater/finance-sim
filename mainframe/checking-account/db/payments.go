@@ -54,23 +54,11 @@ func SelectPayments(db config.DB, abi string, paymentFilter cha.Payment, from st
 	if paymentFilter.Value.Currency != "" {
 		filter["value.currency"] = paymentFilter.Value.Currency
 	}
-	if paymentFilter.Payer.AccountIdentification.Type != "" {
-		filter["payer.accountIdentification.type"] = paymentFilter.Payer.AccountIdentification.Type
+	if paymentFilter.Payer.Account.Id != "" {
+		filter["payer.account.id"] = paymentFilter.Payer.Account.Id
 	}
-	if paymentFilter.Payer.AccountIdentification.Value != "" {
-		filter["payer.accountIdentification.value"] = paymentFilter.Payer.AccountIdentification.Value
-	}
-	if paymentFilter.Payee.Name != "" {
-		filter["payee.name"] = paymentFilter.Payee.Name
-	}
-	if paymentFilter.Payee.AccountIdentification.Type != "" {
-		filter["payee.accountIdentification.type"] = paymentFilter.Payee.AccountIdentification.Type
-	}
-	if paymentFilter.Payee.AccountIdentification.Value != "" {
-		filter["payee.accountIdentification.value"] = paymentFilter.Payee.AccountIdentification.Value
-	}
-	if paymentFilter.Details != "" {
-		filter["details"] = paymentFilter.Details
+	if paymentFilter.Payee.Account.Id != "" {
+		filter["payee.account.id"] = paymentFilter.Payee.Account.Id
 	}
 	filter["_id"] = bson.M{"$gt": from}
 
