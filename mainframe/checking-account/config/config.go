@@ -34,6 +34,13 @@ type Config struct {
 // Path and query parameters
 const ContextAccountId com.ContextKey = "accountId"
 const ContextPaymentId com.ContextKey = "paymentId"
+const ContextPaymentType com.ContextKey = "paymentType"
+const ContextPaymentAmount com.ContextKey = "amount"
+const ContextPaymentCurrency com.ContextKey = "currency"
+const ContextPayerAccount com.ContextKey = "payerAccount"
+const ContextPayerOwner com.ContextKey = "payerOwner"
+const ContextPayeeAccount com.ContextKey = "payeeAccount"
+const ContextPayeeOwner com.ContextKey = "payeeOwner"
 
 const ContextFrom com.ContextKey = "from"
 const ContextLimit com.ContextKey = "limit"
