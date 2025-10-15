@@ -20,6 +20,7 @@ type Config struct {
 const ContextUserId com.ContextKey = "userId"
 const ContextService com.ContextKey = "service"
 const ContextPaymentId com.ContextKey = "paymentId"
+const ContextPaymentType com.ContextKey = "paymentType"
 const ContextIsin com.ContextKey = "isin"
 const ContextOrderId com.ContextKey = "orderId"
 
