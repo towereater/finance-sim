@@ -58,14 +58,14 @@ func main() {
 			continue
 		}
 		if err != nil {
-			fmt.Printf("Error while searching payment with id %s: %s", paymentId, err.Error())
+			fmt.Printf("Error while searching payment %s: %s", paymentId, err.Error())
 			continue
 		}
 
 		// Process payment data
 		outcome, err := service.ProcessPayment(cfg, abi, payment)
 		if err != nil {
-			fmt.Printf("Error while processing payment with id %s: %s", paymentId, err.Error())
+			fmt.Printf("Error while processing payment %s: %s", paymentId, err.Error())
 			continue
 		}
 
@@ -73,10 +73,10 @@ func main() {
 		payment.Outcome = outcome
 		err = db.UpdatePayment(cfg.DB, abi, payment)
 		if err != nil {
-			fmt.Printf("Error while updating payment with id %s: %s", paymentId, err.Error())
+			fmt.Printf("Error while updating payment %s: %s", paymentId, err.Error())
 			continue
 		}
 
-		fmt.Printf("Payment id %s elaboration completed\n", paymentId)
+		fmt.Printf("Payment %s elaboration completed\n", paymentId)
 	}
 }
