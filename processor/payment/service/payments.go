@@ -20,18 +20,17 @@ func ProcessPayment(cfg config.Config, abi string, payment cha.Payment) (cha.Pay
 	var err error
 
 	// Obtain payer account
-	var payerAccount cha.CheckingAccount
+	if payment.Payer.Account.Id == "" {
+		err = fmt.Errorf("payer account identification missing")
+		outcome.Status = "E"
+		outcome.Message = err.Error()
 
-	switch payment.Payer.AccountIdentification.Type {
-	case "ID":
-		payerAccount, err = db.SelectAccount(cfg.DB, abi, payment.Payer.AccountIdentification.Value)
-	case "IBAN":
-		payerAccount, err = db.SelectAccountByIBAN(cfg.DB, abi, payment.Payer.AccountIdentification.Value)
+		return outcome, err
 	}
+
+	payerAccount, err := db.SelectAccount(cfg.DB, abi, payment.Payer.Account.Id)
 	if err == mongo.ErrNoDocuments {
-		err = fmt.Errorf("payer account with %s %s not found",
-			payment.Payer.AccountIdentification.Type,
-			payment.Payer.AccountIdentification.Value)
+		err = fmt.Errorf("payer account %s not found", payment.Payee.Account.Id)
 		outcome.Status = "E"
 		outcome.Message = err.Error()
 
@@ -54,36 +53,50 @@ func ProcessPayment(cfg config.Config, abi string, payment cha.Payment) (cha.Pay
 	}
 
 	// Obtain payee account
-	var payeeAccount cha.CheckingAccount
-
-	if payment.Payee.AccountIdentification.Type == "IBAN" {
-		payeeAccount, err = db.SelectAccountByIBAN(cfg.DB, abi, payment.Payee.AccountIdentification.Value)
-		if err == mongo.ErrNoDocuments {
-			err = fmt.Errorf("payee account with %s %s not found",
-				payment.Payee.AccountIdentification.Type,
-				payment.Payee.AccountIdentification.Value)
-			outcome.Status = "E"
-			outcome.Message = err.Error()
-
-			return outcome, err
-		}
-		if err != nil {
-			outcome.Status = "E"
-			outcome.Message = err.Error()
-
-			return outcome, err
-		}
-	} else {
-		err = fmt.Errorf("unsupported payee account identification type %s",
-			payment.Payee.AccountIdentification.Type)
+	if payment.Payee.Account.Id == "" {
+		err = fmt.Errorf("payee account identification missing")
 		outcome.Status = "E"
 		outcome.Message = err.Error()
 
 		return outcome, err
 	}
 
-	// Remove cash from payer account
+	payeeAccount, err := db.SelectAccount(cfg.DB, abi, payment.Payee.Account.Id)
+	if err == mongo.ErrNoDocuments {
+		err = fmt.Errorf("payee account %s not found", payment.Payee.Account.Id)
+		outcome.Status = "E"
+		outcome.Message = err.Error()
+
+		return outcome, err
+	}
+	if err != nil {
+		outcome.Status = "E"
+		outcome.Message = err.Error()
+
+		return outcome, err
+	}
+
+	// Set up of the successful outcome status
+	outcome.Status = "O"
+	outcome.Message = "payment processed correctly"
+
+	// Construction of checking account payment
+	ckPayment := cha.CheckingPayment{
+		Id:      payment.Id,
+		Type:    payment.Type,
+		Value:   payment.Value,
+		Payee:   payment.Payee,
+		Details: payment.Details,
+		Outcome: outcome,
+	}
+
+	// Update payer account
 	payerAccount.Value.Amount -= payment.Value.Amount
+	payerAccount.LastPayments = append(payerAccount.LastPayments, ckPayment)
+	if len(payerAccount.LastPayments) > 5 {
+		payerAccount.LastPayments = payerAccount.LastPayments[len(payerAccount.LastPayments)-5:]
+	}
+
 	err = db.UpdateAccount(cfg.DB, abi, payerAccount)
 	if err != nil {
 		outcome.Status = "E"
@@ -92,8 +105,13 @@ func ProcessPayment(cfg config.Config, abi string, payment cha.Payment) (cha.Pay
 		return outcome, err
 	}
 
-	// Add cash to payee account
+	// Update to payee account
 	payeeAccount.Value.Amount += payment.Value.Amount
+	payeeAccount.LastPayments = append(payeeAccount.LastPayments, ckPayment)
+	if len(payeeAccount.LastPayments) > 5 {
+		payeeAccount.LastPayments = payeeAccount.LastPayments[len(payeeAccount.LastPayments)-5:]
+	}
+
 	err = db.UpdateAccount(cfg.DB, abi, payeeAccount)
 	if err != nil {
 		outcome.Status = "E"
@@ -101,9 +119,6 @@ func ProcessPayment(cfg config.Config, abi string, payment cha.Payment) (cha.Pay
 
 		return outcome, err
 	}
-
-	outcome.Status = "O"
-	outcome.Message = "payment processed correctly"
 
 	return outcome, err
 }
