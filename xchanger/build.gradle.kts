@@ -31,6 +31,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	//implementation(platform("org.mongodb:mongodb-driver-bom:5.5.1"))
 	implementation("org.mongodb:mongodb-driver-sync")
+	implementation("org.springframework.kafka:spring-kafka")
 	annotationProcessor("org.projectlombok:lombok")
 	compileOnly("org.projectlombok:lombok")
 	//testImplementation("org.springframework.boot:spring-boot-starter-test")
