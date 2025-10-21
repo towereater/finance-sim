@@ -54,9 +54,6 @@ public class OrderController {
         @Valid @RequestBody InsertOrderRequest request
     ) {
         Order order = orderService.createOrder(request);
-
-        orderService.elaborateOrder(order);
-
         return new ResponseEntity<>(order.toDto(), HttpStatus.CREATED);
     }
     

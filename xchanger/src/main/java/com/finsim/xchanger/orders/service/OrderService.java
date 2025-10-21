@@ -11,6 +11,7 @@ import com.finsim.xchanger.banks.model.Bank;
 import com.finsim.xchanger.banks.repository.BankRepository;
 import com.finsim.xchanger.dossiers.model.Dossier;
 import com.finsim.xchanger.dossiers.repository.DossierRepository;
+import com.finsim.xchanger.orders.configuration.OrderProducer;
 import com.finsim.xchanger.orders.model.InsertOrderRequest;
 import com.finsim.xchanger.orders.model.Order;
 import com.finsim.xchanger.orders.repository.OrderRepository;
@@ -25,6 +26,9 @@ import java.util.Optional;
 public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderProducer orderProducer;
 
     @Autowired
     private DossierRepository dossierRepository;
@@ -53,7 +57,12 @@ public class OrderService {
         order.setOptions(orderRequest.options);
         order.setLeftQuantity(orderRequest.quantity);
 
-        return insertOrder(order);
+        order = insertOrder(order);
+
+        // Add order id to queue
+        orderProducer.queueOrder(order.getId());
+
+        return order;
     }
 
     public Order insertOrder(Order order) {
@@ -64,7 +73,16 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    public void elaborateOrder(Order order) {
+    public void elaborateOrder(String id) {
+        // Get order data from given id
+        Optional<Order> orderOptional = findOrderById(id);
+        if (orderOptional.isEmpty()) {
+            System.out.printf("No order with id %s found\n", id);
+            return;
+        }
+
+        // Elaborate order depending on order type
+        Order order = orderOptional.get();
         if (order.getType().equals("BUY")) {
             elaborateBuyOrder(order);
         } else if (order.getType().equals("SELL")) {
