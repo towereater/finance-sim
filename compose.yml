@@ -119,6 +119,7 @@ services:
     networks:
       - back-net
       - db-net
+      - queue-net
   
   # Support services
   mongo:
@@ -143,6 +144,7 @@ services:
 
   kafka:
     image: apache/kafka:4.1.0
+    # container_name: kafka
     env_file:
       - "./kafka/config.env"
     ports:
