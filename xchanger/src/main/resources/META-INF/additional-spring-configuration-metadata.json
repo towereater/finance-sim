@@ -1,5 +1,12 @@
-{"properties": [{
-  "name": "xchanger.payments.host",
-  "type": "java.lang.String",
-  "description": "Host receiving payment requests'"
-}]}
+{"properties": [
+  {
+    "name": "xchanger.kafka.topic.orders",
+    "type": "java.lang.String",
+    "description": "Topic name for orders queue'"
+  },
+  {
+    "name": "xchanger.payments.host",
+    "type": "java.lang.String",
+    "description": "Host receiving payment requests'"
+  }
+]}
