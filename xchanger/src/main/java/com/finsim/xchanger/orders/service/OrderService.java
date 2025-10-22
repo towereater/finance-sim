@@ -85,11 +85,9 @@ public class OrderService {
         // Elaborate order depending on order type
         switch (order.getType()) {
             case "BUY":
-                System.out.printf("BUY Order with id %s found\n", id);
                 elaborateBuyOrder(order);
                 break;
             case "SELL":
-                System.out.printf("SELL Order with id %s found\n", id);
                 elaborateSellOrder(order);
                 break;
             default:
