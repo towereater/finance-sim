@@ -15,7 +15,7 @@ public class OrderConsumer {
     public void elaborateOrder(String id) {
         System.out.printf("Elaboration of order %s started\n", id);
 
-        //orderService.elaborateOrder(id);
+        orderService.elaborateOrder(id);
 
         System.out.printf("Elaboration of order %s completed\n", id);
     }
