@@ -1,5 +1,7 @@
 package com.finsim.xchanger.dossiers.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,4 +19,7 @@ public class DossierDto {
     private String abi;
     private String externalId;
     private String iban;
+    
+    private List<DossierStock> stocks;
+    private DossierValue value;
 }

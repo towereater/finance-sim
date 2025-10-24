@@ -1,6 +1,9 @@
 package com.finsim.xchanger.dossiers.model;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +24,11 @@ public class Dossier {
 
     private String abi;
     private String externalId;
+    @Indexed(unique = true)
     private String iban;
+
+    private List<DossierStock> stocks;
+    private DossierValue value;
 
     public DossierDto toDto() {
         return new DossierDto(
@@ -31,7 +38,9 @@ public class Dossier {
             this.birth,
             this.abi,
             this.externalId,
-            this.iban
+            this.iban,
+            this.stocks,
+            this.value
         );
     }
 }
