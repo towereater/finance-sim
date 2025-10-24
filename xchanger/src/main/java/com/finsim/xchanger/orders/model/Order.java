@@ -1,5 +1,7 @@
 package com.finsim.xchanger.orders.model;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -26,6 +28,7 @@ public class Order {
     private String options;
 
     private int leftQuantity;
+    private List<OrderTransaction> orderTransactions;
 
     public OrderDto toDto() {
         return new OrderDto(
@@ -36,7 +39,8 @@ public class Order {
             this.price,
             this.quantity,
             this.options,
-            this.leftQuantity
+            this.leftQuantity,
+            this.orderTransactions
         );
     }
 }
