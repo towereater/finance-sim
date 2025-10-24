@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Price {
-    public float amount;
-    public String currency;
+    private float amount;
+    private String currency;
 
     public Price multiplyBy(float multiplier) {
         return new Price(this.amount * multiplier, this.currency);
