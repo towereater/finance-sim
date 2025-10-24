@@ -1,9 +1,7 @@
 package com.finsim.xchanger.stocks.model;
 
-import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.finsim.xchanger.orders.model.Order;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,17 +12,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Document(collection = "stocks")
 public class Stock {
-    @Id
-    public String isin;
+    @Indexed(unique = true)
+    private String isin;
 
-    public String symbol;
-    public String description;
-    public String type;
+    private String symbol;
+    private String description;
+    private String type;
 
-    public StockPrices prices;
-
-    public Order[] sellOrders;
-    public Order[] buyOrders;
+    private StockPrices prices;
 
     public StockDto toDto() {
         return new StockDto(
@@ -32,9 +27,7 @@ public class Stock {
             this.symbol,
             this.description,
             this.type,
-            this.prices,
-            this.sellOrders,
-            this.buyOrders
+            this.prices
         );
     }
 }

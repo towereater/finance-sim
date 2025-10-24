@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StockPrices {
-    public Price dailyMax;
-    public Price dailyMin;
-    public Price dailyOpening;
+    private Price dailyMax;
+    private Price dailyMin;
+    private Price dailyOpening;
+    private Price dailyLast;
 }

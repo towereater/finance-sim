@@ -21,7 +21,7 @@ public class StockService {
     }
 
     public Optional<Stock> findStockByIsin(String isin) {
-        return stockRepository.findById(isin);
+        return stockRepository.findByIsin(isin);
     }
 
     public Stock createStock(InsertStockRequest stockRequest) {
@@ -36,6 +36,10 @@ public class StockService {
 
     public Stock insertStock(Stock stock) {
         return stockRepository.insert(stock);
+    }
+
+    public Stock updateStock(Stock stock) {
+        return stockRepository.save(stock);
     }
 
     public void deleteStock(String isin) {
