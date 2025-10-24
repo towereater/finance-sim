@@ -1,6 +1,7 @@
 package com.finsim.xchanger.orders.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.finsim.xchanger.dossiers.model.Dossier;
+import com.finsim.xchanger.dossiers.model.DossierStock;
+import com.finsim.xchanger.dossiers.service.DossierService;
 import com.finsim.xchanger.orders.model.InsertOrderRequest;
 import com.finsim.xchanger.orders.model.Order;
 import com.finsim.xchanger.orders.model.OrderDto;
@@ -28,6 +32,9 @@ import jakarta.validation.Valid;
 public class OrderController {
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private DossierService dossierService;
     
     // Aggregate entity
 
@@ -53,7 +60,45 @@ public class OrderController {
     public ResponseEntity<OrderDto> createOrder(
         @Valid @RequestBody InsertOrderRequest request
     ) {
+        if (request.type.equals("SELL")) {
+            // Get dossier associated with request
+            Optional<Dossier> dossierOptional = dossierService.findDossierById(request.dossier);
+            if (dossierOptional.isEmpty()) {
+                System.out.printf("No dossiers with id %s found\n", request.dossier);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            Dossier dossier = dossierOptional.get();
+
+            if (dossier.getStocks() == null) {
+                System.out.printf("Dossier with id %s has not available stocks\n", request.dossier);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            // Check dossier stocks availability
+            Optional<DossierStock> dossierStockOptional = dossier.getStocks().stream()
+                .filter(ds -> ds.getIsin().equals(request.isin))
+                .findFirst();
+            if (dossierStockOptional.isEmpty()
+            || dossierStockOptional.get().getAvailable() < request.quantity) {
+                System.out.printf("Dossier with id %s has not enough stocks with isin %s\n",
+                    request.dossier, request.isin);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            // Lock dossier stock availability
+            DossierStock dossierStock = dossierStockOptional.get();
+            dossierStock.setAvailable(dossierStock.getAvailable() - request.quantity);
+
+            List<DossierStock> dossierStocks = dossier.getStocks();
+            dossierStocks.replaceAll(ds -> ds.getIsin() == request.isin ? dossierStock : ds);
+
+            dossier.setStocks(dossierStocks);
+            dossierService.updateDossier(dossier);
+        }
+
+        // Create order and add it to queue for later processing
         Order order = orderService.createOrder(request);
+
         return new ResponseEntity<>(order.toDto(), HttpStatus.CREATED);
     }
     
