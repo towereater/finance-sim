@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.index.PartialIndexFilter;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
+import com.finsim.xchanger.orders.model.Order;
+
 @Component
 public class OrderConfiguration implements CommandLineRunner {
     @Autowired
@@ -42,9 +44,7 @@ public class OrderConfiguration implements CommandLineRunner {
 
         DefaultIndexOperations indexOperations = new DefaultIndexOperations(
             mongoTemplate,
-            "orders",
-            //Order.class.getAnnotation(Document.class).collection(),
-            //mongoTemplate.getCollectionName(Order.class.getAnnotation(Document.class)),
+            mongoTemplate.getCollectionName(Order.class),
             getClass()
         );
         indexOperations.createIndex(orderBuyIndex);
