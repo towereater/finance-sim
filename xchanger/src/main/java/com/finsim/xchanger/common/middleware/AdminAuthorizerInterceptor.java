@@ -37,7 +37,7 @@ public class AdminAuthorizerInterceptor implements HandlerInterceptor {
         }
 
         Bank bank = bankOptional.get();
-        if (!bank.apiToken.equals(apiToken)) {
+        if (!bank.getApiToken().equals(apiToken)) {
             System.out.printf("Api token does not match with admin api token%n");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;

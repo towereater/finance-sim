@@ -35,7 +35,7 @@ public class AuthorizerInterceptor implements HandlerInterceptor {
         }
 
         Bank bank = bankOptional.get();
-        request.setAttribute("abi", bank.abi);
+        request.setAttribute("abi", bank.getAbi());
 
         return true;
     }

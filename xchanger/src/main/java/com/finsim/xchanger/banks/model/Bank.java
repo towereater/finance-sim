@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Document(collection = "banks")
 public class Bank {
     @Indexed(unique = true)
-    public String abi;
+    private String abi;
 
     @Indexed(unique = true)
-    public String apiToken;
+    private String apiToken;
 
-    public String externalApiToken;
+    private String externalApiToken;
 
     public BankDto toDto() {
         return new BankDto(
