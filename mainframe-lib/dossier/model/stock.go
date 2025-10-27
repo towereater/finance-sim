@@ -6,12 +6,11 @@ type Stock struct {
 	Description string      `json:"description"`
 	Type        string      `json:"type"`
 	Prices      DailyPrices `json:"prices"`
-	SellOrders  []Order     `json:"sellOrders,omitempty"`
-	BuyOrders   []Order     `json:"buyOrders,omitempty"`
 }
 
 type DailyPrices struct {
 	DailyMax     Price `json:"dailyMax"`
 	DailyMin     Price `json:"dailyMin"`
 	DailyOpening Price `json:"dailyOpening"`
+	DailyLast    Price `json:"dailyLast"`
 }
