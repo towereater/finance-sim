@@ -43,6 +43,6 @@ public class StockService {
     }
 
     public void deleteStock(String isin) {
-        stockRepository.deleteById(isin);
+        stockRepository.deleteByIsin(isin);
     }
 }
