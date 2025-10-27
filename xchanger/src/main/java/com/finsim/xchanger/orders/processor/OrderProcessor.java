@@ -224,7 +224,8 @@ public class OrderProcessor {
                 });
             } else {
                 DossierStock buyDossierStock = buyDossierStockOptional.get();
-                buyDossierStock.setTotal(buyDossierStock.getTotal() - quantity);
+                buyDossierStock.setTotal(buyDossierStock.getTotal() + quantity);
+                buyDossierStock.setAvailable(buyDossierStock.getAvailable() + quantity);
                 buyDossierStocks.replaceAll(ds -> ds.getIsin().equals(isin) ? buyDossierStock : ds);
             }
         }
@@ -287,25 +288,32 @@ public class OrderProcessor {
             ));
             updated = true;
         } else {
-            if (stock.getPrices().getDailyMax() == null ||
-                stock.getPrices().getDailyMax().getAmount() < sellAmount) {
-                stock.getPrices().setDailyMax(new Price(sellAmount, sellCurrency));
+            StockPrices stockPrices = stock.getPrices();
+
+            if (stockPrices.getDailyMax() == null ||
+                stockPrices.getDailyMax().getAmount() < sellAmount) {
+                stockPrices.setDailyMax(new Price(sellAmount, sellCurrency));
                 updated = true;
-            } else if (stock.getPrices().getDailyMin() == null ||
-                stock.getPrices().getDailyMin().getAmount() > sellAmount) {
-                stock.getPrices().setDailyMin(new Price(sellAmount, sellCurrency));
+            }
+            
+            if (stockPrices.getDailyMin() == null ||
+                stockPrices.getDailyMin().getAmount() > sellAmount) {
+                stockPrices.setDailyMin(new Price(sellAmount, sellCurrency));
                 updated = true;
             }
 
-            if (stock.getPrices().getDailyOpening() == null) {
-                stock.getPrices().setDailyOpening(new Price(sellAmount, sellCurrency));
+            if (stockPrices.getDailyOpening() == null) {
+                stockPrices.setDailyOpening(new Price(sellAmount, sellCurrency));
                 updated = true;
             }
 
-            if (stock.getPrices().getDailyLast().getAmount() != sellAmount) {
-                stock.getPrices().setDailyLast(new Price(sellAmount, sellCurrency));
+            if (stockPrices.getDailyLast() == null ||
+                stockPrices.getDailyLast().getAmount() != sellAmount) {
+                stockPrices.setDailyLast(new Price(sellAmount, sellCurrency));
                 updated = true;
             }
+
+            stock.setPrices(stockPrices);
         }
 
         // Update stock data if needed
