@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mainframe/dossier/config"
 	"mainframe/dossier/db"
+	"mainframe/dossier/service"
 	"net/http"
 	"strconv"
 
@@ -34,6 +35,7 @@ func GetDossier(w http.ResponseWriter, r *http.Request) {
 	// Extract context parameters
 	cfg := r.Context().Value(com.ContextConfig).(config.Config)
 	abi := r.Context().Value(com.ContextAbi).(string)
+	auth := r.Context().Value(com.ContextAuth).(string)
 
 	// Select the document
 	dossier, err := db.SelectDossier(cfg.DB, abi, dossierId)
@@ -48,9 +50,36 @@ func GetDossier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get bank data
+	bank, status, err := ssec.GetBankByAbi(cfg.Services.Security, auth, abi)
+	if err != nil {
+		fmt.Printf("Error while searching bank with abi %s: %s\n", abi, err.Error())
+		w.WriteHeader(status)
+		return
+	}
+	if bank.XchangerApiKey == "" {
+		fmt.Printf("Bank with abi %s does not have access to xchanger\n", abi)
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	// Select the document
+	xchangerDossier, status, err := sxch.GetDossier(
+		cfg.Services.Xchanger, bank.XchangerApiKey, dossier.XChangerDossier)
+	if err != nil {
+		fmt.Printf("Error while searching dossier %s on xchanger: %s\n",
+			dossier.XChangerDossier,
+			err.Error())
+		w.WriteHeader(status)
+		return
+	}
+
+	// Convert the document to standard format
+	dossierDto := service.ToDossierDto(dossier, xchangerDossier)
+
 	// Response output
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dossier)
+	json.NewEncoder(w).Encode(dossierDto)
 }
 
 func GetDossiers(w http.ResponseWriter, r *http.Request) {
@@ -250,9 +279,12 @@ func InsertDossier(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Convert the document to standard format
+	dossierDto := service.ToDossierDto(dossier, xchangerDossier)
+
 	// Response output
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(dossier)
+	json.NewEncoder(w).Encode(dossierDto)
 }
 
 func DeleteDossier(w http.ResponseWriter, r *http.Request) {
