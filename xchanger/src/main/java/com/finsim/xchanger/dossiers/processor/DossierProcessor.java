@@ -60,7 +60,6 @@ public class DossierProcessor {
                     }
                 }
 
-                System.out.printf("Dossier %s has %f stocks total value\n", dossier.getId(), totalValue);
                 dossier.setValue(new DossierValue(new Price(totalValue, "EUR"), Instant.now().toString()));
                 dossierService.updateDossier(dossier);
             }
