@@ -25,3 +25,7 @@ type CheckingPayment struct {
 type InsertCheckingAccountInput struct {
 	Owner string `json:"owner"`
 }
+
+type AddCheckingValueInput struct {
+	Value CheckingValue `json:"value"`
+}
