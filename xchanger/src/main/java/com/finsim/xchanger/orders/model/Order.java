@@ -28,7 +28,7 @@ public class Order {
     private String options;
 
     private int leftQuantity;
-    private List<OrderTransaction> orderTransactions;
+    private List<OrderTransaction> transactions;
 
     public OrderDto toDto() {
         return new OrderDto(
@@ -40,7 +40,7 @@ public class Order {
             this.quantity,
             this.options,
             this.leftQuantity,
-            this.orderTransactions
+            this.transactions
         );
     }
 }

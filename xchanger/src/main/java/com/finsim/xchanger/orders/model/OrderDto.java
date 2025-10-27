@@ -26,5 +26,5 @@ public class OrderDto {
 
     private int leftQuantity;
     @JsonInclude(Include.NON_NULL)
-    private List<OrderTransaction> orderTransactions;
+    private List<OrderTransaction> transactions;
 }

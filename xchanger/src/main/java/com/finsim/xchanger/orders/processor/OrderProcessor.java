@@ -2,7 +2,6 @@ package com.finsim.xchanger.orders.processor;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -204,54 +203,27 @@ public class OrderProcessor {
         sellDossier = dossierService.updateDossier(sellDossier);
 
         // Update buy dossier stocks
-        List<DossierStock> buyDossierStocks = buyDossier.getStocks();
-
-        if (buyDossierStocks == null) {
-            buyDossierStocks = new ArrayList<DossierStock>();
-            buyDossierStocks.add(new DossierStock(isin, quantity, quantity));
-        } else {
-            Optional<DossierStock> buyDossierStockOptional = buyDossierStocks.stream()
-                .filter(ds -> ds.getIsin().equals(isin))
-                .findFirst();
-
-            if (buyDossierStockOptional.isEmpty()) {
-                buyDossierStocks.add(new DossierStock(isin, quantity, quantity));
-                buyDossierStocks.sort(new Comparator<DossierStock>() {
-                    @Override
-                    public int compare(DossierStock rhs, DossierStock lhs) {
-                        return rhs.getIsin().compareTo(lhs.getIsin());
-                    }
-                });
-            } else {
-                DossierStock buyDossierStock = buyDossierStockOptional.get();
-                buyDossierStock.setTotal(buyDossierStock.getTotal() + quantity);
-                buyDossierStock.setAvailable(buyDossierStock.getAvailable() + quantity);
-                buyDossierStocks.replaceAll(ds -> ds.getIsin().equals(isin) ? buyDossierStock : ds);
-            }
-        }
-
-        buyDossier.setStocks(buyDossierStocks);
-        buyDossier = dossierService.updateDossier(buyDossier);
+        dossierService.addStocks(buyDossier, isin, quantity);
 
         // Update current orders
         String timestamp = Instant.now().toString();
 
-        List<OrderTransaction> sellOrderTransactions = sellOrder.getOrderTransactions();
-        if (sellOrderTransactions == null) {
-            sellOrderTransactions = new ArrayList<OrderTransaction>();
+        List<OrderTransaction> sellTransactions = sellOrder.getTransactions();
+        if (sellTransactions == null) {
+            sellTransactions = new ArrayList<OrderTransaction>();
         }
-        sellOrderTransactions.add(new OrderTransaction(
+        sellTransactions.add(new OrderTransaction(
             buyOrder.getDossier(),
             quantity,
             sellOrder.getPrice(),
             timestamp
         ));
 
-        List<OrderTransaction> buyOrderTransactions = buyOrder.getOrderTransactions();
-        if (buyOrderTransactions == null) {
-            buyOrderTransactions = new ArrayList<OrderTransaction>();
+        List<OrderTransaction> buyTransactions = buyOrder.getTransactions();
+        if (buyTransactions == null) {
+            buyTransactions = new ArrayList<OrderTransaction>();
         }
-        buyOrderTransactions.add(new OrderTransaction(
+        buyTransactions.add(new OrderTransaction(
             sellOrder.getDossier(),
             quantity,
             sellOrder.getPrice(),
@@ -259,11 +231,11 @@ public class OrderProcessor {
         ));
 
         sellOrder.setLeftQuantity(sellOrder.getLeftQuantity() - quantity);
-        sellOrder.setOrderTransactions(sellOrderTransactions);
+        sellOrder.setTransactions(sellTransactions);
         sellOrder = orderService.updateOrder(sellOrder);
 
         buyOrder.setLeftQuantity(buyOrder.getLeftQuantity() - quantity);
-        buyOrder.setOrderTransactions(buyOrderTransactions);
+        buyOrder.setTransactions(buyTransactions);
         buyOrder = orderService.updateOrder(buyOrder);
 
         // Get stocks data

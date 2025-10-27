@@ -1,6 +1,7 @@
 package com.finsim.xchanger.dossiers.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.finsim.xchanger.dossiers.model.AddStocksRequest;
 import com.finsim.xchanger.dossiers.model.Dossier;
 import com.finsim.xchanger.dossiers.model.DossierDto;
 import com.finsim.xchanger.dossiers.model.InsertDossierRequest;
@@ -76,5 +78,22 @@ public class DossierController {
     ) {
         dossierService.deleteDossier(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Dossier stocks
+
+    @PostMapping("/{id}/stocks")
+    public ResponseEntity<Void> addStocks(
+        @Valid @RequestBody AddStocksRequest request,
+        @PathVariable String id
+    ) {
+        Optional<Dossier> dossierOptional = dossierService.findDossierById(id);
+        if (dossierOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Dossier dossier = dossierOptional.get();
+        dossierService.addStocks(dossier, request.isin, request.quantity);
+        return ResponseEntity.ok().build();
     }
 }
