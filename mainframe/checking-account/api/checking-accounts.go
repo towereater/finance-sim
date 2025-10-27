@@ -198,6 +198,60 @@ func InsertCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(account)
 }
 
+func AddCheckingValue(w http.ResponseWriter, r *http.Request) {
+	// Extract path parameters
+	accountId := r.PathValue(string(config.ContextAccountId))
+	if len(accountId) != 24 {
+		fmt.Printf("Invalid account id value\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Parse the request
+	var req cha.AddCheckingValueInput
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		fmt.Printf("Could not convert request body\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if req.Value.Amount <= 0 {
+		fmt.Printf("Invalid value amount\n")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Extract context parameters
+	cfg := r.Context().Value(com.ContextConfig).(config.Config)
+	abi := r.Context().Value(com.ContextAbi).(string)
+
+	// Select the document
+	account, err := db.SelectAccount(cfg.DB, abi, accountId)
+	if err == mongo.ErrNoDocuments {
+		fmt.Printf("No accounts with id %s\n", accountId)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		fmt.Printf("Error while searching account with id %s: %s\n", accountId, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Update the document
+	account.Value.Amount += req.Value.Amount
+	err = db.UpdateAccount(cfg.DB, abi, account)
+	if err != nil {
+		fmt.Printf("Error while updating account with id %s: %s\n", accountId, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// Response output
+	w.WriteHeader(http.StatusOK)
+}
+
 func DeleteCheckingAccount(w http.ResponseWriter, r *http.Request) {
 	// Extract path parameters
 	accountId := r.PathValue(string(config.ContextAccountId))
