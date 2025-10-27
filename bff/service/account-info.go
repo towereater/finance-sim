@@ -38,7 +38,7 @@ func GetCheckingAccountInfo(cfg config.Config, auth string, userId string, accou
 
 func GetDossierInfo(cfg config.Config, auth string, userId string, dossierId string) (model.DossierInfo, int, error) {
 	// Get account main details
-	_, status, err := sdos.GetDossier(cfg.Services.Dossiers, auth, dossierId)
+	dossier, status, err := sdos.GetDossier(cfg.Services.Dossiers, auth, dossierId)
 	if err != nil {
 		return model.DossierInfo{}, status, err
 	}
@@ -54,6 +54,7 @@ func GetDossierInfo(cfg config.Config, auth string, userId string, dossierId str
 				Service: "DS",
 			},
 		},
+		Value: dossier.Value,
 	}
 
 	return dossierInfo, status, nil

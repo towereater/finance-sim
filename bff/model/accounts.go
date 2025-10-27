@@ -3,6 +3,7 @@ package model
 import (
 	acc "mainframe-lib/account/model"
 	cha "mainframe-lib/checking-account/model"
+	dos "mainframe-lib/dossier/model"
 )
 
 type AccountInfo struct {
@@ -18,6 +19,7 @@ type CheckingAccountInfo struct {
 
 type DossierInfo struct {
 	AccountInfo
+	Value dos.DossierValue `json:"value"`
 }
 
 type GetAccountsOutput struct {
