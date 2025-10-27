@@ -9,9 +9,8 @@ type Stock struct {
 		DailyMax     Price `json:"dailyMax"`
 		DailyMin     Price `json:"dailyMin"`
 		DailyOpening Price `json:"dailyOpening"`
+		DailyLast    Price `json:"dailyLast"`
 	} `json:"prices"`
-	SellOrders []Order `json:"sellOrders,omitempty"`
-	BuyOrders  []Order `json:"buyOrders,omitempty"`
 }
 
 type InsertStockInput struct {
