@@ -58,7 +58,7 @@ docker compose up
 This step will launch all backend services of the project.
 - [discontinued] Run the frontend from its folder using
 ```bash
-cd /bank_app
+cd bank_app/
 
 flutter run
 ```
